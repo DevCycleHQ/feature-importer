@@ -1,0 +1,29 @@
+{
+  "name": "feature-importer",
+  "version": "1.0.0",
+  "description": "DevCycle Feature Importer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevCycleHQ/feature-importer.git"
+  },
+  "keywords": [
+    "DevCycle",
+    "feature",
+    "importer"
+  ],
+  "author": "DevCycle",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DevCycleHQ/feature-importer/issues"
+  },
+  "homepage": "https://github.com/DevCycleHQ/feature-importer#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint": "^8.33.0"
+  }
+}

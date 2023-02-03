@@ -1,2 +1,1 @@
-# feature-importer
-DevCycle Feature Importer
+# DevCycle Feature Importer
