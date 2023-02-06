@@ -1,6 +1,7 @@
 import { handleErrors } from './utils'
+import { Feature } from '../features'
 
-const DVC_BASE_URL = "https://api.devcycle.com/v1";
+const DVC_BASE_URL = 'https://api.devcycle.com/v1'
 
 type Options = {
     throwOnError: boolean
@@ -21,22 +22,22 @@ export default class DevCycleApiWrapper {
 
     private async getApiToken(): Promise<string> {
         if (this.apiToken) return this.apiToken
-        const response = await fetch("https://auth.devcycle.com/oauth/token", {
-            method: "POST",
+        const response = await fetch('https://auth.devcycle.com/oauth/token', {
+            method: 'POST',
             headers: {
-                "content-type": "application/x-www-form-urlencoded",
+                'content-type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-                grant_type: "client_credentials",
-                audience: "https://api.devcycle.com/",
+                grant_type: 'client_credentials',
+                audience: 'https://api.devcycle.com/',
                 client_id: this.dvcClientId,
                 client_secret: this.dvcClientSecret,
             }
             ),
-        });
-        const data = await response.json();
-        return data.access_token;
-    };
+        })
+        const data = await response.json()
+        return data.access_token
+    }
 
     private async getHeaders() {
         const token = await this.getApiToken()
@@ -53,37 +54,37 @@ export default class DevCycleApiWrapper {
     async getProject(projectKey: string, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
-            method: "GET",
+            method: 'GET',
             headers,
-        });
+        })
         if (options.throwOnError) await this.handleErrors(response)
-        return response.json();
+        return response.json()
     }
 
     async createProject(payload: Record<string, string>, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
-            method: "POST",
+            method: 'POST',
             body: JSON.stringify(payload),
             headers,
-        });
+        })
         if (options.throwOnError) await this.handleErrors(response)
-        return response.json();
+        return response.json()
     }
 
-    async updateProject (
+    async updateProject(
         projectKey: string,
         payload: Record<string, string>,
         options: Options = defaultOptions
     ) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
-            method: "PATCH",
+            method: 'PATCH',
             body: JSON.stringify(payload),
             headers,
-        });
+        })
         if (options.throwOnError) await this.handleErrors(response)
-        return response.json();
+        return response.json()
     }
 
     async getAudiences(projectKey: string, options: Options = defaultOptions) {
@@ -91,7 +92,7 @@ export default class DevCycleApiWrapper {
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'GET',
             headers,
-        });
+        })
         if (options.throwOnError) await this.handleErrors(response)
         return response.json()
     }
@@ -111,7 +112,7 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async updateAudience (
+    async updateAudience(
         projectKey: string,
         audienceKey: string,
         payload: Record<string, string>,
@@ -125,5 +126,35 @@ export default class DevCycleApiWrapper {
         })
         if (options.throwOnError) await this.handleErrors(response)
         return response.json()
+    }
+
+    async createFeature(projectKey: string, feature: Feature)  {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
+            method: 'POST',
+            body: JSON.stringify(feature),
+            headers,
+        })
+    
+        return await response.json()
+    }
+    
+    async updateFeature(projectKey: string, feature: Feature) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(feature),
+            headers,
+        })
+        return await response.json()
+    }
+    
+    async getFeaturesForProject(projectKey: string) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
+            headers,
+        })
+    
+        return await response.json()
     }
 }
