@@ -2,19 +2,37 @@
 
 ## Required Configs
 
-    ldAccessToken: process.env.LD_ACCESS_TOKEN
-    dvcClientId: process.env.DVC_CLIENT_ID
-    dvcClientSecret: process.env.DVC_CLIENT_SECRET
-    projectKey: process.env.PROJECT_KEY
+- <String>LaunchDarkly access token, used for pulling feature flags
+  - ldAccessToken
+  - process.env.LD_ACCESS_TOKEN
+- <String> DevCycle client ID and secret, used for fetching API credentials
+  - dvcClientId
+  - dvcClientSecret
+  - process.env.DVC_CLIENT_ID
+  - process.env.DVC_CLIENT_SECRET
+- <String> LaunchDarkly's project key, a project will be created with the same details in DevCycle
+  - projectKey
+  - process.env.PROJECT_KEY
 
 ## Optional Configs
 
-    includeFeatures: process.env.INCLUDE_FEATURES
-    excludeFeatures: process.env.EXCLUDE_FEATURES
-    overwriteDuplicates: process.env.OVERWRITE_DUPLICATES
+- <Array<String>> An array of LD feature flag keys to be imported
+  **Default : []**
+  By default, the importer will attempt to migrate all features
+  - includeFeatures
+  - process.env.INCLUDE_FEATURES
+- <Array<String>> An array of LD feature flag keys to be skipped when importing
+  **Default :[]**
+  - excludeFeatures
+  - process.env.EXCLUDE_FEATURES
+- <Boolean> If true, when the importer encounters a duplicate feature it will be overwritten
+  **Default :false**
+  By default, the importer will skip duplicates
+  - overwriteDuplicates
+  - process.env.OVERWRITE_DUPLICATES
 
-Configs can be added as part of .env file or if you would like to add them as a json file
-you will have to provide the path to the file through CONFIG_FILE_PATH in your environments
+Configs can be added as part of .env file or if you would like to add them as a json
+default config file path is `./configs.json` use CONFIG_FILE_PATH in your .env file to overwrite the default path
 
 sample configs.json
 
