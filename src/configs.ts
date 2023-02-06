@@ -72,4 +72,7 @@ type DVCImporterConfigs = {
     // By default, the importer will skip duplicates
     overwriteDuplicates?: boolean,
 
+  // [Optional] 
+  // apitoken
+  apiToken?: string,
 }
