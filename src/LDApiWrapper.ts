@@ -1,5 +1,7 @@
-const getLDEnvironments = async (access_token: string, projectKey: string) => {
-    const response = await fetch(`https://app.launchdarkly.com/api/v2/projects/${projectKey}/environments`, {
+const LD_BASE_URL = "https://app.launchdarkly.com/api/v2";
+
+const getLDEnvironments = async (access_token: string, project_key: string) => {
+    const response = await fetch(`${LD_BASE_URL}/projects/${project_key}/environments`, {
         method: "GET",
         headers: {
             Authorization: `${access_token}`,
@@ -9,30 +11,8 @@ const getLDEnvironments = async (access_token: string, projectKey: string) => {
     return data;
 };
 
-const getFeatureFlags = async (access_token: string) => {
-    const response = await fetch("https://app.launchdarkly.com/api/v2/flags", {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-    const data = await response.json();
-    return data;
-};
-
-const getFeatureFlag = async (key: string, access_token: string) => {
-    const response = await fetch(`https://app.launchdarkly.com/api/v2/flags/${key}`, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-    const data = await response.json();
-    return data;
-}
-
-const getFeatureFlagsForProject = async (projectKey: string, access_token: string) => {
-    const response = await fetch(`https://app.launchdarkly.com/api/v2/flags/${projectKey}`, {
+const getFeatureFlagsForProject = async (access_token: string, project_key: string,) => {
+    const response = await fetch(`${LD_BASE_URL}/flags/${project_key}`, {
         method: "GET",
         headers: {
             Authorization: `${access_token}`,
@@ -44,7 +24,7 @@ const getFeatureFlagsForProject = async (projectKey: string, access_token: strin
 
 const getProjects = async (access_token: string) => {
     const response = await fetch(
-        `https://app.launchdarkly.com/api/v2/projects`,
+        `${LD_BASE_URL}/projects`,
         {
             method: 'GET',
             headers: {
@@ -58,4 +38,4 @@ const getProjects = async (access_token: string) => {
 }
 
 
-export default { getLDEnvironments, getFeatureFlags, getFeatureFlag, getProjects, getFeatureFlagsForProject };
+export default { getLDEnvironments, getProjects, getFeatureFlagsForProject };
