@@ -1,6 +1,6 @@
-import { handleErrors } from "./utils";
+import { handleErrors } from './utils'
 
-const LD_BASE_URL = "https://app.launchdarkly.com/api/v2";
+const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
 
 type Options = {
     throwOnError: boolean
