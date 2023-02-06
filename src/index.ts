@@ -14,22 +14,17 @@ if (configs.projectKey === '')
 
 let apiToken: string = '';
 
-let apiToken: string = '';
-
 
 
 DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
     apiToken = token;
     console.log(apiToken);
-}
-);
+});
 
-LDApiWrapper.getProjects(configs.ldAccessToken).then((data: any) => {
-    data.items.forEach((project: any) => {
-        LDApiWrapper.getLDEnvironments(configs.ldAccessToken, project.key).then((data: any) => {
-            console.log(data);
-        }
-        );
-    });
-}
-);
+LDApiWrapper.getLDEnvironments(configs.ldAccessToken, configs.projectKey).then((data: any) => {
+    console.log(data);
+});
+
+LDApiWrapper.getFeatureFlagsForProject(configs.ldAccessToken, configs.projectKey).then((data: any) => {
+    console.log(data);
+});
