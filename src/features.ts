@@ -1,99 +1,10 @@
-import { kebabCase } from 'lodash'
 import { getConfigs } from './configs'
 import { LD, DVC } from './api'
+import { LDFeature } from './types/LaunchDarkly'
+import { Feature } from './types/DevCycle'
+import { mapLDFeatureToDVCFeature } from './utils'
 
 const config = getConfigs()
-
-export type Feature = {
-    _id?: string
-    _project?: string
-    name?: string
-    description?: string
-    key: string
-    type?: 'release' | 'experiment' | 'permission' | 'ops'
-    variations?: Variation[]
-    variables?: Variable[]
-}
-
-export type Variable = {
-    name?: string
-    description?: string
-    key: string
-    _feature?: string
-    type: 'String' | 'Number' | 'Boolean' | 'JSON'
-    defaultValue?: object
-}
-
-export type Variation = {
-    key: string
-    name: string
-    variables?: {
-        [key: string]: string | number | boolean | object
-    }
-}
-
-export type LDFeature = {
-    name: string
-    kind: 'string' | 'number' | 'boolean' | 'json'
-    description: string
-    key: string
-    _version: number
-    creationDate: number
-    includeInSnippet: boolean
-    clientSideAvailability: {
-        usingEnvironmentIds: boolean
-        usingMobileKey: boolean
-    }
-    variations: {
-        _id: string
-        value: boolean
-    }[]
-    temporary: boolean
-    tags: string[]
-    _links: {
-        self: {
-            href: string
-            type: string
-        }
-    }
-    maintainerId: string
-}
-
-enum VariableType {
-    string = 'String',
-    number = 'Number',
-    boolean = 'Boolean',
-    json = 'JSON',
-}
-
-const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
-    const { name, description, key, kind, variations } = feature
-
-    const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
-        return {
-            name: variation.name ? variation.name : `Variation ${index + 1}`,
-            key: variation.name ? kebabCase(variation.name) : `variation-${index + 1}`,
-            variables: {
-                [key]: variation.value,
-            }
-        }
-    })
-
-    const dvcVariables: Variable[] = [{
-        key,
-        type: VariableType[kind],
-    }]
-
-    const dvcFeature: Feature = {
-        name,
-        description,
-        key,
-        variations: dvcVariations,
-        variables: dvcVariables,
-    }
-
-    return dvcFeature
-}
 
 export const importFeatures = async () => {
     const { includeFeatures, excludeFeatures, overwriteDuplicates, projectKey } = config

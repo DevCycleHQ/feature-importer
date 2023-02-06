@@ -1,5 +1,5 @@
 import { handleErrors } from './utils'
-import { Feature } from '../features'
+import { Feature } from '../types/DevCycle'
 
 const DVC_BASE_URL = 'https://api.devcycle.com/v1'
 
