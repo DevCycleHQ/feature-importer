@@ -1,20 +1,47 @@
 import { getConfigs } from './configs'
-import DVCWrapper from './DevcycleApiWrapper'
-import LDApiWrapper from './LDApiWrapper'
+import DVCApiWrapper from './api/DevcycleApiWrapper'
+import LDApiWrapper from './api/LDApiWrapper'
 
-const configs = getConfigs()
-if (configs.ldAccessToken === '')
-    throw Error('ldAccessToken cannot be empty')
-if (configs.dvcClientId === '')
-    throw Error('dvcClientId cannot be empty')
-if (configs.dvcClientSecret === '')
-    throw Error('dvcClientSecret cannot be empty')
-if (configs.projectKey === '')
-    throw Error('projectKey cannot be empty')
+const config = getConfigs()
+const LD = new LDApiWrapper(config.ldAccessToken)
+const DVC = new DVCApiWrapper(config.dvcClientId, config.dvcClientSecret)
 
-let apiToken = ''
+async function populateProject() {
+    const ldProject = await LD.getProject(config.projectKey)
+    const dvcProject = await DVC.getProject(config.projectKey)
 
-DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
-    apiToken = token
-})
+    const isDuplicate = Boolean(dvcProject._id)
+
+    const projectPayload = {
+        name: ldProject.name,
+        key: ldProject.key
+    }
+
+    let response
+    if (!isDuplicate) {
+        response = await DVC.createProject(projectPayload)
+        console.log(`Creating project "${projectPayload.key}" in DevCycle`)
+    } else if (config.overwriteDuplicates) {
+        response = await DVC.updateProject(config.projectKey, projectPayload)
+        console.log(`Updating project "${config.projectKey}" in DevCycle`)
+    } else {
+        console.log('Skipping project creation because it already exists')
+    }
+
+    if (response?.statusCode) {
+        console.log(response)
+        throw new Error('Error creating project')
+    }
+
+    return {
+        dvcProject: response,
+        ldProject
+    }
+}
+
+async function run() {
+    await populateProject()
+}
+
+run()
 
