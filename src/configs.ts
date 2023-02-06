@@ -5,30 +5,73 @@ import fs from "fs";
 export const getConfigs = (): DVCImporterConfigs => {
 
   dotenv.config();
-  const configFilePath = process.env.CONFIG_FILE_PATH || "";
+  const defaultConfigsFilePath = "./configs.json";
+  const configFilePath = process.env.CONFIG_FILE_PATH || defaultConfigsFilePath;
+  let configs: DVCImporterConfigs = {
+    ldAccessToken: "",
+    dvcClientId: "",
+    dvcClientSecret: "",
+    projectKey: "",
+  };
 
   if (fs.existsSync(configFilePath)) {
     const fileConfigs = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
-    return {
-      ldAccessToken: fileConfigs.ldAccessToken || process.env.LD_ACCESS_TOKEN,
-      dvcClientId: fileConfigs.dvcClientId || process.env.DVC_CLIENT_ID,
-      dvcClientSecret: fileConfigs.dvcClientSecret || process.env.DVC_CLIENT_SECRET,
-      projectKey: fileConfigs.projectKey || process.env.PROJECT_KEY,
-      includeFeatures: fileConfigs.includeFeatures || (process.env.INCLUDE_FEATURES ? JSON.parse(process.env.INCLUDE_FEATURES) : []),
-      excludeFeatures: fileConfigs.excludeFeatures || (process.env.EXCLUDE_FEATURES ? JSON.parse(process.env.EXCLUDE_FEATURES) : []),
-      overwriteDuplicates: fileConfigs.overwriteDuplicates || (process.env.OVERWRITE_DUPLICATES ? JSON.parse(process.env.OVERWRITE_DUPLICATES) : false),
+    configs = {
+      ldAccessToken: fileConfigs.ldAccessToken,
+      dvcClientId: fileConfigs.dvcClientId,
+      dvcClientSecret: fileConfigs.dvcClientSecret,
+      projectKey: fileConfigs.projectKey,
+      includeFeatures: fileConfigs.includeFeatures,
+      excludeFeatures: fileConfigs.excludeFeatures,
+      overwriteDuplicates: fileConfigs.overwriteDuplicates,
     }
   }
+
+  configs = overWriteConfigsWithEnvVars(configs);
+
+  // validateConfigs(configs);
+
+  return configs
+}
+
+const validateConfigs = (configs: DVCImporterConfigs) => {
+  if (configs.ldAccessToken === '' || configs.ldAccessToken === undefined)
+    throw Error("ldAccessToken cannot be empty")
+  if (configs.dvcClientId === '' || configs.dvcClientId === undefined)
+    throw Error("dvcClientId cannot be empty")
+  if (configs.dvcClientSecret === '' || configs.dvcClientSecret === undefined)
+    throw Error("dvcClientSecret cannot be empty")
+  if (configs.projectKey === '' || configs.projectKey === undefined)
+    throw Error("projectKey cannot be empty")
+}
+
+
+const overWriteConfigsWithEnvVars = (configs: DVCImporterConfigs): DVCImporterConfigs => {
   return {
-    ldAccessToken: process.env.LD_ACCESS_TOKEN || "",
-    dvcClientId: process.env.DVC_CLIENT_ID || "",
-    dvcClientSecret: process.env.DVC_CLIENT_SECRET || "",
-    projectKey: process.env.PROJECT_KEY || "",
-    includeFeatures: process.env.INCLUDE_FEATURES ? JSON.parse(process.env.INCLUDE_FEATURES) : [],
-    excludeFeatures: process.env.EXCLUDE_FEATURES ? JSON.parse(process.env.EXCLUDE_FEATURES) : [],
-    overwriteDuplicates: process.env.OVERWRITE_DUPLICATES ? JSON.parse(process.env.OVERWRITE_DUPLICATES) : false,
+    ldAccessToken: process.env.LD_ACCESS_TOKEN || configs.ldAccessToken,
+    dvcClientId: process.env.DVC_CLIENT_ID || configs.dvcClientId,
+    dvcClientSecret: process.env.DVC_CLIENT_SECRET || configs.dvcClientSecret,
+    projectKey: process.env.PROJECT_KEY || configs.projectKey,
+    includeFeatures: process.env.INCLUDE_FEATURES ? getOptionalArray(process.env.INCLUDE_FEATURES) : configs.includeFeatures,
+    excludeFeatures: process.env.EXCLUDE_FEATURES ? getOptionalArray(process.env.EXCLUDE_FEATURES) : configs.excludeFeatures,
+    overwriteDuplicates: process.env.OVERWRITE_DUPLICATES ? getOptionalBoolean(process.env.OVERWRITE_DUPLICATES) : configs.overwriteDuplicates,
   }
 }
+
+const getOptionalArray = (value: string | undefined): string[] => {
+  if (value === "" || value === undefined) {
+    return [];
+  }
+  return JSON.parse(value);
+};
+
+const getOptionalBoolean = (value: string | undefined): boolean => {
+  if (value === "" || value === undefined) {
+    return false;
+  }
+  return JSON.parse(value);
+};
+
 
 type DVCImporterConfigs = {
   // LaunchDarkly access token, used for pulling feature flags
@@ -43,10 +86,10 @@ type DVCImporterConfigs = {
 
   // [Optional] An array of LD feature flag keys to be imported
   // By default, the importer will attempt to migrate all features
-  includeFeatures?: [],
+  includeFeatures?: string[],
 
   // [Optional] An array of LD feature flag keys to be skipped when importing
-  excludeFeatures?: [],
+  excludeFeatures?: string[],
 
   // [Optional] If true, when the importer encounters a duplicate feature
   // it will be overwritten
