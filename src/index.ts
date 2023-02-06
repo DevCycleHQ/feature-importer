@@ -14,6 +14,8 @@ if (configs.projectKey === '')
 
 let apiToken: string = '';
 
+let apiToken: string = '';
+
 
 
 DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
