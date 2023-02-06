@@ -4,19 +4,17 @@ import LDApiWrapper from './LDApiWrapper'
 
 const configs = getConfigs()
 if (configs.ldAccessToken === '')
-    throw Error("ldAccessToken cannot be empty")
+    throw Error('ldAccessToken cannot be empty')
 if (configs.dvcClientId === '')
-    throw Error("dvcClientId cannot be empty")
+    throw Error('dvcClientId cannot be empty')
 if (configs.dvcClientSecret === '')
     throw Error('dvcClientSecret cannot be empty')
 if (configs.projectKey === '')
     throw Error('projectKey cannot be empty')
 
-let apiToken: string = '';
-
-
+let apiToken = ''
 
 DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
-    apiToken = token;
-});
+    apiToken = token
+})
 
