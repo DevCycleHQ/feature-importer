@@ -18,13 +18,5 @@ let apiToken: string = '';
 
 DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
     apiToken = token;
-    console.log(apiToken);
 });
 
-LDApiWrapper.getLDEnvironments(configs.ldAccessToken, configs.projectKey).then((data: any) => {
-    console.log(data);
-});
-
-LDApiWrapper.getFeatureFlagsForProject(configs.ldAccessToken, configs.projectKey).then((data: any) => {
-    console.log(data);
-});

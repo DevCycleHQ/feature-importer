@@ -1,17 +1,5 @@
 const DVC_BASE_URL = "https://api.devcycle.com/v1";
 
-const getProjects = async (access_token: string) => {
-    const response = await fetch(`${DVC_BASE_URL}/projects`, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-    const data = await response.json();
-    return data;
-
-}
-
 const getApiToken = async (dvcClientId: string, dvcClientSecret: string): Promise<string> => {
     const response = await fetch("https://auth.devcycle.com/oauth/token", {
         method: "POST",
@@ -30,15 +18,4 @@ const getApiToken = async (dvcClientId: string, dvcClientSecret: string): Promis
     return data.access_token;
 };
 
-const getProjectKey = async (access_token: string, dvcProjectKey: string) => {
-    const response = await fetch(`${DVC_BASE_URL}/projects/${dvcProjectKey}`, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
-    const data = await response.json();
-    return data;
-}
-
-export default { getProjects, getApiToken, getProjectKey }
+export default { getApiToken }
