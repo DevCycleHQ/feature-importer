@@ -13,11 +13,13 @@ if (configs.dvcClientSecret === '')
 if (configs.projectKey === '')
     throw Error("projectKey cannot be empty")
 
+let apiToken: string = '';
+
 
 
 DVCWrapper.getApiToken(configs.dvcClientId, configs.dvcClientSecret).then((token: string) => {
-    configs.apiToken = token;
-    console.log(configs);
+    apiToken = token;
+    console.log(apiToken);
 }
 );
 
