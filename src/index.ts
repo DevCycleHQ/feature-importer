@@ -1,10 +1,7 @@
 import { getConfigs } from './configs'
-import DVCApiWrapper from './api/DevcycleApiWrapper'
-import LDApiWrapper from './api/LDApiWrapper'
+import { LD, DVC } from './api'
 
 const config = getConfigs()
-const LD = new LDApiWrapper(config.ldAccessToken)
-const DVC = new DVCApiWrapper(config.dvcClientId, config.dvcClientSecret)
 
 async function populateProject() {
     const ldProject = await LD.getProject(config.projectKey)
