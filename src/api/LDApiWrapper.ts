@@ -26,22 +26,32 @@ export default class LDApiWrapper {
         await handleErrors('Error calling LaunchDarkly API', response)
     }
 
-    async getProject(project_key: string, options: Options = defaultOptions) {
+    async getProject(projectKey: string, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/projects/${project_key}`, {
-            method: "GET",
+        const response = await fetch(`${LD_BASE_URL}/projects/${projectKey}?expand=environments`, {
+            method: 'GET',
             headers,
-        });
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
+    async getSegments(projectKey: string, environmentKey: string, options: Options = defaultOptions) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${LD_BASE_URL}/segments/${projectKey}/${environmentKey}`, {
+            method: 'GET',
+            headers,
+        })
         if (options.throwOnError) await this.handleErrors(response)
         return response.json()
     }
     
-    async getFeatureFlagsForProject(project_key: string, options: Options = defaultOptions) {
+    async getFeatureFlagsForProject(projectKey: string, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/flags/${project_key}`, {
-            method: "GET",
+        const response = await fetch(`${LD_BASE_URL}/flags/${projectKey}`, {
+            method: 'GET',
             headers,
-        });
+        })
         if (options.throwOnError) await this.handleErrors(response)
         return response.json()
     }

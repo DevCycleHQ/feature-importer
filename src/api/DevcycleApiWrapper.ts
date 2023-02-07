@@ -85,4 +85,45 @@ export default class DevCycleApiWrapper {
         if (options.throwOnError) await this.handleErrors(response)
         return response.json();
     }
+
+    async getAudiences(projectKey: string, options: Options = defaultOptions) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
+            method: 'GET',
+            headers,
+        });
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
+    async createAudience(
+        projectKey: string,
+        payload: Record<string, string>,
+        options: Options = defaultOptions
+    ) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers,
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
+    async updateAudience (
+        projectKey: string,
+        audienceKey: string,
+        payload: Record<string, string>,
+        options: Options = defaultOptions
+    ) {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences/${audienceKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify(payload),
+            headers,
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
 }
