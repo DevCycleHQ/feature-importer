@@ -128,33 +128,34 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async createFeature(projectKey: string, feature: Feature)  {
+    async createFeature(projectKey: string, feature: Feature, options: Options = defaultOptions)  {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             method: 'POST',
             body: JSON.stringify(feature),
             headers,
         })
-    
+        if (options.throwOnError) await this.handleErrors(response)
         return await response.json()
     }
     
-    async updateFeature(projectKey: string, feature: Feature) {
+    async updateFeature(projectKey: string, feature: Feature, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
             method: 'PATCH',
             body: JSON.stringify(feature),
             headers,
         })
+        if (options.throwOnError) await this.handleErrors(response)
         return await response.json()
     }
     
-    async getFeaturesForProject(projectKey: string) {
+    async getFeaturesForProject(projectKey: string, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             headers,
         })
-    
+        if (options.throwOnError) await this.handleErrors(response)
         return await response.json()
     }
 }
