@@ -38,13 +38,19 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
         throw Error('projectKey cannot be empty')
 }
 
-const parseMapFromArray = (value: string | undefined): Map<string, boolean> | undefined => {
-    const stringifiedValue = JSON.stringify(value)
-    if (stringifiedValue === '' || stringifiedValue === undefined || stringifiedValue === '[]') {
+const parseMapFromArray = (value: string | string[] | undefined): Map<string, boolean> | undefined => {
+    if (value === '' || value === undefined) {
         return undefined
     }
-    const parsedArray = JSON.parse(stringifiedValue)
-    const parsedMap = parsedArray.reduce((map: Map<string, boolean>, key: string) => {
+
+    let keyArray: string[] = []
+    if (!Array.isArray(value)) {
+        keyArray = value.replace(/[\[\]]/g, '').split(',')
+    } else {
+        keyArray = value
+    }
+
+    const parsedMap = keyArray.reduce((map: Map<string, boolean>, key: string) => {
         map.set(key, true)
         return map
     }, new Map<string, boolean>())

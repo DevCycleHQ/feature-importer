@@ -22,8 +22,12 @@ export const importFeatures = async (config: ParsedImporterConfig) => {
     for (const feature of featuresToImport) {
         const mappedFeature = mapLDFeatureToDVCFeature(feature)
         const isDuplicate = existingFeaturesMap[mappedFeature.key] !== undefined
-        const includeFeature = includeFeatures ? includeFeatures.get(mappedFeature.key) : true
-        const excludeFeature = excludeFeatures ? excludeFeatures.get(mappedFeature.key) : false
+        const includeFeature = (includeFeatures && includeFeatures.size > 0) ?
+            includeFeatures.get(mappedFeature.key) : 
+            true
+        const excludeFeature = (excludeFeatures && excludeFeatures.size > 0) ?
+            excludeFeatures.get(mappedFeature.key) :
+            false
 
         if (!includeFeature || excludeFeature) {
             featuresToSkip.push(mappedFeature)
