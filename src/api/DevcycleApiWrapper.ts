@@ -1,4 +1,14 @@
+import { handleErrors } from './utils'
+
 const DVC_BASE_URL = "https://api.devcycle.com/v1";
+
+type Options = {
+    throwOnError: boolean
+}
+
+const defaultOptions = {
+    throwOnError: true
+}
 
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string) {
@@ -36,32 +46,43 @@ export default class DevCycleApiWrapper {
         }
     }
 
-    async getProject(projectKey: string) {
+    private async handleErrors(response: Response) {
+        await handleErrors('Error calling DevCycle API', response)
+    }
+
+    async getProject(projectKey: string, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: "GET",
             headers,
         });
+        if (options.throwOnError) await this.handleErrors(response)
         return response.json();
     }
 
-    async createProject(payload: Record<string, string>) {
+    async createProject(payload: Record<string, string>, options: Options = defaultOptions) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
             method: "POST",
             body: JSON.stringify(payload),
             headers,
         });
+        if (options.throwOnError) await this.handleErrors(response)
         return response.json();
     }
 
-    async updateProject (projectKey: string, payload: Record<string, string>) {
+    async updateProject (
+        projectKey: string,
+        payload: Record<string, string>,
+        options: Options = defaultOptions
+    ) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: "PATCH",
             body: JSON.stringify(payload),
             headers,
         });
+        if (options.throwOnError) await this.handleErrors(response)
         return response.json();
     }
 }

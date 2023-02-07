@@ -49,7 +49,7 @@ const getOptionalBoolean = (value: string | undefined): boolean => {
     return JSON.parse(value)
 }
 
-type DVCImporterConfigs = {
+export type DVCImporterConfigs = {
     // LaunchDarkly access token, used for pulling feature flags
     ldAccessToken: string,
 
