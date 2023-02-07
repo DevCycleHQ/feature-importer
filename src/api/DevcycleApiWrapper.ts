@@ -9,7 +9,7 @@ export default class DevCycleApiWrapper {
     dvcClientSecret: string
     apiToken: string
 
-    async getApiToken(): Promise<string> {
+    private async getApiToken(): Promise<string> {
         if (this.apiToken) return this.apiToken
         const response = await fetch("https://auth.devcycle.com/oauth/token", {
             method: "POST",
@@ -28,40 +28,39 @@ export default class DevCycleApiWrapper {
         return data.access_token;
     };
 
-    async getProject(projectKey: string) {
+    private async getHeaders() {
         const token = await this.getApiToken()
+        return {
+            Authorization: token,
+            'Content-Type': 'application/json'
+        }
+    }
+
+    async getProject(projectKey: string) {
+        const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: "GET",
-            headers: {
-                Authorization: token,
-                'Content-Type': 'application/json'
-            },
+            headers,
         });
         return response.json();
     }
 
     async createProject(payload: Record<string, string>) {
-        const token = await this.getApiToken()
+        const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
             method: "POST",
             body: JSON.stringify(payload),
-            headers: {
-                Authorization: token,
-                'Content-Type': 'application/json'
-            },
+            headers,
         });
         return response.json();
     }
 
     async updateProject (projectKey: string, payload: Record<string, string>) {
-        const token = await this.getApiToken()
+        const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: "PATCH",
             body: JSON.stringify(payload),
-            headers: {
-                Authorization: token,
-                'Content-Type': 'application/json'
-            },
+            headers,
         });
         return response.json();
     }
