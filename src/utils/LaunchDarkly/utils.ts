@@ -3,7 +3,7 @@ import { LDFeature } from "../../types/LaunchDarkly"
 import { kebabCase } from 'lodash'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
-    const { name, description, key, kind, variations } = feature
+    const { name, description, key, kind, variations, tags } = feature
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
         return {
@@ -26,6 +26,7 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
         key,
         variations: dvcVariations,
         variables: dvcVariables,
+        tags,
     }
 
     return dvcFeature
