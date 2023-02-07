@@ -1,49 +1,48 @@
-import { getConfigs } from '../configs'
 import { LD, DVC } from '../api'
 import { LDFeature } from '../types/LaunchDarkly'
 import { Feature } from '../types/DevCycle'
 import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly/utils'
+import { DVCImporterConfigs } from '../configs'
 
-const config = getConfigs()
-
-export const importFeatures = async () => {
+export const importFeatures = async (config: DVCImporterConfigs) => {
     const { includeFeatures, excludeFeatures, overwriteDuplicates, projectKey } = config
 
     const existingFeatures = await DVC.getFeaturesForProject(projectKey)
     let { items: featuresToImport } = await LD.getFeatureFlagsForProject(projectKey)
 
-    let featuresToCreate: Feature[] = []
-    let featuresToUpdate: Feature[] = []
+    const featuresToCreate: Feature[] = []
+    const featuresToUpdate: Feature[] = []
     const featuresToSkip: Feature[] = []
-
     const featureErrorList: Feature[] = []
+    
+    const existingFeaturesMap: { [key: string]: Feature } = {}
+    existingFeatures.forEach((feature: Feature) => {
+        existingFeaturesMap[feature.key] = feature
+    })
 
     if (includeFeatures !== undefined && includeFeatures.length > 0) {
         featuresToImport = featuresToImport.filter((feature: LDFeature) => includeFeatures.includes(feature.key))
     }
 
-    featuresToImport.filter((feature: LDFeature) => {
+    for (const feature of featuresToImport) {
         const mappedFeature = mapLDFeatureToDVCFeature(feature)
-        if (existingFeatures.find((existingFeature: Feature) => existingFeature.key === feature.key)) {
-            if (overwriteDuplicates) {
-                featuresToUpdate.push(mappedFeature)
-            } else {
-                featuresToSkip.push(mappedFeature)
-            }
-        } else {
-            featuresToCreate.push(mappedFeature)
-        }
-    })
+        const isDuplicate = existingFeaturesMap[mappedFeature.key] !== undefined
+        const excludeFeature = excludeFeatures !== undefined && excludeFeatures.length > 0
 
-    if (excludeFeatures !== undefined && excludeFeatures.length > 0) {
-        featuresToCreate = featuresToCreate.filter((feature) => !excludeFeatures.includes(feature.key))
-        featuresToUpdate = featuresToUpdate.filter((feature) => !excludeFeatures.includes(feature.key))
+        if (!isDuplicate && !excludeFeature) {
+            featuresToCreate.push(mappedFeature)
+        } else if (overwriteDuplicates) {
+            featuresToUpdate.push(mappedFeature)
+        } else {
+            featuresToSkip.push(mappedFeature)
+        }
+
     }
 
     let createdCount = 0
     let updatedCount = 0
 
-    for (let feature of featuresToCreate) {
+    for (const feature of featuresToCreate) {
         const response = await DVC.createFeature(projectKey, feature)
         if (response?.statusCode) {
             featureErrorList.push(response)
@@ -52,7 +51,7 @@ export const importFeatures = async () => {
         }
     }
 
-    for (let feature of featuresToUpdate) {
+    for (const feature of featuresToUpdate) {
         const response = await DVC.updateFeature(projectKey, feature)
         if (response?.statusCode) {
             featureErrorList.push(response)
