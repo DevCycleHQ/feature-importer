@@ -25,14 +25,17 @@ export const importFeatures = async (config: ParsedImporterConfig) => {
         const includeFeature = includeFeatures ? includeFeatures.get(mappedFeature.key) : true
         const excludeFeature = excludeFeatures ? excludeFeatures.get(mappedFeature.key) : false
 
-        if (!isDuplicate && !excludeFeature && includeFeature) {
+        if (!includeFeature || excludeFeature) {
+            featuresToSkip.push(mappedFeature)
+            continue
+        }
+        if (!isDuplicate) {
             featuresToCreate.push(mappedFeature)
-        } else if (overwriteDuplicates && isDuplicate && !excludeFeature && includeFeature) {
+        } else if (overwriteDuplicates) {
             featuresToUpdate.push(mappedFeature)
         } else {
             featuresToSkip.push(mappedFeature)
         }
-
     }
 
     let createdCount = 0
