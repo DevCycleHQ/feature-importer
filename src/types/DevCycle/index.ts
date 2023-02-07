@@ -7,6 +7,7 @@ export type Feature = {
     type?: 'release' | 'experiment' | 'permission' | 'ops'
     variations?: Variation[]
     variables?: Variable[]
+    tags?: string[]
 }
 
 export type Variable = {
