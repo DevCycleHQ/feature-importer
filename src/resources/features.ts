@@ -1,8 +1,8 @@
-import { getConfigs } from './configs'
-import { LD, DVC } from './api'
-import { LDFeature } from './types/LaunchDarkly'
-import { Feature } from './types/DevCycle'
-import { mapLDFeatureToDVCFeature } from './utils'
+import { getConfigs } from '../configs'
+import { LD, DVC } from '../api'
+import { LDFeature } from '../types/LaunchDarkly'
+import { Feature } from '../types/DevCycle'
+import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly/utils'
 
 const config = getConfigs()
 

@@ -1,7 +1,7 @@
 import { getConfigs } from './configs'
 import { importAudiences } from './resources/audiences'
 import { importProject } from './resources/project'
-import { importFeatures } from './features'
+import { importFeatures } from './resources/features'
 
 const config = getConfigs()
 
