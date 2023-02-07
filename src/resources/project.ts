@@ -1,7 +1,7 @@
 import { LD, DVC } from '../api'
-import { DVCImporterConfigs } from '../configs'
+import { ParsedImporterConfig } from '../configs'
 
-export async function importProject(config: DVCImporterConfigs) {
+export async function importProject(config: ParsedImporterConfig) {
     const ldProject = await LD.getProject(config.projectKey)
     const dvcProject = await DVC.getProject(config.projectKey, { throwOnError: false })
 

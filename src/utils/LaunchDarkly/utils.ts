@@ -6,9 +6,11 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
     const { name, description, key, kind, variations, tags } = feature
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
+        const variationName = variation.name || `Variation ${index + 1}`
+
         return {
-            name: variation.name ? variation.name : `Variation ${index + 1}`,
-            key: variation.name ? kebabCase(variation.name) : `variation-${index + 1}`,
+            name: variationName,
+            key: kebabCase(variationName),
             variables: {
                 [key]: variation.value,
             }
