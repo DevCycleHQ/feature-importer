@@ -1,5 +1,5 @@
-import { Feature, Variation, Variable, VariableType } from "./types/DevCycle"
-import { LDFeature } from "./types/LaunchDarkly"
+import { Feature, Variation, Variable, VariableType } from "../../types/DevCycle"
+import { LDFeature } from "../../types/LaunchDarkly"
 import { kebabCase } from 'lodash'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
