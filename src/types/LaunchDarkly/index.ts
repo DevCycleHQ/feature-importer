@@ -1,4 +1,4 @@
-export type LDFeature = {
+export type Feature = {
     name: string
     kind: 'string' | 'number' | 'boolean' | 'json'
     description: string
@@ -25,14 +25,14 @@ export type LDFeature = {
     maintainerId: string
 }
 
-export type LDEnvironment = {
+export type Environment = {
     _id: string
     key: string
     name: string
     color: string
 }
 
-export type LDEnvironments = {
+export type Environments = {
     totalCount: number
-    items: LDEnvironment[]
+    items: Environment[]
 }

@@ -34,7 +34,7 @@ export enum VariableType {
     json = 'JSON',
 }
 
-export type DVCEnvironmentPayload = {
+export type EnvironmentPayload = {
     name: string
     key: string
     type: string
@@ -42,7 +42,7 @@ export type DVCEnvironmentPayload = {
     color?: string
 }
 
-export type DVCEnvironmentResponse = {
+export type EnvironmentResponse = {
     _id: string
     _project: string
     name: string

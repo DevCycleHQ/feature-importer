@@ -1,8 +1,8 @@
-import { Feature, Variation, Variable, VariableType } from '../../types/DevCycle'
-import { LDFeature } from '../../types/LaunchDarkly'
+import { Feature as DVCFeature, Variation, Variable, VariableType } from '../../types/DevCycle'
+import { Feature as LDFeature } from '../../types/LaunchDarkly'
 import { kebabCase } from 'lodash'
 
-export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
+export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
     const { name, description, key, kind, variations, tags } = feature
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
@@ -22,7 +22,7 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): Feature => {
         type: VariableType[kind],
     }]
 
-    const dvcFeature: Feature = {
+    const dvcFeature: DVCFeature = {
         name,
         description,
         key,

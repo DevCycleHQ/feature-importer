@@ -1,7 +1,7 @@
 import { DVC } from '../api'
 import inquirer from 'inquirer'
-import { DVCEnvironmentResponse, EnvironmentType } from '../types/DevCycle'
-import { LDEnvironment, LDEnvironments } from '../types/LaunchDarkly'
+import { EnvironmentResponse as DVCEnvironmentResponse, EnvironmentType as DVCEnvironmentType } from '../types/DevCycle'
+import { Environment as LDEnvironment, Environments as LDEnvironments } from '../types/LaunchDarkly'
 import { ParsedImporterConfig } from '../configs'
 
 const promptToGetEnvironmentType = async (environmentKey: string) => {
@@ -12,10 +12,10 @@ const promptToGetEnvironmentType = async (environmentKey: string) => {
                 name: "type",
                 message: `Please choose environment type for environment: ${environmentKey}`,
                 choices: [
-                    EnvironmentType.Dev,
-                    EnvironmentType.Staging,
-                    EnvironmentType.Prod,
-                    EnvironmentType.Recovery
+                    DVCEnvironmentType.Dev,
+                    DVCEnvironmentType.Staging,
+                    DVCEnvironmentType.Prod,
+                    DVCEnvironmentType.Recovery
                 ]
             }
         ])

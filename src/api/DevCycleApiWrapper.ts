@@ -1,5 +1,5 @@
 import { handleErrors } from './utils'
-import { DVCEnvironmentPayload, DVCEnvironmentResponse, Feature } from '../types/DevCycle'
+import { EnvironmentPayload, EnvironmentResponse, Feature } from '../types/DevCycle'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1";
 
@@ -163,7 +163,7 @@ export default class DevCycleApiWrapper {
     async getEnvironments(
         projectKey: string,
         options: Options = defaultOptions
-    ): Promise<DVCEnvironmentResponse[]> {
+    ): Promise<EnvironmentResponse[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "GET",
@@ -175,9 +175,9 @@ export default class DevCycleApiWrapper {
 
     async createEnvironment(
         projectKey: string,
-        environment: DVCEnvironmentPayload,
+        environment: EnvironmentPayload,
         options: Options = defaultOptions
-    ): Promise<DVCEnvironmentResponse> {
+    ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "POST",
@@ -191,9 +191,9 @@ export default class DevCycleApiWrapper {
     async updateEnvironment(
         projectKey: string,
         environmentKey: string,
-        environment: DVCEnvironmentPayload,
+        environment: EnvironmentPayload,
         options: Options = defaultOptions
-    ): Promise<DVCEnvironmentResponse> {
+    ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
             method: "PATCH",
