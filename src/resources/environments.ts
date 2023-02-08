@@ -41,27 +41,26 @@ const getEnvironmentPayload = async (environment: LDEnvironment) => {
 export const importEnvironments = async (config: ParsedImporterConfig, environments: LDEnvironments) => {
     const projectKey = config.projectKey
 
-    const dvcEnvironments = await DVC.getEnvironments(projectKey)
-    const dvcEnvironmentsKeys = dvcEnvironments.map(({ key }) => key)
-
-    const createdEnvironments: DVCEnvironmentResponse[] = []
-    const updatedEnvironments: DVCEnvironmentResponse[] = []
+    const environmentsByKey = await DVC.getEnvironments(projectKey).then((environments) => (
+        environments.reduce((map: Record<string, DVCEnvironmentResponse>, environment: DVCEnvironmentResponse) => {
+            map[environment.key] = environment
+            return map
+        }, {})
+    ))
 
     for (const environment of environments.items) {
         const { key } = environment
-        const isDuplicate = dvcEnvironmentsKeys.includes(key)
+        const isDuplicate = Boolean(environmentsByKey[key])
 
         if (!isDuplicate) {
             const environmentPayload = await getEnvironmentPayload(environment)
 
-            const createdEnvironment = await DVC.createEnvironment(projectKey, environmentPayload)
-            createdEnvironments.push(createdEnvironment)
+            environmentsByKey[key] = await DVC.createEnvironment(projectKey, environmentPayload)
             console.log(`Creating environment "${key}" in DevCycle`)
         } else if (config.overwriteDuplicates) {
             const environmentPayload = await getEnvironmentPayload(environment)
 
-            const updatedEnvironment = await DVC.updateEnvironment(projectKey, key, environmentPayload)
-            updatedEnvironments.push(updatedEnvironment)
+            environmentsByKey[key] = await DVC.updateEnvironment(projectKey, key, environmentPayload)
             console.log(`Updating environment "${key}" in DevCycle`)
         } else {
             console.log(`Skipping environment "${key}" creation because it already exists`)
@@ -70,8 +69,7 @@ export const importEnvironments = async (config: ParsedImporterConfig, environme
     }
 
     return {
-        createdEnvironments,
-        updatedEnvironments
+        environmentsByKey
     }
 
 }

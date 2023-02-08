@@ -24,8 +24,7 @@ async function run() {
         unsupportedAudiencesByKey
     } = await importAudiences(config, environmentKeys)
     const {
-        createdEnvironments,
-        updatedEnvironments
+        environmentsByKey
     } = await importEnvironments(config, ldProject.environments)
 }
 run()
