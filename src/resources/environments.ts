@@ -1,38 +1,8 @@
 import { DVC } from '../api'
-import { DVCImporterConfigs } from '../configs'
 import inquirer from 'inquirer'
-
-type LDEnvironment = {
-    _id: string
-    key: string
-    name: string
-    color: string
-}
-
-type LDEnvironments = {
-    totalCount: number
-    items: LDEnvironment[]
-}
-
-export type DVCEnvironmentResponse = {
-    _id: string
-    _project: string
-    name: string
-    key: string
-    type: string
-    color: string
-    _createdBy: string
-    createdAt: string
-    updatedAt: string
-    sdkKeys: Record<string, unknown>
-}
-
-enum EnvironmentType {
-    Dev = "development",
-    Staging = "staging",
-    Prod = "production",
-    Recovery = "disaster_recovery"
-}
+import { DVCEnvironmentResponse, EnvironmentType } from '../types/DevCycle'
+import { LDEnvironment, LDEnvironments } from '../types/LaunchDarkly'
+import { ParsedImporterConfig } from '../configs'
 
 const promptToGetEnvironmentType = async (environmentKey: string) => {
     try {
@@ -68,7 +38,7 @@ const getEnvironmentPayload = async (environment: LDEnvironment) => {
     return environmentPayload
 }
 
-export const importEnvironments = async (config: DVCImporterConfigs, environments: LDEnvironments) => {
+export const importEnvironments = async (config: ParsedImporterConfig, environments: LDEnvironments) => {
     const projectKey = config.projectKey
 
     const dvcEnvironments = await DVC.getEnvironments(projectKey)

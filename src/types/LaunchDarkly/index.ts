@@ -24,3 +24,15 @@ export type LDFeature = {
     }
     maintainerId: string
 }
+
+export type LDEnvironment = {
+    _id: string
+    key: string
+    name: string
+    color: string
+}
+
+export type LDEnvironments = {
+    totalCount: number
+    items: LDEnvironment[]
+}
