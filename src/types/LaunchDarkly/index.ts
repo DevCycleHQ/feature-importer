@@ -1,3 +1,5 @@
+export * from './segments'
+
 export type Feature = {
     name: string
     kind: 'string' | 'number' | 'boolean' | 'json'

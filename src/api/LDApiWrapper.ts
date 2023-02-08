@@ -1,3 +1,4 @@
+import { SegmentResponse } from '../types/LaunchDarkly'
 import { handleErrors } from './utils'
 
 const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
@@ -36,7 +37,11 @@ export default class LDApiWrapper {
         return response.json()
     }
 
-    async getSegments(projectKey: string, environmentKey: string, options: Options = defaultOptions) {
+    async getSegments(
+        projectKey: string,
+        environmentKey: string,
+        options: Options = defaultOptions
+    ): Promise<SegmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${LD_BASE_URL}/segments/${projectKey}/${environmentKey}`, {
             method: 'GET',

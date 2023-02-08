@@ -1,3 +1,5 @@
+export * from './audience'
+
 export type Feature = {
     _id?: string
     _project?: string
