@@ -1,5 +1,6 @@
 import { getConfigs } from './configs'
 import { importAudiences } from './resources/audiences'
+import { importEnvironments } from './resources/environments'
 import { importProject } from './resources/project'
 import { importFeatures } from './resources/features'
 
@@ -22,6 +23,10 @@ async function run() {
         audiencesByKey,
         unsupportedAudiencesByKey
     } = await importAudiences(config, environmentKeys)
+    const {
+        createdEnvironments,
+        updatedEnvironments
+    } = await importEnvironments(config, ldProject.environments)
 }
 run()
 
