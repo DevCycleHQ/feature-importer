@@ -1,7 +1,13 @@
 import { handleErrors } from './utils'
-import { EnvironmentPayload, EnvironmentResponse, Feature } from '../types/DevCycle'
+import {
+    AudiencePayload,
+    AudienceResponse,
+    EnvironmentPayload,
+    EnvironmentResponse,
+    Feature
+} from '../types/DevCycle'
 
-const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1";
+const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1"
 
 type Options = {
     throwOnError: boolean
@@ -87,7 +93,10 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async getAudiences(projectKey: string, options: Options = defaultOptions) {
+    async getAudiences(
+        projectKey: string,
+        options: Options = defaultOptions
+    ): Promise<AudienceResponse[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'GET',
@@ -99,9 +108,9 @@ export default class DevCycleApiWrapper {
 
     async createAudience(
         projectKey: string,
-        payload: Record<string, string>,
+        payload: AudiencePayload,
         options: Options = defaultOptions
-    ) {
+    ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'POST',
@@ -115,9 +124,9 @@ export default class DevCycleApiWrapper {
     async updateAudience(
         projectKey: string,
         audienceKey: string,
-        payload: Record<string, string>,
+        payload: AudiencePayload,
         options: Options = defaultOptions
-    ) {
+    ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences/${audienceKey}`, {
             method: 'PATCH',

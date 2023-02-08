@@ -1,6 +1,6 @@
 import { LD, DVC } from '../api'
 import { Feature } from '../types/DevCycle'
-import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly/utils'
+import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly'
 import { ParsedImporterConfig } from '../configs'
 
 export const importFeatures = async (config: ParsedImporterConfig) => {

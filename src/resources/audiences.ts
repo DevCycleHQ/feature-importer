@@ -1,12 +1,16 @@
 import { LD, DVC } from '../api'
 import { ParsedImporterConfig } from '../configs'
+import { AudiencePayload, AudienceResponse, FilterOrOperator, Operator } from '../types/DevCycle'
+import { Rule, Segment } from '../types/LaunchDarkly'
+import { mapClauseToFilter } from '../utils/LaunchDarkly'
+import { createUserFilter } from '../utils/DevCycle'
 
 
 export async function importAudiences(config: ParsedImporterConfig, environmentKeys: string[]) {
-    const unsupportedAudiencesByKey: Record<string, string> = {};
+    const unsupportedAudiencesByKey: Record<string, string> = {}
     const audiencesByKey = await DVC.getAudiences(config.projectKey).then((audiences) => (
-        audiences.reduce((map: Record<string, any>, audience: Record<string, any>) => {
-            map[audience.key] = audience
+        audiences.reduce((map: Record<string, AudienceResponse>, audience: AudienceResponse) => {
+            if (audience.key) map[audience.key] = audience
             return map
         }, {})
     ))
@@ -17,12 +21,21 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
             const key = `${segment.key}-${environmentKey}`
             const isDuplicate = Boolean(audiencesByKey[key])
 
-            const audiencePayload = {
+            let filters: AudiencePayload['filters']
+            try {
+                filters = mapSegmentToFilters(segment)
+            } catch (err) {
+                unsupportedAudiencesByKey[key] = err instanceof Error ? err.message : 'Error creating segment filters'
+                console.log(`Skipping audience "${key}" because it contains unsupported rules`)
+                continue
+            }
+
+            const audiencePayload: AudiencePayload = {
                 name: segment.name,
                 key,
                 description: segment.description,
                 tags: segment.tags,
-                filters: segment.rules.map(mapRuleToFilter)
+                filters
             }
 
             if (!isDuplicate) {
@@ -36,12 +49,55 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
             }
         }
     }
+    
     return {
         audiencesByKey,
         unsupportedAudiencesByKey
     }
 }
 
-function mapRuleToFilter(rule: Record<string, any>) {
-    // TODO: map rules to filters
+function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'] {
+    const rulesFilters = segment.rules?.length
+        ? segment.rules.map(mapSegmentRuleToFilter)
+        : []
+    
+    if (segment.included?.length) {
+        const includesFilter = createUserFilter('user_id', '!=', segment.included)
+        rulesFilters.unshift(includesFilter)
+    }
+
+    const filters: Operator = {
+        operator: 'or',
+        filters: rulesFilters
+    }
+
+    if (segment.excluded?.length) {
+        const excludesFilter = createUserFilter('user_id', '!=', segment.excluded)
+        return {
+            operator: 'and',
+            filters: [excludesFilter, filters]
+        }
+    }
+
+    return filters
+}
+
+function mapSegmentRuleToFilter(rule: Rule): FilterOrOperator {
+    if (rule.weight) {
+        throw new Error('Weighted rules are not supported in segments')
+    }
+    const filters = rule.clauses.map((clause) => {
+        if (clause.attribute === 'segmentMatch') {
+            throw new Error('Segment match rules are not supported in segments')
+        }
+        return mapClauseToFilter(clause)
+    })
+
+    if (filters.length === 1) {
+        return filters[0]
+    }
+    return {
+        operator: 'and',
+        filters
+    }
 }

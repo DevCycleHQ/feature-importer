@@ -1,5 +1,5 @@
 import { getConfigs } from '../configs'
-import DVCApiWrapper from './DevcycleApiWrapper'
+import DVCApiWrapper from './DevCycleApiWrapper'
 import LDApiWrapper from './LDApiWrapper'
 
 const config = getConfigs()
