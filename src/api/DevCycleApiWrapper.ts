@@ -1,7 +1,8 @@
+import { DVCEnvironmentResponse } from '../resources/environments';
 import { handleErrors } from './utils'
 import { Feature } from '../types/DevCycle'
 
-const DVC_BASE_URL = 'https://api.devcycle.com/v1'
+const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1";
 
 type Options = {
     throwOnError: boolean
@@ -9,6 +10,14 @@ type Options = {
 
 const defaultOptions = {
     throwOnError: true
+}
+
+type DVCEnvironmentPayload = {
+    name: string
+    key: string
+    type: string
+    description?: string
+    color?: string
 }
 
 export default class DevCycleApiWrapper {
@@ -158,4 +167,50 @@ export default class DevCycleApiWrapper {
         if (options.throwOnError) await this.handleErrors(response)
         return await response.json()
     }
+
+
+    async getEnvironments(
+        projectKey: string,
+        options: Options = defaultOptions
+    ): Promise<DVCEnvironmentResponse[]> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
+            method: "GET",
+            headers,
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
+    async createEnvironment(
+        projectKey: string,
+        environment: DVCEnvironmentPayload,
+        options: Options = defaultOptions
+    ): Promise<DVCEnvironmentResponse> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
+            method: "POST",
+            body: JSON.stringify(environment),
+            headers,
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
+    async updateEnvironment(
+        projectKey: string,
+        environmentKey: string,
+        environment: DVCEnvironmentPayload,
+        options: Options = defaultOptions
+    ): Promise<DVCEnvironmentResponse> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
+            method: "PATCH",
+            body: JSON.stringify(environment),
+            headers,
+        })
+        if (options.throwOnError) await this.handleErrors(response)
+        return response.json()
+    }
+
 }
