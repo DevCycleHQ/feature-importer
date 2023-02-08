@@ -1,8 +1,8 @@
 import { LD, DVC } from '../api'
-import { DVCImporterConfigs } from '../configs'
+import { ParsedImporterConfig } from '../configs'
 
 
-export async function importAudiences(config: DVCImporterConfigs, environmentKeys: string[]) {
+export async function importAudiences(config: ParsedImporterConfig, environmentKeys: string[]) {
     const unsupportedAudiencesByKey: Record<string, string> = {};
     const audiencesByKey = await DVC.getAudiences(config.projectKey).then((audiences) => (
         audiences.reduce((map: Record<string, any>, audience: Record<string, any>) => {

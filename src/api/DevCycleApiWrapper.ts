@@ -1,6 +1,5 @@
-import { DVCEnvironmentResponse } from '../resources/environments';
 import { handleErrors } from './utils'
-import { Feature } from '../types/DevCycle'
+import { DVCEnvironmentPayload, DVCEnvironmentResponse, Feature } from '../types/DevCycle'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1";
 
@@ -10,14 +9,6 @@ type Options = {
 
 const defaultOptions = {
     throwOnError: true
-}
-
-type DVCEnvironmentPayload = {
-    name: string
-    key: string
-    type: string
-    description?: string
-    color?: string
 }
 
 export default class DevCycleApiWrapper {
