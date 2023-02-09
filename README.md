@@ -1,40 +1,44 @@
 # DevCycle Feature Importer
 
-## Required Configs
+DevCycle's Feature Importer is designed to import resources from other feature flag providers. 
+The importer is intended to be run on a single project and will create or update a project with the same key containing Environments, Features, and Variables. 
 
-- <String>LaunchDarkly access token, used for pulling feature flags
-  - ldAccessToken
-  - process.env.LD_ACCESS_TOKEN
-- <String> DevCycle client ID and secret, used for fetching API credentials
-  - dvcClientId
-  - dvcClientSecret
-  - process.env.DVC_CLIENT_ID
-  - process.env.DVC_CLIENT_SECRET
-- <String> LaunchDarkly's project key, a project will be created with the same details in DevCycle
-  - projectKey
-  - process.env.PROJECT_KEY
+## Setup
+1. Run `yarn` to install dependencies
+2. Setup [configuration file](#configuration)
+3. Run `yarn start` to start import
 
-## Optional Configs
+## Configuration
+The feature importer can be configured using environment variables or a JSON config file. 
+By default the config is read from `configs.json` in the project root, this can be overwritten using `CONFIG_FILE_PATH`.
+### Required
 
-- <Array<String>> An array of LD feature flag keys to be imported
-  **Default : []**
-  By default, the importer will attempt to migrate all features
-  - includeFeatures
-  - process.env.INCLUDE_FEATURES
-- <Array<String>> An array of LD feature flag keys to be skipped when importing
-  **Default :[]**
-  - excludeFeatures
-  - process.env.EXCLUDE_FEATURES
-- <Boolean> If true, when the importer encounters a duplicate feature it will be overwritten
-  **Default :false**
-  By default, the importer will skip duplicates
-  - overwriteDuplicates
-  - process.env.OVERWRITE_DUPLICATES
+- <b>ldAccessToken</b>: <i>string</i>
+  - LaunchDarkly access token, used for pulling feature flags
+  - Equivalent env var: LD_ACCESS_TOKEN
+- <b>dvcClientId</b>: <i>string</i>
+  - DevCycle client ID, used for fetching API credentials
+  - Equivalent env var: DVC_CLIENT_ID
+- <b>dvcClientSecret</b>: <i>string</i>
+  - DevCycle client secret, used for fetching API credentials
+  - Equivalent env var: DVC_CLIENT_SECRET
+- <b>projectKey</b>: <i>string</i>
+  - LaunchDarkly's project key, a project will be created with the same details in DevCycle
+  - Equivalent env var: PROJECT_KEY
 
-Configs can be added as part of .env file or if you would like to add them as a json
-default config file path is `./configs.json` use CONFIG_FILE_PATH in your .env file to overwrite the default path
+### Optional
 
-sample configs.json
+- <b>includeFeatures</b>: <i>string[]</i>
+  - An array of LD feature flag keys to be imported. By default, the importer will attempt to migrate all features.
+  - Equivalent env var: INCLUDE_FEATURES
+- <b>excludeFeatures</b>: <i>string[]</i>
+  - An array of LD feature flag keys to be skipped when importing.
+  - Equivalent env var: EXCLUDE_FEATURES
+- <b>overwriteDuplicates</b>: <i>boolean</i>
+  - If true, when the importer encounters a duplicate resource it will be overwritten. By default, duplicates will be skipped.
+  - Equivalent env var: OVERWRITE_DUPLICATES
+
+Sample configs.json
 
 ```json
 {
@@ -42,26 +46,20 @@ sample configs.json
   "dvcClientId": "clientId",
   "dvcClientSecret": "clientSecret",
   "projectKey": "project-key",
-  "includeFeatures": [],
+  "includeFeatures": ["feat-1"],
   "excludeFeatures": [],
   "overwriteDuplicates": false
 }
 ```
 
-sample .env file using a json file
-
-```bash
-CONFIG_FILE_PATH="./configs.json"
-```
-
-sample .env file not using a json file
+Sample .env file
 
 ```bash
 LD_ACCESS_TOKEN="api-key"
 DVC_CLIENT_ID="clientId"
 DVC_CLIENT_SECRET="clientSecret"
 PROJECT_KEY="project-key"
-INCLUDE_FEATURES=[]
+INCLUDE_FEATURES=["feat-1"]
 EXCLUDE_FEATURES=[]
 OVERWRITE_DUPLICATES=false
 ```
