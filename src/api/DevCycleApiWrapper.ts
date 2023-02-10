@@ -4,7 +4,9 @@ import {
     AudienceResponse,
     EnvironmentPayload,
     EnvironmentResponse,
-    Feature
+    Feature,
+    ProjectPayload,
+    ProjectResponse
 } from '../types/DevCycle'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1"
@@ -57,7 +59,10 @@ export default class DevCycleApiWrapper {
         await handleErrors('Error calling DevCycle API', response)
     }
 
-    async getProject(projectKey: string, options: Options = defaultOptions) {
+    async getProject(
+        projectKey: string,
+        options: Options = defaultOptions
+    ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'GET',
@@ -67,7 +72,10 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async createProject(payload: Record<string, string>, options: Options = defaultOptions) {
+    async createProject(
+        payload: ProjectPayload,
+        options: Options = defaultOptions
+    ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
             method: 'POST',
@@ -80,9 +88,9 @@ export default class DevCycleApiWrapper {
 
     async updateProject(
         projectKey: string,
-        payload: Record<string, string>,
+        payload: ProjectPayload,
         options: Options = defaultOptions
-    ) {
+    ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'PATCH',
