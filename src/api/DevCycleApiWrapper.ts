@@ -19,6 +19,11 @@ const defaultOptions = {
     throwOnError: true
 }
 
+type DVCError = {
+    statusCode: number
+    message: string
+}
+
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string) {
         this.dvcClientId = dvcClientId
@@ -62,7 +67,7 @@ export default class DevCycleApiWrapper {
     async getProject(
         projectKey: string,
         options: Options = defaultOptions
-    ): Promise<ProjectResponse> {
+    ): Promise<ProjectResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'GET',
@@ -75,7 +80,7 @@ export default class DevCycleApiWrapper {
     async createProject(
         payload: ProjectPayload,
         options: Options = defaultOptions
-    ): Promise<ProjectResponse> {
+    ): Promise<ProjectResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
             method: 'POST',
@@ -90,7 +95,7 @@ export default class DevCycleApiWrapper {
         projectKey: string,
         payload: ProjectPayload,
         options: Options = defaultOptions
-    ): Promise<ProjectResponse> {
+    ): Promise<ProjectResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'PATCH',
@@ -104,7 +109,7 @@ export default class DevCycleApiWrapper {
     async getAudiences(
         projectKey: string,
         options: Options = defaultOptions
-    ): Promise<AudienceResponse[]> {
+    ): Promise<AudienceResponse[] | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'GET',
@@ -118,7 +123,7 @@ export default class DevCycleApiWrapper {
         projectKey: string,
         payload: AudiencePayload,
         options: Options = defaultOptions
-    ): Promise<AudienceResponse> {
+    ): Promise<AudienceResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'POST',
@@ -134,7 +139,7 @@ export default class DevCycleApiWrapper {
         audienceKey: string,
         payload: AudiencePayload,
         options: Options = defaultOptions
-    ): Promise<AudienceResponse> {
+    ): Promise<AudienceResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences/${audienceKey}`, {
             method: 'PATCH',
@@ -180,7 +185,7 @@ export default class DevCycleApiWrapper {
     async getEnvironments(
         projectKey: string,
         options: Options = defaultOptions
-    ): Promise<EnvironmentResponse[]> {
+    ): Promise<EnvironmentResponse[] | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "GET",
@@ -194,7 +199,7 @@ export default class DevCycleApiWrapper {
         projectKey: string,
         environment: EnvironmentPayload,
         options: Options = defaultOptions
-    ): Promise<EnvironmentResponse> {
+    ): Promise<EnvironmentResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "POST",
@@ -210,7 +215,7 @@ export default class DevCycleApiWrapper {
         environmentKey: string,
         environment: EnvironmentPayload,
         options: Options = defaultOptions
-    ): Promise<EnvironmentResponse> {
+    ): Promise<EnvironmentResponse | DVCError> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
             method: "PATCH",
