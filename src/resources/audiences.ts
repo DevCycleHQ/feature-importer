@@ -1,6 +1,6 @@
 import { LD, DVC } from '../api'
 import { ParsedImporterConfig } from '../configs'
-import { AudiencePayload, AudienceResponse, FilterOrOperator, Operator } from '../types/DevCycle'
+import { AudiencePayload, AudienceResponse, FilterOrOperator, Operator, OperatorType } from '../types/DevCycle'
 import { Rule, Segment } from '../types/LaunchDarkly'
 import { mapClauseToFilter } from '../utils/LaunchDarkly'
 import { createUserFilter } from '../utils/DevCycle'
@@ -56,25 +56,25 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
     }
 }
 
-function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'] {
+export function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'] {
     const rulesFilters = segment.rules?.length
         ? segment.rules.map(mapSegmentRuleToFilter)
         : []
     
     if (segment.included?.length) {
-        const includesFilter = createUserFilter('user_id', '!=', segment.included)
+        const includesFilter = createUserFilter('user_id', '=', segment.included)
         rulesFilters.unshift(includesFilter)
     }
 
     const filters: Operator = {
-        operator: 'or',
+        operator: OperatorType.or,
         filters: rulesFilters
     }
 
     if (segment.excluded?.length) {
         const excludesFilter = createUserFilter('user_id', '!=', segment.excluded)
         return {
-            operator: 'and',
+            operator: OperatorType.and,
             filters: [excludesFilter, filters]
         }
     }
@@ -97,7 +97,7 @@ function mapSegmentRuleToFilter(rule: Rule): FilterOrOperator {
         return filters[0]
     }
     return {
-        operator: 'and',
+        operator: OperatorType.and,
         filters
     }
 }

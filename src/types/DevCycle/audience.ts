@@ -6,7 +6,7 @@ export type AudienceResponse = {
     description?: string
     filters: {
         filters: FilterOrOperator[]
-        operator: 'or' | 'and'
+        operator: OperatorType
     }
     tags?: string[]
 }
@@ -17,7 +17,7 @@ export type AudiencePayload = {
     description?: string
     filters: {
         filters: FilterOrOperator[]
-        operator: 'or' | 'and'
+        operator: OperatorType
     }
     tags?: string[]
 }
@@ -33,6 +33,11 @@ export type Filter = {
 }
 
 export type Operator = {
-    operator: 'or' | 'and'
+    operator: OperatorType
     filters: FilterOrOperator[]
+}
+
+export enum OperatorType {
+    or = 'or',
+    and = 'and'
 }
