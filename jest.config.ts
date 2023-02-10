@@ -5,6 +5,6 @@ export default {
             tsconfig: '<rootDir>/tsconfig.spec.json',
         }]
     },
-    moduleFileExtensions: ['ts', 'js', 'html'],
+    moduleFileExtensions: ['ts', 'js'],
     maxWorkers: 1,
 }

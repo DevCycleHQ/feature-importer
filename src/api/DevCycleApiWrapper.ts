@@ -11,19 +11,6 @@ import {
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1"
 
-type Options = {
-    throwOnError: boolean
-}
-
-const defaultOptions = {
-    throwOnError: true
-}
-
-type DVCError = {
-    statusCode: number
-    message: string
-}
-
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string) {
         this.dvcClientId = dvcClientId
@@ -64,165 +51,149 @@ export default class DevCycleApiWrapper {
         await handleErrors('Error calling DevCycle API', response)
     }
 
-    async getProject(
-        projectKey: string,
-        options: Options = defaultOptions
-    ): Promise<ProjectResponse | DVCError> {
+    async getProject(projectKey: string): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'GET',
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
-    async createProject(
-        payload: ProjectPayload,
-        options: Options = defaultOptions
-    ): Promise<ProjectResponse | DVCError> {
+    async createProject(payload: ProjectPayload): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects`, {
             method: 'POST',
             body: JSON.stringify(payload),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
     async updateProject(
         projectKey: string,
-        payload: ProjectPayload,
-        options: Options = defaultOptions
-    ): Promise<ProjectResponse | DVCError> {
+        payload: ProjectPayload
+    ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
             method: 'PATCH',
             body: JSON.stringify(payload),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
     async getAudiences(
-        projectKey: string,
-        options: Options = defaultOptions
-    ): Promise<AudienceResponse[] | DVCError> {
+        projectKey: string
+    ): Promise<AudienceResponse[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'GET',
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
         return response.json()
     }
 
     async createAudience(
         projectKey: string,
-        payload: AudiencePayload,
-        options: Options = defaultOptions
-    ): Promise<AudienceResponse | DVCError> {
+        payload: AudiencePayload
+    ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
             method: 'POST',
             body: JSON.stringify(payload),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
     async updateAudience(
         projectKey: string,
         audienceKey: string,
-        payload: AudiencePayload,
-        options: Options = defaultOptions
-    ): Promise<AudienceResponse | DVCError> {
+        payload: AudiencePayload
+    ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences/${audienceKey}`, {
             method: 'PATCH',
             body: JSON.stringify(payload),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
-    async createFeature(projectKey: string, feature: Feature, options: Options = defaultOptions)  {
+    async createFeature(projectKey: string, feature: Feature)  {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             method: 'POST',
             body: JSON.stringify(feature),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return await response.json()
     }
     
-    async updateFeature(projectKey: string, feature: Feature, options: Options = defaultOptions) {
+    async updateFeature(projectKey: string, feature: Feature) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
             method: 'PATCH',
             body: JSON.stringify(feature),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return await response.json()
     }
     
-    async getFeaturesForProject(projectKey: string, options: Options = defaultOptions) {
+    async getFeaturesForProject(projectKey: string) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return await response.json()
     }
 
 
-    async getEnvironments(
-        projectKey: string,
-        options: Options = defaultOptions
-    ): Promise<EnvironmentResponse[] | DVCError> {
+    async getEnvironments(projectKey: string): Promise<EnvironmentResponse[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "GET",
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
     async createEnvironment(
         projectKey: string,
-        environment: EnvironmentPayload,
-        options: Options = defaultOptions
-    ): Promise<EnvironmentResponse | DVCError> {
+        environment: EnvironmentPayload
+    ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
             method: "POST",
             body: JSON.stringify(environment),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 
     async updateEnvironment(
         projectKey: string,
         environmentKey: string,
-        environment: EnvironmentPayload,
-        options: Options = defaultOptions
-    ): Promise<EnvironmentResponse | DVCError> {
+        environment: EnvironmentPayload
+    ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
             method: "PATCH",
             body: JSON.stringify(environment),
             headers,
         })
-        if (options.throwOnError) await this.handleErrors(response)
+        await this.handleErrors(response)
         return response.json()
     }
 

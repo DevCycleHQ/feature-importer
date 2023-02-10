@@ -50,7 +50,7 @@ describe('Project Import', () => {
             key: ldProject.key
         }
         mockLD.getProject.mockResolvedValue(ldProject)
-        mockDVC.getProject.mockResolvedValue({ statusCode: 404, message: 'Not found' })
+        mockDVC.getProject.mockRejectedValue(new Error('Not found'))
         mockDVC.createProject.mockResolvedValue(dvcResponse)
 
         const result = await importProject(config)
