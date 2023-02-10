@@ -3,16 +3,21 @@ import { ParsedImporterConfig } from '../configs'
 
 export async function importProject(config: ParsedImporterConfig) {
     const ldProject = await LD.getProject(config.projectKey)
-    const dvcProject = await DVC.getProject(config.projectKey, { throwOnError: false })
 
-    const isDuplicate = Object.keys(dvcProject).includes('_id')
+    let dvcProject, isDuplicate
+    try {
+        dvcProject = await DVC.getProject(config.projectKey)
+        isDuplicate = true
+    } catch (e) {
+        isDuplicate = false
+    }
 
     const projectPayload = {
         name: ldProject.name,
         key: ldProject.key
     }
 
-    let response = dvcProject
+    let response
     if (!isDuplicate) {
         response = await DVC.createProject(projectPayload)
         console.log(`Creating project "${projectPayload.key}" in DevCycle`)
@@ -20,6 +25,7 @@ export async function importProject(config: ParsedImporterConfig) {
         response = await DVC.updateProject(config.projectKey, projectPayload)
         console.log(`Updating project "${config.projectKey}" in DevCycle`)
     } else {
+        response = dvcProject
         console.log('Skipping project creation because it already exists')
     }
 
