@@ -5,14 +5,14 @@ export async function importProject(config: ParsedImporterConfig) {
     const ldProject = await LD.getProject(config.projectKey)
     const dvcProject = await DVC.getProject(config.projectKey, { throwOnError: false })
 
-    const isDuplicate = Boolean(dvcProject._id)
+    const isDuplicate = Object.keys(dvcProject).includes('_id')
 
     const projectPayload = {
         name: ldProject.name,
         key: ldProject.key
     }
 
-    let response
+    let response = dvcProject
     if (!isDuplicate) {
         response = await DVC.createProject(projectPayload)
         console.log(`Creating project "${projectPayload.key}" in DevCycle`)
