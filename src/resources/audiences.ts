@@ -5,7 +5,6 @@ import { Rule, Segment } from '../types/LaunchDarkly'
 import { mapClauseToFilter } from '../utils/LaunchDarkly'
 import { createUserFilter } from '../utils/DevCycle'
 
-
 export async function importAudiences(config: ParsedImporterConfig, environmentKeys: string[]) {
     const unsupportedAudiencesByKey: Record<string, string> = {}
     const audiencesByKey = await DVC.getAudiences(config.projectKey).then((audiences) => (
@@ -49,7 +48,7 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
             }
         }
     }
-    
+
     return {
         audiencesByKey,
         unsupportedAudiencesByKey
@@ -60,7 +59,7 @@ export function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'
     const rulesFilters = segment.rules?.length
         ? segment.rules.map(mapSegmentRuleToFilter)
         : []
-    
+
     if (segment.included?.length) {
         const includesFilter = createUserFilter('user_id', '=', segment.included)
         rulesFilters.unshift(includesFilter)

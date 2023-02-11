@@ -20,8 +20,8 @@ export type EnvironmentResponse = {
 }
 
 export enum EnvironmentType {
-    Dev = "development",
-    Staging = "staging",
-    Prod = "production",
-    Recovery = "disaster_recovery"
+    Dev = 'development',
+    Staging = 'staging',
+    Prod = 'production',
+    Recovery = 'disaster_recovery'
 }

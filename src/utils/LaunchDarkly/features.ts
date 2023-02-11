@@ -1,16 +1,16 @@
 import { Feature as DVCFeature, Variation, Variable, VariableType } from '../../types/DevCycle'
 import { Feature as LDFeature } from '../../types/LaunchDarkly'
-import { kebabCase } from 'lodash'
+import { getVariationKey, getVariationName } from './variation'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
     const { name, description, key, kind, variations, tags } = feature
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
-        const variationName = variation.name || `Variation ${index + 1}`
+        const variationName = getVariationName(feature, index)
 
         return {
             name: variationName,
-            key: kebabCase(variationName),
+            key: getVariationKey(feature, index),
             variables: {
                 [key]: variation.value,
             }
@@ -19,12 +19,13 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
 
     const dvcVariables: Variable[] = [{
         key,
-        type: VariableType[kind],
+        type: getVariableType(variations),
     }]
 
     const dvcFeature: DVCFeature = {
         name,
         description,
+        type: 'release',
         key,
         variations: dvcVariations,
         variables: dvcVariables,
@@ -32,4 +33,22 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
     }
 
     return dvcFeature
+}
+
+const getVariableType = (variations: any[]) => {
+    const types = variations.map((variation: any) => typeof variation.value)
+
+    if (types.every((type) => type === 'string')) {
+        return VariableType.string
+    }
+
+    if (types.every((type) => type === 'number')) {
+        return VariableType.number
+    }
+
+    if (types.every((type) => type === 'boolean')) {
+        return VariableType.boolean
+    }
+
+    return VariableType.json
 }
