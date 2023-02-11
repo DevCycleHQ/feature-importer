@@ -41,10 +41,10 @@ export default class LDApiWrapper {
         await this.handleErrors(response)
         return response.json()
     }
-    
+
     async getFeatureFlagsForProject(projectKey: string) {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/flags/${projectKey}`, {
+        const response = await fetch(`${LD_BASE_URL}/flags/${projectKey}?summary=0`, {
             method: 'GET',
             headers,
         })

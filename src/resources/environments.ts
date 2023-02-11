@@ -8,8 +8,8 @@ const promptToGetEnvironmentType = async (environmentKey: string) => {
     try {
         const answer = await inquirer.prompt([
             {
-                type: "list",
-                name: "type",
+                type: 'list',
+                name: 'type',
                 message: `Please choose environment type for environment: ${environmentKey}`,
                 choices: [
                     DVCEnvironmentType.Dev,

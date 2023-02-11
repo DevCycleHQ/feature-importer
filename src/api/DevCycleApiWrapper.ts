@@ -8,8 +8,9 @@ import {
     ProjectPayload,
     ProjectResponse
 } from '../types/DevCycle'
+import { FeatureConfiguration } from '../types/DevCycle/targeting'
 
-const DVC_BASE_URL = process.env.DVC_BASE_URL || "https://api.devcycle.com/v1"
+const DVC_BASE_URL = process.env.DVC_BASE_URL || 'https://api.devcycle.com/v1'
 
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string) {
@@ -126,7 +127,7 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async createFeature(projectKey: string, feature: Feature)  {
+    async createFeature(projectKey: string, feature: Feature) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             method: 'POST',
@@ -136,7 +137,7 @@ export default class DevCycleApiWrapper {
         await this.handleErrors(response)
         return await response.json()
     }
-    
+
     async updateFeature(projectKey: string, feature: Feature) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
@@ -147,7 +148,7 @@ export default class DevCycleApiWrapper {
         await this.handleErrors(response)
         return await response.json()
     }
-    
+
     async getFeaturesForProject(projectKey: string) {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
@@ -157,11 +158,10 @@ export default class DevCycleApiWrapper {
         return await response.json()
     }
 
-
     async getEnvironments(projectKey: string): Promise<EnvironmentResponse[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
-            method: "GET",
+            method: 'GET',
             headers,
         })
         await this.handleErrors(response)
@@ -174,7 +174,7 @@ export default class DevCycleApiWrapper {
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
-            method: "POST",
+            method: 'POST',
             body: JSON.stringify(environment),
             headers,
         })
@@ -189,11 +189,30 @@ export default class DevCycleApiWrapper {
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
-            method: "PATCH",
+            method: 'PATCH',
             body: JSON.stringify(environment),
             headers,
         })
         await this.handleErrors(response)
+        return response.json()
+    }
+
+    async updateFeatureConfigurations(
+        projectKey: string,
+        featureKey: string,
+        environment: string,
+        configurations: FeatureConfiguration,
+        options: { throwOnError: boolean } = { throwOnError: true }
+    ): Promise<FeatureConfiguration> {
+        const headers = await this.getHeaders()
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${projectKey}/features/${featureKey}/configurations?environment=${environment}`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify(configurations),
+                headers,
+            })
+        if (options.throwOnError) await this.handleErrors(response)
         return response.json()
     }
 

@@ -30,6 +30,8 @@ export type Filter = {
     comparator?: string
     values?: any[]
     _audiences?: string[]
+    dataKey?: string
+    dataKeyType?: string
 }
 
 export type Operator = {

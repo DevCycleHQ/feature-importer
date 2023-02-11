@@ -1,3 +1,5 @@
+import { Target, Rule } from './targeting'
+
 export type Feature = {
     name: string
     kind: 'string' | 'number' | 'boolean' | 'json'
@@ -11,6 +13,7 @@ export type Feature = {
         usingMobileKey: boolean
     }
     variations: {
+        name?: string
         _id: string
         value: boolean
     }[]
@@ -23,4 +26,11 @@ export type Feature = {
         }
     }
     maintainerId: string
+    environments: {
+        [key: string]: {
+            on: boolean,
+            targets: Target[],
+            rules: Rule[]
+        }
+    }
 }

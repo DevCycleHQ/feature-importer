@@ -21,7 +21,7 @@ export type Variable = {
 
 export type Variation = {
     key: string
-    name: string
+    name?: string
     variables?: {
         [key: string]: string | number | boolean | object
     }
