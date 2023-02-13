@@ -2,7 +2,7 @@ import { LD, DVC } from '../api'
 import { Feature } from '../types/DevCycle'
 import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly'
 import { ParsedImporterConfig } from '../configs'
-import { FeaturesToImport } from '../types'
+import { FeatureImportAction, FeaturesToImport } from '../types'
 
 export const prepareFeaturesToImport = async (config: ParsedImporterConfig) => {
     const { includeFeatures, excludeFeatures, overwriteDuplicates, projectKey } = config
@@ -28,15 +28,15 @@ export const prepareFeaturesToImport = async (config: ParsedImporterConfig) => {
             false
 
         if (!includeFeature || excludeFeature) {
-            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: 'skip' }
+            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Skip }
             continue
         }
         if (!isDuplicate) {
-            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: 'create' }
+            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Create }
         } else if (overwriteDuplicates) {
-            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: 'update' }
+            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Update }
         } else {
-            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: 'skip' }
+            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Skip }
         }
     }
     return { featuresToImport, ldFeatures }
@@ -55,10 +55,10 @@ export const importFeatures = async (
     for (const featurekey in featuresToImport) {
         const listItem = featuresToImport[featurekey]
         try {
-            if (listItem.action === 'create') {
+            if (listItem.action === FeatureImportAction.Create) {
                 await DVC.createFeature(projectKey, listItem.feature)
                 createdCount += 1
-            } else if (listItem.action === 'update') {
+            } else if (listItem.action === FeatureImportAction.Update) {
                 await DVC.updateFeature(projectKey, listItem.feature)
                 updatedCount += 1
             } else {

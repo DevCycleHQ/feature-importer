@@ -2,13 +2,13 @@ import { Target, Rule } from './targeting'
 
 export type Feature = {
     name: string
-    kind: 'string' | 'number' | 'boolean' | 'json'
-    description: string
+    kind: FeatureKind
+    description?: string
     key: string
     _version: number
     creationDate: number
-    includeInSnippet: boolean
-    clientSideAvailability: {
+    includeInSnippet?: boolean
+    clientSideAvailability?: {
         usingEnvironmentIds: boolean
         usingMobileKey: boolean
     }
@@ -17,9 +17,9 @@ export type Feature = {
         _id: string
         value: boolean
     }[]
-    temporary: boolean
-    tags: string[]
-    _links: {
+    temporary?: boolean
+    tags?: string[]
+    _links?: {
         self: {
             href: string
             type: string
@@ -33,4 +33,11 @@ export type Feature = {
             rules: Rule[]
         }
     }
+}
+
+export enum FeatureKind {
+    string = 'string',
+    number = 'number',
+    boolean = 'boolean',
+    json = 'json',
 }
