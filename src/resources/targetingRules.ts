@@ -35,8 +35,8 @@ export const prepareFeatureConfigsToImport = async (
                 }
             } catch (err) {
                 featuresToImport[matchingDVCFeature.key].action = 'unsupported'
-                const errorMessage = err instanceof Error ? 'due to ' + err.message : ''
-                console.log('Skipping feature', matchingDVCFeature.key, 'due to', errorMessage)
+                const errorMessage = err instanceof Error ? err.message : 'unknown error'
+                console.log(`Skipping feature "${matchingDVCFeature.key}" due to`, errorMessage)
             }
         })
     }
