@@ -63,7 +63,7 @@ describe('Audience Import', () => {
             audiencesByKey: {
                 [`${ldSegment.key}-${envKey}`]: createResponse
             },
-            unsupportedAudiencesByKey: {}
+            errorsByKey: {}
         })
         expect(mockDVC.createAudience).toHaveBeenCalledWith(
             config.projectKey,
@@ -94,7 +94,7 @@ describe('Audience Import', () => {
             audiencesByKey: {
                 [existingAudience.key]: existingAudience
             },
-            unsupportedAudiencesByKey: {}
+            errorsByKey: {}
         })
         expect(mockDVC.createAudience).not.toHaveBeenCalled()
         expect(mockDVC.updateAudience).not.toHaveBeenCalled()
@@ -127,7 +127,7 @@ describe('Audience Import', () => {
             audiencesByKey: {
                 [`${ldSegment.key}-${envKey}`]: updateResponse
             },
-            unsupportedAudiencesByKey: {}
+            errorsByKey: {}
         })
         expect(mockDVC.updateAudience).toHaveBeenCalledWith(
             config.projectKey,

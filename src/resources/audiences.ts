@@ -1,12 +1,19 @@
 import { LD, DVC } from '../api'
 import { ParsedImporterConfig } from '../configs'
 import { AudiencePayload, AudienceResponse, FilterOrOperator, Operator, OperatorType } from '../types/DevCycle'
-import { Rule, Segment } from '../types/LaunchDarkly'
+import { Segment, SegmentRule } from '../types/LaunchDarkly'
 import { mapClauseToFilter } from '../utils/LaunchDarkly'
 import { createUserFilter } from '../utils/DevCycle'
 
-export async function importAudiences(config: ParsedImporterConfig, environmentKeys: string[]) {
-    const unsupportedAudiencesByKey: Record<string, string> = {}
+export type AudienceOutput = {
+    audiencesByKey: Record<string, AudienceResponse>,
+    errorsByKey: Record<string, string>
+}
+export async function importAudiences(
+    config: ParsedImporterConfig,
+    environmentKeys: string[]
+): Promise<AudienceOutput> {
+    const errorsByKey: Record<string, string> = {}
     const audiencesByKey = await DVC.getAudiences(config.projectKey).then((audiences) => (
         audiences.reduce((map: Record<string, AudienceResponse>, audience: AudienceResponse) => {
             if (audience.key) map[audience.key] = audience
@@ -24,7 +31,8 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
             try {
                 filters = mapSegmentToFilters(segment)
             } catch (err) {
-                unsupportedAudiencesByKey[key] = err instanceof Error ? err.message : 'Error creating segment filters'
+                const errorMessage = err instanceof Error ? err.message : 'Error creating segment filters'
+                errorsByKey[key] = `Error in segment ${segment.key}: ${errorMessage}`
                 console.log(`Skipping audience "${key}" because it contains unsupported rules`)
                 continue
             }
@@ -51,7 +59,7 @@ export async function importAudiences(config: ParsedImporterConfig, environmentK
 
     return {
         audiencesByKey,
-        unsupportedAudiencesByKey
+        errorsByKey
     }
 }
 
@@ -81,7 +89,7 @@ export function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'
     return filters
 }
 
-function mapSegmentRuleToFilter(rule: Rule): FilterOrOperator {
+function mapSegmentRuleToFilter(rule: SegmentRule): FilterOrOperator {
     if (rule.weight) {
         throw new Error('Weighted rules are not supported in segments')
     }
