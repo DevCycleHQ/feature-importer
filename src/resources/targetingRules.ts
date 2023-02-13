@@ -1,42 +1,42 @@
-import { LD, DVC } from '../api'
+import { DVC } from '../api'
 import {
-    Feature as DVCFeature, FeatureConfiguration
+    FeatureConfiguration, OperatorType, TargetingRule
 } from '../types/DevCycle'
 import { Feature as LDFeature } from '../types/LaunchDarkly'
 import { ParsedImporterConfig } from '../configs'
-import { mapLDTargetToDVCTarget } from '../utils/LaunchDarkly/targeting'
 import { FeaturesToImport } from '../types'
+import { getComparator, getVariationKey, mapClauseToFilter } from '../utils/LaunchDarkly'
+import { createAudienceMatchFilter, createUserFilter } from '../utils/DevCycle'
+import { AudienceOutput } from './audiences'
 
 export const prepareFeatureConfigsToImport = async (
     featuresToImport: FeaturesToImport,
-    ldFeatureFlags: LDFeature[]
+    ldFeatureFlags: LDFeature[],
+    audiences: AudienceOutput
 ) => {
     for (const feature of ldFeatureFlags) {
-        if (featuresToImport[feature.key].action === 'skip') {
-            continue
-        }
+        const { action, feature: dvcFeature } = featuresToImport[feature.key]
+        if (action === 'skip') continue
+
         featuresToImport[feature.key].configs ??= []
-        const matchingDVCFeature: DVCFeature = featuresToImport[feature.key].feature
 
         Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
-            const environmentTargetingRules: FeatureConfiguration = {
-                targets: [],
-                status: environmentConfig.on ? 'active' : 'inactive',
-            }
-            let dvcTargets
             try {
-                dvcTargets = mapLDTargetToDVCTarget(feature, environment)
-                environmentTargetingRules.targets.push(...dvcTargets)
-                if (environmentTargetingRules.targets.length !== 0) {
-                    featuresToImport[matchingDVCFeature.key].configs?.push({
+                const targets = buildTargetingRules(feature, environment, audiences)
+                const targetingRules: FeatureConfiguration = {
+                    targets,
+                    status: environmentConfig.on ? 'active' : 'inactive',
+                }
+                if (targets.length > 0) {
+                    featuresToImport[dvcFeature.key].configs?.push({
                         environment,
-                        targetingRules: environmentTargetingRules,
+                        targetingRules,
                     })
                 }
             } catch (err) {
-                featuresToImport[matchingDVCFeature.key].action = 'unsupported'
+                featuresToImport[dvcFeature.key].action = 'unsupported'
                 const errorMessage = err instanceof Error ? err.message : 'unknown error'
-                console.log(`Skipping feature "${matchingDVCFeature.key}" due to`, errorMessage)
+                console.log(`Skipping feature "${dvcFeature.key}":`, errorMessage)
             }
         })
     }
@@ -51,20 +51,83 @@ export const importFeatureConfigs = async (
     const { projectKey } = config
     let count = 0
     for (const featureKey in featureConfigurationsToImport) {
-        if (featureConfigurationsToImport[featureKey].action === 'skip') {
-            continue
-        }
-        const { feature, configs = [] } = featureConfigurationsToImport[featureKey]
+        const { action, feature, configs = [] } = featureConfigurationsToImport[featureKey]
+        if (action === 'skip') continue
+
         for (const config of configs) {
             try {
-                DVC.updateFeatureConfigurations(
+                await DVC.updateFeatureConfigurations(
                     projectKey, feature.key, config.environment, config.targetingRules
                 )
                 count++
             } catch (e) {
+                console.log(e)
                 errorList.push(e)
             }
         }
     }
     return { count, errorList }
+}
+
+const buildTargetingRules = (
+    feature: LDFeature,
+    environmentKey: string,
+    audiences: AudienceOutput
+): TargetingRule[] => {
+    const targetingRules: TargetingRule[] = []
+    const { targets, rules } = feature.environments[environmentKey]
+
+    for (const target of targets) {
+        const audience = {
+            name: 'imported-target',
+            filters: {
+                filters: [createUserFilter('user_id', '=', target.values)],
+                operator: OperatorType.and
+            }
+        }
+        const distribution = [{
+            _variation: getVariationKey(feature, target.variation),
+            percentage: 1
+        }]
+
+        targetingRules.push({ audience, distribution })
+    }
+
+    for (const rule of rules) {
+        const filters = rule.clauses.map((clause) => {
+            if (clause.op === 'segmentMatch') {
+                const audienceIds = clause.values.map((segKey) => {
+                    const audienceKey = `${segKey}-${environmentKey}`
+                    if (audiences.errorsByKey[audienceKey] || !audiences.audiencesByKey[audienceKey]) {
+                        const errorMessage = audiences.errorsByKey[audienceKey] || 'unknown error'
+                        throw new Error(errorMessage)
+                    } else {
+                        return audiences.audiencesByKey[audienceKey]._id
+                    }
+                })
+                return createAudienceMatchFilter(
+                    getComparator(clause),
+                    audienceIds
+                )
+            }
+            return mapClauseToFilter(clause)
+        })
+        const audience = {
+            name: 'imported-rule',
+            filters: {
+                filters,
+                operator: OperatorType.and
+            }
+        }
+        const distribution = [{
+            _variation: getVariationKey(feature, rule.variation),
+            percentage: 1
+        }]
+        targetingRules.push({
+            audience,
+            distribution
+        })
+    }
+
+    return targetingRules
 }

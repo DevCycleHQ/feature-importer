@@ -18,6 +18,14 @@ export function createCustomDataFilter(dataKey: string, comparator: string, valu
     }
 }
 
+export function createAudienceMatchFilter(comparator: string, audiences: string[]) {
+    return {
+        type: 'audienceMatch',
+        comparator,
+        _audiences: audiences
+    }
+}
+
 export function getDataType(values: any[]) {
     const typeMap = {
         string: 'String',

@@ -1,3 +1,5 @@
+import { Clause } from './targeting'
+
 export type SegmentResponse = {
     items: Segment[]
 }
@@ -10,19 +12,11 @@ export type Segment = {
     key: string
     included?: string[]
     excluded?: string[]
-    rules: Rule[]
+    rules: SegmentRule[]
 }
 
-export type Rule = {
+export type SegmentRule = {
     _id?: string
     clauses: Clause[]
     weight?: number
-}
-
-export type Clause = {
-    _id?: string
-    attribute: string
-    negate: boolean
-    op: string
-    values: any[]
 }

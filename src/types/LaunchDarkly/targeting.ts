@@ -8,13 +8,7 @@ export type Clause = {
 
 export type Rule = {
     _id: string
-    clauses: {
-        _id: string
-        attribute: string
-        negate: boolean
-        op: string
-        values: string[]
-    }[]
+    clauses: Clause[]
     description: string
     ref: string
     trackEvents: boolean

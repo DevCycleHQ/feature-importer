@@ -16,14 +16,11 @@ async function run() {
 
     const ldEnvironments = ldProject.environments.items
     const environmentKeys = ldEnvironments.map((env: Record<string, any>) => env.key)
-    const {
-        audiencesByKey,
-        unsupportedAudiencesByKey
-    } = await importAudiences(config, environmentKeys)
+    const audienceOutput = await importAudiences(config, environmentKeys)
 
     const { featuresToImport, ldFeatures } = await prepareFeaturesToImport(config)
     const featuresAndConfigurationsToImport =
-        await prepareFeatureConfigsToImport(featuresToImport, ldFeatures)
+        await prepareFeatureConfigsToImport(featuresToImport, ldFeatures, audienceOutput)
 
     const {
         createdCount,
