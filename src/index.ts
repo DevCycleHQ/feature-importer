@@ -22,31 +22,32 @@ async function run() {
     } = await importAudiences(config, environmentKeys)
 
     const { featuresToImport, ldFeatures } = await prepareFeaturesToImport(config)
-
     const featuresAndConfigurationsToImport =
         await prepareFeatureConfigsToImport(featuresToImport, ldFeatures)
 
-    console.log('Summary: ')
-    const importFeaturesResult = await importFeatures(config, featuresAndConfigurationsToImport)
-    console.log(`Created ${importFeaturesResult.createdCount} features`)
-    console.log(`Updated ${importFeaturesResult.updatedCount} features`)
-    console.log(`Failed to import the following ${importFeaturesResult.errored.length} features: `,
-        JSON.stringify(importFeaturesResult.errored))
-    console.log(`Skipped ${importFeaturesResult.skippedCount} features: `,
-        (importFeaturesResult.skipped))
+    const {
+        createdCount,
+        updatedCount,
+        skippedCount,
+        errored: erroredFeatures
+    } = await importFeatures(config, featuresAndConfigurationsToImport)
+    await importFeatureConfigs(config, featuresAndConfigurationsToImport)
 
-    const createTargetingRulesResult = await importFeatureConfigs(config, featuresAndConfigurationsToImport)
-
-    console.log(`Created ${createTargetingRulesResult.count} targeting rules`)
-    console.log(`Failed to import the following ${createTargetingRulesResult.errorList.length} features configs: `,
-        JSON.stringify(createTargetingRulesResult.errorList))
-
-    // const unsupportedFeatures = Object.entries(featuresAndConfigurationsToImport).filter(([featureKey, feature]) => {
-    //     return feature.action === 'unsupported'
-    // })
-    // console.log(`Skipped ${unsupportedFeatures.length} features due to unsupported targeting rules: `,
-    //     JSON.stringify(unsupportedFeatures))
-
+    console.log('-------------------------------------------')
+    console.log(`Created ${createdCount} features in DevCycle`)
+    if (updatedCount) console.log(`Updated ${updatedCount} features`)
+    if (skippedCount) console.log(`Skipped ${skippedCount} features`)
+    if (Object.keys(erroredFeatures).length) {
+        console.error(
+            'Failed to import the following features:',
+            Object
+                .entries(erroredFeatures)
+                .map(([key, error]) => `\n\t- ${key}: ${error}`)
+                .join('')
+        )
+    }
+    console.log('-------------------------------------------')
 }
+
 run()
 

@@ -51,8 +51,7 @@ export const importFeatures = async (
     let createdCount = 0
     let updatedCount = 0
     let skippedCount = 0
-    const featureErrorList: unknown[] = []
-    const featureSkipList: Feature[] = []
+    const featureErrors: Record<string, string> = {}
     for (const featurekey in featuresToImport) {
         const listItem = featuresToImport[featurekey]
         try {
@@ -63,11 +62,10 @@ export const importFeatures = async (
                 await DVC.updateFeature(projectKey, listItem.feature)
                 updatedCount += 1
             } else {
-                featureSkipList.push(listItem.feature)
                 skippedCount += 1
             }
         } catch (e) {
-            featureErrorList.push(e)
+            featureErrors[listItem.feature.key] = e instanceof Error ? e.message : 'Unknown error'
         }
     }
 
@@ -75,7 +73,6 @@ export const importFeatures = async (
         createdCount,
         updatedCount,
         skippedCount,
-        skipped: featureSkipList,
-        errored: featureErrorList,
+        errored: featureErrors,
     }
 }
