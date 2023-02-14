@@ -37,6 +37,8 @@ export function getComparator(clause: Clause) {
         greaterThan: (neg: boolean) => '>',
         greaterThanOrEqual: (neg: boolean) => '>=',
         segmentMatch: (neg: boolean) => neg ? '!=' : '=',
+        before: () => '<',
+        after: () => '>',
     }
     if (!(op in operationMap)) {
         throw new Error(`Unsupported operation: ${op}`)
@@ -49,7 +51,7 @@ export function getPercentageFromWeight(weight: number) {
     return weight / 100000
 }
 
-export function buildTargetingRules (
+export function buildTargetingRules(
     feature: LDFeature,
     environmentKey: string,
     audienceImport: LDAudienceImporter
