@@ -27,10 +27,10 @@ async function run() {
     const featureImporter = new LDFeatureImporter(config, audienceImporter)
     const featureSummary = await featureImporter.import()
 
-    printSumary(featureSummary)
+    printSummary(featureSummary)
 }
 
-function printSumary(featureSummary: FeatureSummary) {
+function printSummary(featureSummary: FeatureSummary) {
     const {
         createdCount,
         updatedCount,

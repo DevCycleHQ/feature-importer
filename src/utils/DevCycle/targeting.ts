@@ -7,6 +7,10 @@ export function createUserFilter(subType: string, comparator: string, values: st
     }
 }
 
+export function createAllUsersFilter() {
+    return { type: 'all' }
+}
+
 export function createCustomDataFilter(dataKey: string, comparator: string, values: any[]) {
     return {
         type: 'user',
