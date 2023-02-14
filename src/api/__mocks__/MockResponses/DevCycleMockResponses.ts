@@ -1,4 +1,4 @@
-import { FeatureType } from '../../types/DevCycle'
+import { FeatureType } from '../../../types/DevCycle'
 
 export const mockDVCFeaturesResponse = [{
     _id: '123',

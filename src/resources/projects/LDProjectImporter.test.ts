@@ -41,7 +41,7 @@ describe('LDProjectImporter', () => {
         jest.clearAllMocks()
     })
 
-    test("project is created when it doesn't exist yet", async () => {
+    test('project is created when it doesn\'t exist yet', async () => {
         const config = { ...mockConfig }
         const dvcResponse = {
             ...mockDvcProjectResponse,
@@ -65,7 +65,7 @@ describe('LDProjectImporter', () => {
         expect(mockDVC.updateProject).not.toHaveBeenCalled()
     })
 
-    test("project is skipped when it already exists", async () => {
+    test('project is skipped when it already exists', async () => {
         const config = { ...mockConfig }
         const dvcResponse = {
             ...mockDvcProjectResponse,
@@ -85,7 +85,7 @@ describe('LDProjectImporter', () => {
         expect(mockDVC.updateProject).not.toHaveBeenCalled()
     })
 
-    test("project is updated when overwriteDuplicates is true", async () => {
+    test('project is updated when overwriteDuplicates is true', async () => {
         const config = { ...mockConfig, overwriteDuplicates: true }
         const dvcResponse = {
             ...mockDvcProjectResponse,

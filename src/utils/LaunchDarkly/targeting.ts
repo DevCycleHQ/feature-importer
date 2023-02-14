@@ -1,5 +1,12 @@
 import { LDAudienceImporter } from '../../resources/audiences'
-import { AudiencePayload, CustomPropertyType, Filter, FilterOrOperator, OperatorType, TargetingRule } from '../../types/DevCycle'
+import {
+    AudiencePayload,
+    CustomPropertyType,
+    Filter,
+    FilterOrOperator,
+    OperatorType,
+    TargetingRule
+} from '../../types/DevCycle'
 import { Clause, Fallthrough, Feature, Feature as LDFeature, Rollout, Rule, Target } from '../../types/LaunchDarkly'
 import {
     createAllUsersFilter,
@@ -22,7 +29,8 @@ export function mapClauseToFilter(clause: Clause): Filter {
     return !(attribute in attributeMap)
         ? createCustomDataFilter(attribute, comparator, values)
         : createUserFilter(
-            attributeMap[attribute as keyof typeof attributeMap], // we've already checked that attribute is a key of attributeMap
+            // we've already checked that attribute is a key of attributeMap
+            attributeMap[attribute as keyof typeof attributeMap],
             comparator,
             values
         )
@@ -125,6 +133,7 @@ export function buildTargetingRuleFromRule(
 ): { targetingRule: TargetingRule, customPropertiesToImport: CustomPropertyFromFilter[] } {
     let customProperties: CustomPropertyFromFilter[] = []
     const filters = rule.clauses.map((clause) => {
+        console.log(audienceImport)
         if (clause.op === 'segmentMatch') {
             const audienceIds = clause.values.map((segKey) => {
                 const audienceKey = `${segKey}-${environmentKey}`
