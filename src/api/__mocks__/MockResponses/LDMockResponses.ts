@@ -1,5 +1,5 @@
-import { FeatureType, VariableType } from '../../types/DevCycle'
-import { FeatureKind } from '../../types/LaunchDarkly'
+import { FeatureType, VariableType } from '../../../types/DevCycle'
+import { FeatureKind } from '../../../types/LaunchDarkly'
 
 export const mockLDFeaturesFlags = {
     items: [
