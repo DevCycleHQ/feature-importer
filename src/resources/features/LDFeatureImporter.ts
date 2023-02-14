@@ -138,7 +138,7 @@ export class LDFeatureImporter {
     }
 
     private async importFeatureConfigs() {
-        const { projectKey } = this.config
+        const { projectKey, overwriteDuplicates } = this.config
         for (const featureKey in this.featuresToImport) {
             const { action, feature, configs = [] } = this.featuresToImport[featureKey]
             if (this.errors[feature.key]) continue
@@ -146,9 +146,12 @@ export class LDFeatureImporter {
 
             for (const config of configs) {
                 try {
-                    await DVC.updateFeatureConfigurations(
-                        projectKey, feature.key, config.environment, config.targetingRules
-                    )
+                    if ((action === FeatureImportAction.Create) ||
+                        (action === FeatureImportAction.Update && overwriteDuplicates)) {
+                        await DVC.updateFeatureConfigurations(
+                            projectKey, feature.key, config.environment, config.targetingRules
+                        )
+                    }
                 } catch (e) {
                     this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
                 }

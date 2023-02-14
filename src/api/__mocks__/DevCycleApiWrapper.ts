@@ -14,4 +14,6 @@ export default class DevCycleApiWrapper {
     getEnvironments = jest.fn()
     createEnvironment = jest.fn()
     updateEnvironment = jest.fn()
+
+    updateFeatureConfigurations = jest.fn()
 }

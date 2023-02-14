@@ -19,11 +19,11 @@ describe('mapSegmentToFilters', () => {
             rules: [{
                 clauses: [
                     {
-                        "attribute": "email",
-                        "negate": false,
-                        "op": "in",
-                        "values": [
-                            "email@email.com"
+                        'attribute': 'email',
+                        'negate': false,
+                        'op': 'in',
+                        'values': [
+                            'email@email.com'
                         ]
                     }
                 ]
@@ -67,19 +67,19 @@ describe('mapSegmentToFilters', () => {
                 {
                     clauses: [
                         {
-                            "attribute": "email",
-                            "negate": false,
-                            "op": "in",
-                            "values": [
-                                "email@email.com"
+                            'attribute': 'email',
+                            'negate': false,
+                            'op': 'in',
+                            'values': [
+                                'email@email.com'
                             ]
                         },
                         {
-                            "attribute": "key",
-                            "negate": true,
-                            "op": "in",
-                            "values": [
-                                "user1"
+                            'attribute': 'key',
+                            'negate': true,
+                            'op': 'in',
+                            'values': [
+                                'user1'
                             ]
                         }
                     ]
@@ -87,11 +87,11 @@ describe('mapSegmentToFilters', () => {
                 {
                     clauses: [
                         {
-                            "attribute": "name",
-                            "negate": false,
-                            "op": "contains",
-                            "values": [
-                                "jim"
+                            'attribute': 'name',
+                            'negate': false,
+                            'op': 'contains',
+                            'values': [
+                                'jim'
                             ]
                         }
                     ]
@@ -138,11 +138,11 @@ describe('mapSegmentToFilters', () => {
                 {
                     clauses: [
                         {
-                            "attribute": "segmentMatch",
-                            "negate": false,
-                            "op": "in",
-                            "values": [
-                                "my-segment"
+                            'attribute': 'segmentMatch',
+                            'negate': false,
+                            'op': 'in',
+                            'values': [
+                                'my-segment'
                             ]
                         }
                     ]
@@ -158,11 +158,11 @@ describe('mapSegmentToFilters', () => {
             rules: [
                 {
                     clauses: [{
-                        "attribute": "email",
-                        "negate": false,
-                        "op": "in",
-                        "values": [
-                            "email@email.com"
+                        'attribute': 'email',
+                        'negate': false,
+                        'op': 'in',
+                        'values': [
+                            'email@email.com'
                         ]
                     }],
                     weight: 50000
