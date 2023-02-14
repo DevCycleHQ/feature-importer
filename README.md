@@ -3,6 +3,13 @@
 DevCycle's Feature Importer is designed to import resources from other feature flag providers. 
 The importer is intended to be run on a single project and will create or update a project with the same key containing Environments, Features, and Variables. 
 
+## Table of Contents
+- [Setup](#setup)
+- [Configuration](#configuration)
+  - [Required](#required)
+  - [Optional](#optional)
+- [Changes Necessary when Migrating Code](#changes-necessary-when-migrating-code)
+
 ## Setup
 1. Run `yarn` to install dependencies
 2. Setup [configuration file](#configuration)
@@ -63,3 +70,6 @@ INCLUDE_FEATURES=["feat-1"]
 EXCLUDE_FEATURES=[]
 OVERWRITE_DUPLICATES=false
 ```
+
+## Changes Necessary when Migrating Code
+- For rules where the attribute is a date and using the before/after operators, the value needs to be converted to a long instead of sending as a date.
