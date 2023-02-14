@@ -1,5 +1,5 @@
 import { LDAudienceImporter } from '../../resources/audiences'
-import { AudiencePayload, Filter, FilterOrOperator, OperatorType, TargetingRule } from '../../types/DevCycle'
+import { AudiencePayload, CustomPropertyType, Filter, FilterOrOperator, OperatorType, TargetingRule } from '../../types/DevCycle'
 import { Clause, Fallthrough, Feature, Feature as LDFeature, Rollout, Rule, Target } from '../../types/LaunchDarkly'
 import {
     createAllUsersFilter,
@@ -8,6 +8,7 @@ import {
     createUserFilter,
 } from '../../utils/DevCycle/targeting'
 import { getVariationKey } from './variation'
+import { CustomPropertyFromFilter } from '../../resources/features/types'
 
 export function mapClauseToFilter(clause: Clause): Filter {
     const { attribute, values } = clause
@@ -80,9 +81,10 @@ export function buildTargetingRules(
     feature: LDFeature,
     environmentKey: string,
     audienceImport: LDAudienceImporter
-): TargetingRule[] {
+): { targetingRules: TargetingRule[], customPropertiesToImport: CustomPropertyFromFilter[] } {
     const targetingRules: TargetingRule[] = []
     const { targets = [], rules = [], fallthrough } = feature.environments[environmentKey]
+    let customPropertiesToImport: CustomPropertyFromFilter[] = []
 
     for (const target of targets) {
         targetingRules.push(
@@ -91,9 +93,11 @@ export function buildTargetingRules(
     }
 
     for (const rule of rules) {
-        targetingRules.push(
-            buildTargetingRuleFromRule(rule, feature, environmentKey, audienceImport)
-        )
+        const {
+            targetingRule, customPropertiesToImport: customPropertiesForTargeting
+        } = buildTargetingRuleFromRule(rule, feature, environmentKey, audienceImport)
+        targetingRules.push(targetingRule)
+        customPropertiesToImport = [...customPropertiesToImport, ...customPropertiesForTargeting]
     }
 
     if (fallthrough) {
@@ -102,7 +106,7 @@ export function buildTargetingRules(
         )
     }
 
-    return targetingRules
+    return { targetingRules, customPropertiesToImport }
 }
 
 export function buildTargetingRuleFromTarget(target: Target, feature: Feature): TargetingRule {
@@ -118,7 +122,8 @@ export function buildTargetingRuleFromRule(
     feature: Feature,
     environmentKey: string,
     audienceImport: LDAudienceImporter
-): TargetingRule {
+): { targetingRule: TargetingRule, customPropertiesToImport: CustomPropertyFromFilter[] } {
+    let customProperties: CustomPropertyFromFilter[] = []
     const filters = rule.clauses.map((clause) => {
         if (clause.op === 'segmentMatch') {
             const audienceIds = clause.values.map((segKey) => {
@@ -139,6 +144,13 @@ export function buildTargetingRuleFromRule(
     })
     const audience = getAudience('Imported Rule', filters)
 
+    customProperties = filters.filter((filter: Filter) => filter?.subType === 'customData').map((filter: Filter) => {
+        return {
+            dataKey: filter.dataKey || '',
+            dataKeyType: convertDataKeyTypeToCustomPropertyType(filter.dataKeyType)
+        }
+    })
+
     let distribution
     if (rule.variation !== undefined) {
         distribution = getDistribution(feature, rule.variation)
@@ -149,7 +161,7 @@ export function buildTargetingRuleFromRule(
         throw new Error('Rule must have either a variation or rollout')
     }
 
-    return { audience, distribution }
+    return { targetingRule: { audience, distribution }, customPropertiesToImport: customProperties }
 }
 
 export function buildTargetingRulesFromFallthrough(fallthrough: Fallthrough, feature: Feature): TargetingRule {
@@ -166,4 +178,15 @@ export function buildTargetingRulesFromFallthrough(fallthrough: Fallthrough, fea
         throw new Error('Fallthrough must have either a variation or rollout')
     }
     return { audience, distribution }
+}
+
+const convertDataKeyTypeToCustomPropertyType = (dataKeyType?: string): CustomPropertyType => {
+    switch (dataKeyType) {
+        case 'Boolean':
+            return CustomPropertyType.Boolean
+        case 'Number':
+            return CustomPropertyType.Number
+        default:
+            return CustomPropertyType.String
+    }
 }

@@ -35,7 +35,6 @@ export function getDataType(values: any[]) {
         string: 'String',
         number: 'Number',
         boolean: 'Boolean',
-        object: 'JSON'
     }
     const type = typeof values[0]
     if (

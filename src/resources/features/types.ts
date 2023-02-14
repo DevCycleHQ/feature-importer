@@ -1,4 +1,4 @@
-import { Feature, FeatureConfiguration } from '../../types/DevCycle'
+import { CustomPropertyType, Feature, FeatureConfiguration } from '../../types/DevCycle'
 
 export type FeaturesToImport = {
     [key: string]: {
@@ -23,4 +23,9 @@ export type FeatureSummary = {
     updatedCount: number
     skippedCount: number
     errored: Record<string, string>
+}
+
+export type CustomPropertyFromFilter = {
+    dataKey: string
+    dataKeyType: CustomPropertyType
 }

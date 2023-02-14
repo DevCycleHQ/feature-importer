@@ -1,4 +1,5 @@
 export * from './audience'
+export * from './customProperties'
 export * from './environment'
 export * from './feature'
 export * from './project'

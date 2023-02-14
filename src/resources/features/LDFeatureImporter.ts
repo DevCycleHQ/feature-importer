@@ -1,10 +1,11 @@
 import { LD, DVC } from '../../api'
-import { Feature as DVCFeature, FeatureConfiguration } from '../../types/DevCycle'
+import { CustomProperties, Feature as DVCFeature, FeatureConfiguration } from '../../types/DevCycle'
 import { Feature as LDFeature } from '../../types/LaunchDarkly'
 import { buildTargetingRules, mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
 import { ParsedImporterConfig } from '../../configs'
-import { FeatureImportAction, FeaturesToImport } from './types'
+import { CustomPropertyFromFilter, FeatureImportAction, FeaturesToImport } from './types'
 import { LDAudienceImporter } from '../audiences'
+import { kebabCase, uniqBy } from 'lodash'
 
 export class LDFeatureImporter {
     private config: ParsedImporterConfig
@@ -19,6 +20,9 @@ export class LDFeatureImporter {
     // List of LD feature flags
     sourceFeatures: LDFeature[]
 
+    // List of custom properties to import
+    customPropertiesToImport: CustomPropertyFromFilter[] = []
+
     constructor(config: ParsedImporterConfig, audienceImport: LDAudienceImporter) {
         this.config = config
         this.audienceImport = audienceImport
@@ -26,17 +30,17 @@ export class LDFeatureImporter {
 
     private async getFeaturesToImport(): Promise<FeaturesToImport> {
         const { includeFeatures, excludeFeatures, overwriteDuplicates, projectKey } = this.config
-    
+
         const existingFeatures = await DVC.getFeaturesForProject(projectKey)
         const { items: ldFeatures } = await LD.getFeatureFlagsForProject(projectKey)
-    
+
         const featuresToImport: FeaturesToImport = {}
-    
+
         const existingFeaturesMap = existingFeatures.reduce((map: Record<string, DVCFeature>, feature) => {
             map[feature.key] = feature
             return map
         }, {})
-    
+
         for (const feature of ldFeatures) {
             const mappedFeature = mapLDFeatureToDVCFeature(feature)
             const isDuplicate = existingFeaturesMap[mappedFeature.key] !== undefined
@@ -48,7 +52,7 @@ export class LDFeatureImporter {
                 false
 
             featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Skip }
-    
+
             if (!includeFeature || excludeFeature) continue
 
             if (!isDuplicate) {
@@ -67,15 +71,17 @@ export class LDFeatureImporter {
         for (const feature of this.sourceFeatures) {
             const { action, feature: dvcFeature } = this.featuresToImport[feature.key]
             if (action === FeatureImportAction.Skip) continue
-    
+
             this.featuresToImport[feature.key].configs ??= []
-    
+
             Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
                 try {
                     if (environmentConfig.prerequisites?.length) {
                         throw new Error(`Unable to import prerequisite in "${environment}" environment`)
                     }
-                    const targets = buildTargetingRules(feature, environment, this.audienceImport)
+                    const { targetingRules: targets, customPropertiesToImport: newCustomProperties } = buildTargetingRules(feature, environment, this.audienceImport)
+                    this.customPropertiesToImport = this.customPropertiesToImport.concat(newCustomProperties)
+
                     const targetingRules: FeatureConfiguration = {
                         targets,
                         status: environmentConfig.on ? 'active' : 'inactive',
@@ -94,6 +100,7 @@ export class LDFeatureImporter {
                 }
             })
         }
+        this.customPropertiesToImport = uniqBy(this.customPropertiesToImport, 'dataKey')
         return this.featuresToImport
     }
 
@@ -121,7 +128,7 @@ export class LDFeatureImporter {
                 this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
             }
         }
-    
+
         return {
             createdCount,
             updatedCount,
@@ -136,7 +143,7 @@ export class LDFeatureImporter {
             const { action, feature, configs = [] } = this.featuresToImport[featureKey]
             if (this.errors[feature.key]) continue
             if (action === FeatureImportAction.Skip) continue
-    
+
             for (const config of configs) {
                 try {
                     await DVC.updateFeatureConfigurations(
@@ -149,11 +156,40 @@ export class LDFeatureImporter {
         }
     }
 
+    private async importCustomProperties() {
+        const { overwriteDuplicates, projectKey } = this.config
+        const existingCustomPropertiesMap = await DVC.getCustomPropertiesForProject(projectKey)
+            .then((existingCustomProperties) => existingCustomProperties.reduce((map: Record<string, CustomProperties>, cp) => {
+                map[cp.propertyKey] = cp
+                return map
+            }, {}))
+
+        for (const customProperty of this.customPropertiesToImport) {
+            const customPropertyToCreate = {
+                key: kebabCase(customProperty.dataKey),
+                name: customProperty.dataKey,
+                type: customProperty.dataKeyType,
+                propertyKey: customProperty.dataKey,
+            }
+            const isDuplicate = existingCustomPropertiesMap[customPropertyToCreate.propertyKey] !== undefined
+            try {
+                if (!isDuplicate) {
+                    await DVC.createCustomProperty(projectKey, customPropertyToCreate)
+                } else if (overwriteDuplicates) {
+                    await DVC.updateCustomProperty(projectKey, customPropertyToCreate)
+                }
+            } catch (e) {
+                console.log(`Error Importing Custom Property ${customPropertyToCreate.propertyKey} due to: ${e instanceof Error ? e.message : 'unknown error'}`)
+            }
+        }
+    }
+
     public async import() {
         await this.getFeaturesToImport()
         await this.getFeatureConfigsToImport()
         const { createdCount, updatedCount, skippedCount } = await this.importFeatures()
         await this.importFeatureConfigs()
+        await this.importCustomProperties()
         return {
             createdCount,
             updatedCount,
