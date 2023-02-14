@@ -1,9 +1,12 @@
-import { Filter } from '../../types/DevCycle'
-import { Clause } from '../../types/LaunchDarkly'
+import { AudienceOutput } from '../../resources/audiences'
+import { Filter, OperatorType, TargetingRule } from '../../types/DevCycle'
+import { Clause, Feature as LDFeature } from '../../types/LaunchDarkly'
 import {
+    createAudienceMatchFilter,
     createCustomDataFilter,
     createUserFilter,
 } from '../../utils/DevCycle/targeting'
+import { getVariationKey } from './variation'
 
 export function mapClauseToFilter(clause: Clause): Filter {
     const { attribute, values } = clause
@@ -39,4 +42,67 @@ export function getComparator(clause: Clause) {
     }
     const opKey = op as keyof typeof operationMap // we've already checked that op is a key of operationMap
     return operationMap[opKey](negate)
+}
+
+export function buildTargetingRules (
+    feature: LDFeature,
+    environmentKey: string,
+    audiences: AudienceOutput
+): TargetingRule[] {
+    const targetingRules: TargetingRule[] = []
+    const { targets, rules } = feature.environments[environmentKey]
+
+    for (const target of targets) {
+        const audience = {
+            name: 'imported-target',
+            filters: {
+                filters: [createUserFilter('user_id', '=', target.values)],
+                operator: OperatorType.and
+            }
+        }
+        const distribution = [{
+            _variation: getVariationKey(feature, target.variation),
+            percentage: 1
+        }]
+
+        targetingRules.push({ audience, distribution })
+    }
+
+    for (const rule of rules) {
+        const filters = rule.clauses.map((clause) => {
+            if (clause.op === 'segmentMatch') {
+                const audienceIds = clause.values.map((segKey) => {
+                    const audienceKey = `${segKey}-${environmentKey}`
+                    if (audiences.errorsByKey[audienceKey] || !audiences.audiencesByKey[audienceKey]) {
+                        const errorMessage = audiences.errorsByKey[audienceKey] || 'unknown error'
+                        throw new Error(errorMessage)
+                    } else {
+                        return audiences.audiencesByKey[audienceKey]._id
+                    }
+                })
+                return createAudienceMatchFilter(
+                    getComparator(clause),
+                    audienceIds
+                )
+            }
+            return mapClauseToFilter(clause)
+        })
+        const audience = {
+            name: 'imported-rule',
+            filters: {
+                filters,
+                operator: OperatorType.and
+            }
+        }
+        const distribution = [{
+            _variation: getVariationKey(feature, rule.variation),
+            percentage: 1
+        }]
+        targetingRules.push({
+            audience,
+            distribution
+        })
+    }
+
+    return targetingRules
 }

@@ -127,7 +127,7 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
-    async createFeature(projectKey: string, feature: Feature) {
+    async createFeature(projectKey: string, feature: Feature): Promise<Feature> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             method: 'POST',
@@ -138,7 +138,7 @@ export default class DevCycleApiWrapper {
         return await response.json()
     }
 
-    async updateFeature(projectKey: string, feature: Feature) {
+    async updateFeature(projectKey: string, feature: Feature): Promise<Feature> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
             method: 'PATCH',
@@ -149,7 +149,7 @@ export default class DevCycleApiWrapper {
         return await response.json()
     }
 
-    async getFeaturesForProject(projectKey: string) {
+    async getFeaturesForProject(projectKey: string): Promise<Feature[]> {
         const headers = await this.getHeaders()
         const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
             headers,

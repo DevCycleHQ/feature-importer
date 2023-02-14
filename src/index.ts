@@ -2,8 +2,8 @@ import { getConfigs } from './configs'
 import { importAudiences } from './resources/audiences'
 import { importEnvironments } from './resources/environments'
 import { importProject } from './resources/project'
-import { prepareFeaturesToImport, importFeatures } from './resources/features'
-import { importFeatureConfigs, prepareFeatureConfigsToImport } from './resources/targetingRules'
+
+import { LDFeatureImporter } from './resources/features'
 
 const config = getConfigs()
 
@@ -18,17 +18,13 @@ async function run() {
     const environmentKeys = ldEnvironments.map((env: Record<string, any>) => env.key)
     const audienceOutput = await importAudiences(config, environmentKeys)
 
-    const { featuresToImport, ldFeatures } = await prepareFeaturesToImport(config)
-    const featuresAndConfigurationsToImport =
-        await prepareFeatureConfigsToImport(featuresToImport, ldFeatures, audienceOutput)
-
+    const featureImporter = new LDFeatureImporter(config, audienceOutput)
     const {
         createdCount,
         updatedCount,
         skippedCount,
         errored: erroredFeatures
-    } = await importFeatures(config, featuresAndConfigurationsToImport)
-    await importFeatureConfigs(config, featuresAndConfigurationsToImport)
+    } = await featureImporter.import()
 
     console.log('-------------------------------------------')
     console.log(`Created ${createdCount} features in DevCycle`)
