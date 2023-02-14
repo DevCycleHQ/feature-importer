@@ -29,16 +29,18 @@ export type Feature = {
     environments: {
         [key: string]: {
             on: boolean,
-            targets: Target[]
-            rules: Rule[]
-            fallthrough?: {
-                variation?: number
-                rollout?: {
-                    variations?: WeightedVariation[]
-                }
-            }
+            targets?: Target[]
+            rules?: Rule[]
+            fallthrough?: Fallthrough
             prerequisites?: Prerequisite[]
         }
+    }
+}
+
+export type Fallthrough = {
+    variation?: number
+    rollout?: {
+        variations: WeightedVariation[]
     }
 }
 
