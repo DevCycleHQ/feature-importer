@@ -1,21 +1,156 @@
-import { mockLDFeaturesFlags } from '../../api/__mocks__/MockResponses'
+jest.mock('../../api')
+
+import { mockLDFeaturesFlags, mockConfig } from '../../api/__mocks__/MockResponses'
+import { LDAudienceImporter } from '../../resources/audiences'
 import { OperatorType } from '../../types/DevCycle'
-import { buildTargetingRulesFromFallthrough } from './targeting'
+import { buildTargetingRuleFromRule, buildTargetingRuleFromTarget, buildTargetingRulesFromFallthrough } from './targeting'
+
+const mockFeature = mockLDFeaturesFlags.items[0]
+mockFeature.variations = [
+    {
+        _id: 'variation-1',
+        value: false,
+    },
+ 
+    {
+        _id: 'variation-2',
+        value: true,
+    }
+]
+
+describe('buildTargetingRuleFromTarget', () => {
+    test('builds targeting rule from targets', () => {
+        const target = {
+            variation: 1,
+            values: ['user-1', 'user-2'],
+        }
+
+        const result = buildTargetingRuleFromTarget(target, mockFeature)
+        expect(result).toEqual({
+            audience: {
+                name: 'Imported Target',
+                filters: {
+                    filters: [{
+                        type: 'user',
+                        subType: 'user_id',
+                        comparator: '=',
+                        values: target.values
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
+        })
+
+    })
+})
+
+describe('buildTargetingRuleFromRule', () => {
+    test('builds targeting rule from a simple rule', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const rule = {
+            _id: '123',
+            clauses: [
+                {
+                    _id: 'abc',
+                    attribute: 'email',
+                    negate: false,
+                    op: 'in',
+                    values: ['email@email.com']
+                }
+            ],
+            variation: 1
+        }
+
+        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        expect(result).toEqual({
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [expect.objectContaining({ subType: 'email' })],
+                    operator: OperatorType.and
+                }   
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
+        })
+
+    })
+
+    test('builds targeting rule from a segment match rule', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        audienceImport.audiences = {
+            'seg-1-prod': {
+                _id: 'audienceId',
+                _project: 'project',
+                filters: { filters: [], operator: OperatorType.and }
+            }
+        }
+        const rule = {
+            _id: '123',
+            clauses: [
+                {
+                    _id: 'abc',
+                    attribute: 'segmentMatch',
+                    negate: false,
+                    op: 'segmentMatch',
+                    values: ['seg-1']
+                }
+            ],
+            variation: 0
+        }
+
+        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        expect(result).toEqual({
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [{
+                        type: 'audienceMatch',
+                        comparator: '=',
+                        _audiences: ['audienceId']
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-1',
+                percentage: 1
+            }]
+        })
+
+    })
+
+    test('throws error if an error occured while creating audience', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        audienceImport.errors = {
+            'seg-1-prod': 'an error occured'
+        }
+        const rule = {
+            _id: '123',
+            clauses: [
+                {
+                    _id: 'abc',
+                    attribute: 'segmentMatch',
+                    negate: false,
+                    op: 'segmentMatch',
+                    values: ['seg-1']
+                }
+            ],
+            variation: 0
+        }
+
+        const methodCall = () => buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        expect(methodCall).toThrowError('an error occured')
+    })
+})
 
 describe('buildTargetingRulesFromFallthrough', () => {
-    const mockFeature = mockLDFeaturesFlags.items[0]
-    mockFeature.variations = [
-        {
-            _id: 'variation-1',
-            value: false,
-        },
-     
-        {
-            _id: 'variation-2',
-            value: true,
-        }
-    ]
-
     test('builds targeting rule with variation', () => {
         const fallthrough = {
             variation: 1

@@ -9,10 +9,8 @@ export type Clause = {
 export type Rule = {
     _id: string
     clauses: Clause[]
-    description: string
-    ref: string
-    trackEvents: boolean
-    variation: number
+    description?: string
+    variation?: number
 }
 
 export type Target = {

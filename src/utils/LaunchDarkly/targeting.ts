@@ -78,7 +78,7 @@ export function buildTargetingRules (
     return targetingRules
 }
 
-function buildTargetingRuleFromTarget(target: Target, feature: Feature): TargetingRule {
+export function buildTargetingRuleFromTarget(target: Target, feature: Feature): TargetingRule {
     const audience = {
         name: 'Imported Target',
         filters: {
@@ -94,7 +94,7 @@ function buildTargetingRuleFromTarget(target: Target, feature: Feature): Targeti
     return { audience, distribution }
 }
 
-function buildTargetingRuleFromRule(
+export function buildTargetingRuleFromRule(
     rule: Rule,
     feature: Feature,
     environmentKey: string,
@@ -125,6 +125,11 @@ function buildTargetingRuleFromRule(
             operator: OperatorType.and
         }
     }
+
+    if (rule.variation === undefined) {
+        throw new Error('Rule is missing a variation')
+    }
+
     const distribution = [{
         _variation: getVariationKey(feature, rule.variation),
         percentage: 1
