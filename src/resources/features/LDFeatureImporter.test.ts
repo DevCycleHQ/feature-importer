@@ -1,20 +1,25 @@
-jest.mock('../api')
+jest.mock('../../api')
 
-import { LD, DVC } from '../api'
-import { importFeatures, prepareFeaturesToImport } from './features'
-import { FeatureImportAction } from '../types'
+import { LD, DVC } from '../../api'
+import { LDFeatureImporter } from '.'
+import { FeatureImportAction } from './types'
 import { 
     mockConfig,
     mockDVCFeaturesResponse,
     mockLDFeaturesFlags,
     mockLDFeaturesMappedToDVC
-} from '../api/__mocks__/MockResponses'
+} from '../../api/__mocks__/MockResponses'
 
 const mockLD = LD as jest.Mocked<typeof LD>
 const mockDVC = DVC as jest.Mocked<typeof DVC>
 
-describe('Feature Import', () => {
-    describe('prepareFeaturesToImport', () => {
+const mockAudiences = {
+    audiencesByKey: {},
+    errorsByKey: {}
+}
+
+describe('LDFeatureImporter', () => {
+    describe('getFeaturesToImport', () => {
         const mockIncludeExcludeMap: Map<string, boolean> = new Map([
             ['feature-key', true]
         ])
@@ -28,25 +33,24 @@ describe('Feature Import', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const result = await prepareFeaturesToImport(config)
+            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            await featureImporter['getFeaturesToImport']()
 
-            expect(result).toEqual({
-                featuresToImport: {
-                    'feature-key': {
-                        feature: mockLDFeaturesMappedToDVC[0],
-                        action: 'create'
-                    },
-                    'feature-key-2': {
-                        feature: mockLDFeaturesMappedToDVC[1],
-                        action: 'create'
-                    },
-                    'duplicate-key': {
-                        feature: mockLDFeaturesMappedToDVC[2],
-                        action: 'skip'
-                    }
+            expect(featureImporter.featuresToImport).toEqual({
+                'feature-key': {
+                    feature: mockLDFeaturesMappedToDVC[0],
+                    action: 'create'
                 },
-                ldFeatures: mockLDFeaturesFlags.items,
+                'feature-key-2': {
+                    feature: mockLDFeaturesMappedToDVC[1],
+                    action: 'create'
+                },
+                'duplicate-key': {
+                    feature: mockLDFeaturesMappedToDVC[2],
+                    action: 'skip'
+                }
             })
+            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
         })
 
         test('with overwriteDuplicates=true - updates duplicate features', async () => {
@@ -54,25 +58,24 @@ describe('Feature Import', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const result = await prepareFeaturesToImport(config)
+            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            await featureImporter['getFeaturesToImport']()
 
-            expect(result).toEqual({
-                featuresToImport: {
-                    'feature-key': {
-                        feature: mockLDFeaturesMappedToDVC[0],
-                        action: 'create'
-                    },
-                    'feature-key-2': {
-                        feature: mockLDFeaturesMappedToDVC[1],
-                        action: 'create'
-                    },
-                    'duplicate-key': {
-                        feature: mockLDFeaturesMappedToDVC[2],
-                        action: 'update'
-                    }
+            expect(featureImporter.featuresToImport).toEqual({
+                'feature-key': {
+                    feature: mockLDFeaturesMappedToDVC[0],
+                    action: 'create'
                 },
-                ldFeatures: mockLDFeaturesFlags.items,
+                'feature-key-2': {
+                    feature: mockLDFeaturesMappedToDVC[1],
+                    action: 'create'
+                },
+                'duplicate-key': {
+                    feature: mockLDFeaturesMappedToDVC[2],
+                    action: 'update'
+                }
             })
+            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
         })
 
         test('with an includeFeatures array', async () => {
@@ -81,25 +84,24 @@ describe('Feature Import', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const result = await prepareFeaturesToImport(config)
+            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            await featureImporter['getFeaturesToImport']()
 
-            expect(result).toEqual({
-                featuresToImport: {
-                    'feature-key': {
-                        feature: mockLDFeaturesMappedToDVC[0],
-                        action: 'create'
-                    },
-                    'feature-key-2': {
-                        feature: mockLDFeaturesMappedToDVC[1],
-                        action: 'skip'
-                    },
-                    'duplicate-key': {
-                        feature: mockLDFeaturesMappedToDVC[2],
-                        action: 'skip'
-                    }
+            expect(featureImporter.featuresToImport).toEqual({
+                'feature-key': {
+                    feature: mockLDFeaturesMappedToDVC[0],
+                    action: 'create'
                 },
-                ldFeatures: mockLDFeaturesFlags.items,
+                'feature-key-2': {
+                    feature: mockLDFeaturesMappedToDVC[1],
+                    action: 'skip'
+                },
+                'duplicate-key': {
+                    feature: mockLDFeaturesMappedToDVC[2],
+                    action: 'skip'
+                }
             })
+            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
         })
 
         test('with an excludeFeatures array', async () => {
@@ -108,25 +110,24 @@ describe('Feature Import', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const result = await prepareFeaturesToImport(config)
+            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            await featureImporter['getFeaturesToImport']()
 
-            expect(result).toEqual({
-                featuresToImport: {
-                    'feature-key': {
-                        feature: mockLDFeaturesMappedToDVC[0],
-                        action: 'skip'
-                    },
-                    'feature-key-2': {
-                        feature: mockLDFeaturesMappedToDVC[1],
-                        action: 'create'
-                    },
-                    'duplicate-key': {
-                        feature: mockLDFeaturesMappedToDVC[2],
-                        action: 'skip'
-                    }
+            expect(featureImporter.featuresToImport).toEqual({
+                'feature-key': {
+                    feature: mockLDFeaturesMappedToDVC[0],
+                    action: 'skip'
                 },
-                ldFeatures: mockLDFeaturesFlags.items,
+                'feature-key-2': {
+                    feature: mockLDFeaturesMappedToDVC[1],
+                    action: 'create'
+                },
+                'duplicate-key': {
+                    feature: mockLDFeaturesMappedToDVC[2],
+                    action: 'skip'
+                }
             })
+            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
         })
     })
 
@@ -143,7 +144,9 @@ describe('Feature Import', () => {
                 },
             }
 
-            const result = await importFeatures(mockConfig, featuresToImport)
+            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            featureImporter.featuresToImport = featuresToImport
+            const result = await featureImporter['importFeatures']()
 
             expect(result).toEqual({
                 createdCount: 0,
@@ -163,7 +166,9 @@ describe('Feature Import', () => {
                 },
             }
 
-            const result = await importFeatures(mockConfig, featuresToImport)
+            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            featureImporter.featuresToImport = featuresToImport
+            const result = await featureImporter['importFeatures']()
 
             expect(result).toEqual({
                 createdCount: 1,
@@ -186,7 +191,9 @@ describe('Feature Import', () => {
                 },
             }
 
-            const result = await importFeatures(mockConfig, featuresToImport)
+            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            featureImporter.featuresToImport = featuresToImport
+            const result = await featureImporter['importFeatures']()
 
             expect(result).toEqual({
                 createdCount: 0,
@@ -209,7 +216,9 @@ describe('Feature Import', () => {
                 },
             }
 
-            const result = await importFeatures(mockConfig, featuresToImport)
+            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            featureImporter.featuresToImport = featuresToImport
+            const result = await featureImporter['importFeatures']()
 
             expect(result).toEqual({
                 createdCount: 0,

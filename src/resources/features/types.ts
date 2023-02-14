@@ -1,4 +1,4 @@
-import { Feature, FeatureConfiguration } from './DevCycle'
+import { Feature, FeatureConfiguration } from '../../types/DevCycle'
 
 export type FeaturesToImport = {
     [key: string]: {
@@ -16,4 +16,11 @@ export enum FeatureImportAction {
     Update = 'update',
     Skip = 'skip',
     Unsupported = 'unsupported',
+}
+
+export type FeatureSummary = {
+    createdCount: number
+    updatedCount: number
+    skippedCount: number
+    errored: Record<string, string>
 }
