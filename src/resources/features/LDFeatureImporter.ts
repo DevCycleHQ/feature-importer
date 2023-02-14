@@ -4,11 +4,11 @@ import { Feature as LDFeature } from '../../types/LaunchDarkly'
 import { buildTargetingRules, mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
 import { ParsedImporterConfig } from '../../configs'
 import { FeatureImportAction, FeaturesToImport } from './types'
-import { AudienceOutput } from '../audiences'
+import { LDAudienceImporter } from '../audiences'
 
 export class LDFeatureImporter {
     private config: ParsedImporterConfig
-    private audiences: AudienceOutput
+    private audienceImport: LDAudienceImporter
 
     // Errors by feature key
     errors: Record<string, string> = {}
@@ -19,9 +19,9 @@ export class LDFeatureImporter {
     // List of LD feature flags
     sourceFeatures: LDFeature[]
 
-    constructor(config: ParsedImporterConfig, audiences: AudienceOutput) {
+    constructor(config: ParsedImporterConfig, audienceImport: LDAudienceImporter) {
         this.config = config
-        this.audiences = audiences
+        this.audienceImport = audienceImport
     }
 
     private async getFeaturesToImport(): Promise<FeaturesToImport> {
@@ -75,7 +75,7 @@ export class LDFeatureImporter {
                     if (environmentConfig.prerequisites?.length) {
                         throw new Error(`Unable to import prerequisite in "${environment}" environment`)
                     }
-                    const targets = buildTargetingRules(feature, environment, this.audiences)
+                    const targets = buildTargetingRules(feature, environment, this.audienceImport)
                     const targetingRules: FeatureConfiguration = {
                         targets,
                         status: environmentConfig.on ? 'active' : 'inactive',

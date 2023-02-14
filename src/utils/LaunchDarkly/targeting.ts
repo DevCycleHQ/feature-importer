@@ -1,4 +1,4 @@
-import { AudienceOutput } from '../../resources/audiences'
+import { LDAudienceImporter } from '../../resources/audiences'
 import { Filter, OperatorType, TargetingRule } from '../../types/DevCycle'
 import { Clause, Feature as LDFeature } from '../../types/LaunchDarkly'
 import {
@@ -47,7 +47,7 @@ export function getComparator(clause: Clause) {
 export function buildTargetingRules (
     feature: LDFeature,
     environmentKey: string,
-    audiences: AudienceOutput
+    audienceImport: LDAudienceImporter
 ): TargetingRule[] {
     const targetingRules: TargetingRule[] = []
     const { targets, rules } = feature.environments[environmentKey]
@@ -73,11 +73,11 @@ export function buildTargetingRules (
             if (clause.op === 'segmentMatch') {
                 const audienceIds = clause.values.map((segKey) => {
                     const audienceKey = `${segKey}-${environmentKey}`
-                    if (audiences.errorsByKey[audienceKey] || !audiences.audiencesByKey[audienceKey]) {
-                        const errorMessage = audiences.errorsByKey[audienceKey] || 'unknown error'
+                    if (audienceImport.errors[audienceKey] || !audienceImport.audiences[audienceKey]) {
+                        const errorMessage = audienceImport.errors[audienceKey] || 'unknown error'
                         throw new Error(errorMessage)
                     } else {
-                        return audiences.audiencesByKey[audienceKey]._id
+                        return audienceImport.audiences[audienceKey]._id
                     }
                 })
                 return createAudienceMatchFilter(
