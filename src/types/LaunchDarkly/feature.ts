@@ -29,10 +29,27 @@ export type Feature = {
     environments: {
         [key: string]: {
             on: boolean,
-            targets: Target[],
+            targets: Target[]
             rules: Rule[]
+            fallthrough?: {
+                variation?: number
+                rollout?: {
+                    variations?: WeightedVariation[]
+                }
+            }
+            prerequisites?: Prerequisite[]
         }
     }
+}
+
+type WeightedVariation = {
+    variation: number
+    weight: number
+}
+
+type Prerequisite = {
+    key: string
+    variation: number
 }
 
 export enum FeatureKind {

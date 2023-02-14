@@ -72,6 +72,9 @@ export class LDFeatureImporter {
     
             Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
                 try {
+                    if (environmentConfig.prerequisites?.length) {
+                        throw new Error(`Unable to import prerequisite in "${environment}" environment`)
+                    }
                     const targets = buildTargetingRules(feature, environment, this.audiences)
                     const targetingRules: FeatureConfiguration = {
                         targets,
