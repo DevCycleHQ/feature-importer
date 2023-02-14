@@ -1,10 +1,10 @@
 import { getConfigs } from './configs'
-import { importEnvironments } from './resources/environments'
 
-import { LDFeatureImporter } from './resources/features'
 import { FeatureSummary } from './resources/features/types'
+import { LDFeatureImporter } from './resources/features'
 import { LDProjectImporter } from './resources/projects'
 import { LDAudienceImporter } from './resources/audiences'
+import { LDEnvironmentImporter } from './resources/environments'
 
 const config = getConfigs()
 
@@ -14,9 +14,8 @@ async function run() {
 
     const sourceProject = projectImporter.sourceProject
 
-    const {
-        environmentsByKey
-    } = await importEnvironments(config, sourceProject.environments)
+    const environmentImporter = new LDEnvironmentImporter(config)
+    await environmentImporter.import(sourceProject.environments)
 
     const ldEnvironments = sourceProject.environments.items
     const environmentKeys = ldEnvironments.map((env: Record<string, any>) => env.key)
