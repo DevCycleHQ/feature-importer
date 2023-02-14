@@ -11,6 +11,16 @@ export type Rule = {
     clauses: Clause[]
     description?: string
     variation?: number
+    rollout?: Rollout
+}
+
+export type Rollout = {
+    variations: WeightedVariation[]
+}
+
+type WeightedVariation = {
+    variation: number
+    weight: number
 }
 
 export type Target = {

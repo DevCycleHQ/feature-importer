@@ -1,4 +1,4 @@
-import { Target, Rule } from './targeting'
+import { Target, Rule, Rollout } from './targeting'
 
 export type Feature = {
     name: string
@@ -39,14 +39,7 @@ export type Feature = {
 
 export type Fallthrough = {
     variation?: number
-    rollout?: {
-        variations: WeightedVariation[]
-    }
-}
-
-type WeightedVariation = {
-    variation: number
-    weight: number
+    rollout?: Rollout
 }
 
 type Prerequisite = {
