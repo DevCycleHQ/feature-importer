@@ -2,15 +2,19 @@ jest.mock('../api')
 
 import { LD, DVC } from '../api'
 import { importFeatures, prepareFeaturesToImport } from './features'
-import { mapLDFeatureToDVCFeature } from '../utils/LaunchDarkly'
 import { FeatureImportAction } from '../types'
-import { mockConfig, mockDVCFeaturesResponse, mockLDFeaturesFlags } from '../api/__mocks__/MockResponses'
+import { 
+    mockConfig,
+    mockDVCFeaturesResponse,
+    mockLDFeaturesFlags,
+    mockLDFeaturesMappedToDVC
+} from '../api/__mocks__/MockResponses'
 
 const mockLD = LD as jest.Mocked<typeof LD>
 const mockDVC = DVC as jest.Mocked<typeof DVC>
 
 describe('Feature Import', () => {
-    describe('importProject', () => {
+    describe('prepareFeaturesToImport', () => {
         const mockIncludeExcludeMap: Map<string, boolean> = new Map([
             ['feature-key', true]
         ])
@@ -19,7 +23,7 @@ describe('Feature Import', () => {
             jest.clearAllMocks()
         })
 
-        test('all default config options', async () => {
+        test('with default config options', async () => {
             const config = { ...mockConfig }
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
@@ -29,15 +33,15 @@ describe('Feature Import', () => {
             expect(result).toEqual({
                 featuresToImport: {
                     'feature-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                        feature: mockLDFeaturesMappedToDVC[0],
                         action: 'create'
                     },
                     'feature-key-2': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[1]),
+                        feature: mockLDFeaturesMappedToDVC[1],
                         action: 'create'
                     },
                     'duplicate-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[2]),
+                        feature: mockLDFeaturesMappedToDVC[2],
                         action: 'skip'
                     }
                 },
@@ -45,7 +49,7 @@ describe('Feature Import', () => {
             })
         })
 
-        test('overwriteDuplicates true - updates duplicate features', async () => {
+        test('with overwriteDuplicates=true - updates duplicate features', async () => {
             const config = { ...mockConfig, overwriteDuplicates: true }
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
@@ -55,15 +59,15 @@ describe('Feature Import', () => {
             expect(result).toEqual({
                 featuresToImport: {
                     'feature-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                        feature: mockLDFeaturesMappedToDVC[0],
                         action: 'create'
                     },
                     'feature-key-2': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[1]),
+                        feature: mockLDFeaturesMappedToDVC[1],
                         action: 'create'
                     },
                     'duplicate-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[2]),
+                        feature: mockLDFeaturesMappedToDVC[2],
                         action: 'update'
                     }
                 },
@@ -71,7 +75,7 @@ describe('Feature Import', () => {
             })
         })
 
-        test('includeFeatures', async () => {
+        test('with an includeFeatures array', async () => {
             const config = { ...mockConfig, includeFeatures: mockIncludeExcludeMap }
 
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
@@ -82,15 +86,15 @@ describe('Feature Import', () => {
             expect(result).toEqual({
                 featuresToImport: {
                     'feature-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                        feature: mockLDFeaturesMappedToDVC[0],
                         action: 'create'
                     },
                     'feature-key-2': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[1]),
+                        feature: mockLDFeaturesMappedToDVC[1],
                         action: 'skip'
                     },
                     'duplicate-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[2]),
+                        feature: mockLDFeaturesMappedToDVC[2],
                         action: 'skip'
                     }
                 },
@@ -98,7 +102,7 @@ describe('Feature Import', () => {
             })
         })
 
-        test('excludeFeatures', async () => {
+        test('with an excludeFeatures array', async () => {
             const config = { ...mockConfig, excludeFeatures: mockIncludeExcludeMap }
 
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
@@ -109,15 +113,15 @@ describe('Feature Import', () => {
             expect(result).toEqual({
                 featuresToImport: {
                     'feature-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                        feature: mockLDFeaturesMappedToDVC[0],
                         action: 'skip'
                     },
                     'feature-key-2': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[1]),
+                        feature: mockLDFeaturesMappedToDVC[1],
                         action: 'create'
                     },
                     'duplicate-key': {
-                        feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[2]),
+                        feature: mockLDFeaturesMappedToDVC[2],
                         action: 'skip'
                     }
                 },
@@ -131,10 +135,10 @@ describe('Feature Import', () => {
             jest.clearAllMocks()
         })
 
-        test('skip - feature is not created or updated', async () => {
+        test('feature is not created or updated when action=skip', async () => {
             const featuresToImport = {
                 'feature-key': {
-                    feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                    feature: mockLDFeaturesMappedToDVC[0],
                     action: FeatureImportAction.Skip
                 },
             }
@@ -145,17 +149,16 @@ describe('Feature Import', () => {
                 createdCount: 0,
                 updatedCount: 0,
                 skippedCount: 1,
-                skipped: [featuresToImport['feature-key'].feature],
-                errored: [],
+                errored: {},
             })
             expect(mockDVC.createFeature).not.toHaveBeenCalled()
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()
         })
 
-        test('create - feature is created', async () => {
+        test('feature is created when action=create', async () => {
             const featuresToImport = {
                 'feature-key': {
-                    feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                    feature: mockLDFeaturesMappedToDVC[0],
                     action: FeatureImportAction.Create
                 },
             }
@@ -166,8 +169,7 @@ describe('Feature Import', () => {
                 createdCount: 1,
                 updatedCount: 0,
                 skippedCount: 0,
-                skipped: [],
-                errored: [],
+                errored: {},
             })
             expect(mockDVC.createFeature).toHaveBeenCalledWith(
                 mockConfig.projectKey,
@@ -176,10 +178,10 @@ describe('Feature Import', () => {
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()
         })
 
-        test('update - feature is updated', async () => {
+        test('feature is updated when action=update', async () => {
             const featuresToImport = {
                 'feature-key': {
-                    feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                    feature: mockLDFeaturesMappedToDVC[0],
                     action: FeatureImportAction.Update
                 },
             }
@@ -190,8 +192,7 @@ describe('Feature Import', () => {
                 createdCount: 0,
                 updatedCount: 1,
                 skippedCount: 0,
-                skipped: [],
-                errored: [],
+                errored: {},
             })
             expect(mockDVC.updateFeature).toHaveBeenCalledWith(
                 mockConfig.projectKey,
@@ -200,10 +201,10 @@ describe('Feature Import', () => {
             expect(mockDVC.createFeature).not.toHaveBeenCalled()
         })
 
-        test('unsupported - feature is not created or updated', async () => {
+        test('feature is not created or updated when action=unsupported', async () => {
             const featuresToImport = {
                 'feature-key': {
-                    feature: mapLDFeatureToDVCFeature(mockLDFeaturesFlags.items[0]),
+                    feature: mockLDFeaturesMappedToDVC[0],
                     action: FeatureImportAction.Unsupported
                 },
             }
@@ -214,8 +215,7 @@ describe('Feature Import', () => {
                 createdCount: 0,
                 updatedCount: 0,
                 skippedCount: 1,
-                skipped: [featuresToImport['feature-key'].feature],
-                errored: [],
+                errored: {},
             })
             expect(mockDVC.createFeature).not.toHaveBeenCalled()
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()

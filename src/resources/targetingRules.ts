@@ -4,7 +4,7 @@ import {
 } from '../types/DevCycle'
 import { Feature as LDFeature } from '../types/LaunchDarkly'
 import { ParsedImporterConfig } from '../configs'
-import { FeaturesToImport } from '../types'
+import { FeatureImportAction, FeaturesToImport } from '../types'
 import { getComparator, getVariationKey, mapClauseToFilter } from '../utils/LaunchDarkly'
 import { createAudienceMatchFilter, createUserFilter } from '../utils/DevCycle'
 import { AudienceOutput } from './audiences'
@@ -16,7 +16,7 @@ export const prepareFeatureConfigsToImport = async (
 ) => {
     for (const feature of ldFeatureFlags) {
         const { action, feature: dvcFeature } = featuresToImport[feature.key]
-        if (action === 'skip') continue
+        if (action === FeatureImportAction.Skip) continue
 
         featuresToImport[feature.key].configs ??= []
 
@@ -34,7 +34,7 @@ export const prepareFeatureConfigsToImport = async (
                     })
                 }
             } catch (err) {
-                featuresToImport[dvcFeature.key].action = 'unsupported'
+                featuresToImport[dvcFeature.key].action = FeatureImportAction.Unsupported
                 const errorMessage = err instanceof Error ? err.message : 'unknown error'
                 console.log(`Skipping feature "${dvcFeature.key}":`, errorMessage)
             }
@@ -52,7 +52,7 @@ export const importFeatureConfigs = async (
     let count = 0
     for (const featureKey in featureConfigurationsToImport) {
         const { action, feature, configs = [] } = featureConfigurationsToImport[featureKey]
-        if (action === 'skip') continue
+        if (action === FeatureImportAction.Skip) continue
 
         for (const config of configs) {
             try {

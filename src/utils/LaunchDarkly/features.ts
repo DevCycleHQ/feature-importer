@@ -1,4 +1,4 @@
-import { Feature as DVCFeature, Variation, Variable, VariableType } from '../../types/DevCycle'
+import { Feature as DVCFeature, Variation, Variable, VariableType, FeatureType } from '../../types/DevCycle'
 import { Feature as LDFeature } from '../../types/LaunchDarkly'
 import { getVariationKey, getVariationName } from './variation'
 
@@ -25,7 +25,7 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
     const dvcFeature: DVCFeature = {
         name,
         description,
-        type: 'release',
+        type: FeatureType.release,
         key,
         variations: dvcVariations,
         variables: dvcVariables,
