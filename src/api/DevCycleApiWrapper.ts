@@ -2,6 +2,8 @@ import { handleErrors } from './utils'
 import {
     AudiencePayload,
     AudienceResponse,
+    CustomProperties,
+    CustomPropertiesPayload,
     EnvironmentPayload,
     EnvironmentResponse,
     Feature,
@@ -216,4 +218,37 @@ export default class DevCycleApiWrapper {
         return response.json()
     }
 
+    async createCustomProperty(
+        projectKey: string,
+        customProperty: CustomPropertiesPayload
+    ): Promise<CustomProperties> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties`, {
+            method: 'POST',
+            body: JSON.stringify(customProperty),
+            headers,
+        })
+        await this.handleErrors(response)
+        return response.json()
+    }
+
+    async getCustomPropertiesForProject(projectKey: string): Promise<CustomProperties[]> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties`, {
+            headers,
+        })
+        await this.handleErrors(response)
+        return await response.json()
+    }
+
+    async updateCustomProperty(projectKey: string, customProperty: CustomPropertiesPayload): Promise<CustomProperties> {
+        const headers = await this.getHeaders()
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties/${customProperty.key}`, {
+            method: 'PATCH',
+            body: JSON.stringify(customProperty),
+            headers,
+        })
+        await this.handleErrors(response)
+        return await response.json()
+    }
 }
