@@ -4,6 +4,7 @@ import { importEnvironments } from './resources/environments'
 import { importProject } from './resources/project'
 
 import { LDFeatureImporter } from './resources/features'
+import { FeatureSummary } from './resources/features/types'
 
 const config = getConfigs()
 
@@ -19,22 +20,29 @@ async function run() {
     const audienceOutput = await importAudiences(config, environmentKeys)
 
     const featureImporter = new LDFeatureImporter(config, audienceOutput)
+    const featureSummary = await featureImporter.import()
+
+    printSumary(featureSummary)
+}
+
+function printSumary(featureSummary: FeatureSummary) {
     const {
         createdCount,
         updatedCount,
         skippedCount,
-        errored: erroredFeatures
-    } = await featureImporter.import()
+        errored
+    } = featureSummary
 
     console.log('-------------------------------------------')
     console.log(`Created ${createdCount} features in DevCycle`)
     if (updatedCount) console.log(`Updated ${updatedCount} features`)
     if (skippedCount) console.log(`Skipped ${skippedCount} features`)
-    if (Object.keys(erroredFeatures).length) {
+    if (Object.keys(errored).length) {
+        console.log('-------------------------------------------')
         console.error(
             'Failed to import the following features:',
             Object
-                .entries(erroredFeatures)
+                .entries(errored)
                 .map(([key, error]) => `\n\t- ${key}: ${error}`)
                 .join('')
         )

@@ -9,7 +9,14 @@ import { AudienceOutput } from '../audiences'
 export class LDFeatureImporter {
     private config: ParsedImporterConfig
     private audiences: AudienceOutput
+
+    // Errors by feature key
+    errors: Record<string, string> = {}
+
+    // Features to import, by feature key
     featuresToImport: FeaturesToImport
+
+    // List of LD feature flags
     sourceFeatures: LDFeature[]
 
     constructor(config: ParsedImporterConfig, audiences: AudienceOutput) {
@@ -79,6 +86,7 @@ export class LDFeatureImporter {
                 } catch (err) {
                     this.featuresToImport[dvcFeature.key].action = FeatureImportAction.Unsupported
                     const errorMessage = err instanceof Error ? err.message : 'unknown error'
+                    this.errors[dvcFeature.key] = errorMessage
                     console.log(`Skipping feature "${dvcFeature.key}":`, errorMessage)
                 }
             })
@@ -91,21 +99,23 @@ export class LDFeatureImporter {
         let createdCount = 0
         let updatedCount = 0
         let skippedCount = 0
-        const featureErrors: Record<string, string> = {}
+
         for (const featurekey in this.featuresToImport) {
-            const listItem = this.featuresToImport[featurekey]
+            const { feature, action } = this.featuresToImport[featurekey]
+            if (this.errors[feature.key]) continue
+
             try {
-                if (listItem.action === FeatureImportAction.Create) {
-                    await DVC.createFeature(projectKey, listItem.feature)
+                if (action === FeatureImportAction.Create) {
+                    await DVC.createFeature(projectKey, feature)
                     createdCount += 1
-                } else if (listItem.action === FeatureImportAction.Update) {
-                    await DVC.updateFeature(projectKey, listItem.feature)
+                } else if (action === FeatureImportAction.Update) {
+                    await DVC.updateFeature(projectKey, feature)
                     updatedCount += 1
                 } else {
                     skippedCount += 1
                 }
             } catch (e) {
-                featureErrors[listItem.feature.key] = e instanceof Error ? e.message : 'Unknown error'
+                this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
             }
         }
     
@@ -113,7 +123,7 @@ export class LDFeatureImporter {
             createdCount,
             updatedCount,
             skippedCount,
-            errored: featureErrors,
+            errored: this.errors,
         }
     }
 
@@ -121,6 +131,7 @@ export class LDFeatureImporter {
         const { projectKey } = this.config
         for (const featureKey in this.featuresToImport) {
             const { action, feature, configs = [] } = this.featuresToImport[featureKey]
+            if (this.errors[feature.key]) continue
             if (action === FeatureImportAction.Skip) continue
     
             for (const config of configs) {
@@ -129,7 +140,7 @@ export class LDFeatureImporter {
                         projectKey, feature.key, config.environment, config.targetingRules
                     )
                 } catch (e) {
-                    console.error(e)
+                    this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
                 }
             }
         }
@@ -138,13 +149,13 @@ export class LDFeatureImporter {
     public async import() {
         await this.getFeaturesToImport()
         await this.getFeatureConfigsToImport()
-        const { createdCount, updatedCount, skippedCount, errored } = await this.importFeatures()
+        const { createdCount, updatedCount, skippedCount } = await this.importFeatures()
         await this.importFeatureConfigs()
         return {
             createdCount,
             updatedCount,
             skippedCount,
-            errored,
+            errored: this.errors,
         }
     }
 }
