@@ -1,7 +1,7 @@
-jest.mock('../api')
+jest.mock('../../api')
 
-import { importProject } from './project'
-import { LD, DVC } from '../api'
+import { LDProjectImporter } from '.'
+import { LD, DVC } from '../../api'
 
 const mockLD = LD as jest.Mocked<typeof LD>
 const mockDVC = DVC as jest.Mocked<typeof DVC>
@@ -25,7 +25,7 @@ const mockDvcProjectResponse = {
 }
 
 
-describe('Project Import', () => {
+describe('LDProjectImporter', () => {
     const ldProject = {
         _id: 'abc',
         name: 'project name',
@@ -53,11 +53,11 @@ describe('Project Import', () => {
         mockDVC.getProject.mockRejectedValue(new Error('Not found'))
         mockDVC.createProject.mockResolvedValue(dvcResponse)
 
-        const result = await importProject(config)
-        expect(result).toEqual({
-            dvcProject: expect.objectContaining(dvcResponse),
-            ldProject
-        })
+        const projectImporter = new LDProjectImporter(config)
+        const result = await projectImporter.import()
+
+        expect(result).toEqual(expect.objectContaining(dvcResponse))
+        expect(projectImporter.sourceProject).toEqual(ldProject)
         expect(mockDVC.createProject).toHaveBeenCalledWith({
             name: ldProject.name,
             key: ldProject.key
@@ -76,13 +76,13 @@ describe('Project Import', () => {
         mockLD.getProject.mockResolvedValue(ldProject)
         mockDVC.getProject.mockResolvedValue(dvcResponse)
 
-        const result = await importProject(config)
+        const projectImporter = new LDProjectImporter(config)
+        const result = await projectImporter.import()
+
+        expect(result).toEqual(expect.objectContaining(dvcResponse))
+        expect(projectImporter.sourceProject).toEqual(ldProject)
         expect(mockDVC.createProject).not.toHaveBeenCalled()
         expect(mockDVC.updateProject).not.toHaveBeenCalled()
-        expect(result).toEqual({
-            dvcProject: expect.objectContaining(dvcResponse),
-            ldProject
-        })
     })
 
     test("project is updated when overwriteDuplicates is true", async () => {
@@ -103,11 +103,11 @@ describe('Project Import', () => {
         mockDVC.getProject.mockResolvedValue(dvcResponse)
         mockDVC.updateProject.mockResolvedValue(updatedDvcResponse)
 
-        const result = await importProject(config)
-        expect(result).toEqual({
-            dvcProject: expect.objectContaining(updatedDvcResponse),
-            ldProject
-        })
+        const projectImporter = new LDProjectImporter(config)
+        const result = await projectImporter.import()
+
+        expect(result).toEqual(expect.objectContaining(updatedDvcResponse))
+        expect(projectImporter.sourceProject).toEqual(ldProject)
         expect(mockDVC.updateProject).toHaveBeenCalledWith(
             ldProject.key,
             {
