@@ -1,6 +1,6 @@
 import { LDAudienceImporter } from '../../resources/audiences'
-import { Filter, OperatorType, TargetingRule } from '../../types/DevCycle'
-import { Clause, Fallthrough, Feature, Feature as LDFeature, Rule, Target } from '../../types/LaunchDarkly'
+import { AudiencePayload, Filter, FilterOrOperator, OperatorType, TargetingRule } from '../../types/DevCycle'
+import { Clause, Fallthrough, Feature, Feature as LDFeature, Rollout, Rule, Target } from '../../types/LaunchDarkly'
 import {
     createAllUsersFilter,
     createAudienceMatchFilter,
@@ -47,8 +47,33 @@ export function getComparator(clause: Clause) {
     return operationMap[opKey](negate)
 }
 
-export function getPercentageFromWeight(weight: number) {
+function getDistribution(feature: Feature, variationIndex: number): TargetingRule['distribution'] {
+    return [{
+        _variation: getVariationKey(feature, variationIndex),
+        percentage: 1
+    }]
+}
+
+function getDistributionFromRollout(rollout: Rollout, feature: Feature): TargetingRule['distribution'] {
+    return rollout.variations.map(({ variation, weight }) => ({
+        _variation: getVariationKey(feature, variation),
+        percentage: getPercentageFromWeight(weight)
+    }))
+}
+
+function getPercentageFromWeight(weight: number) {
     return weight / 100000
+}
+
+function getAudience(
+    name: string,
+    filters: FilterOrOperator[],
+    operator: OperatorType = OperatorType.and
+): AudiencePayload {
+    return {
+        name,
+        filters: { filters, operator }
+    }
 }
 
 export function buildTargetingRules(
@@ -81,17 +106,9 @@ export function buildTargetingRules(
 }
 
 export function buildTargetingRuleFromTarget(target: Target, feature: Feature): TargetingRule {
-    const audience = {
-        name: 'Imported Target',
-        filters: {
-            filters: [createUserFilter('user_id', '=', target.values)],
-            operator: OperatorType.and
-        }
-    }
-    const distribution = [{
-        _variation: getVariationKey(feature, target.variation),
-        percentage: 1
-    }]
+    const filters = [createUserFilter('user_id', '=', target.values)]
+    const audience = getAudience('Imported Target', filters)
+    const distribution = getDistribution(feature, target.variation)
 
     return { audience, distribution }
 }
@@ -120,45 +137,30 @@ export function buildTargetingRuleFromRule(
         }
         return mapClauseToFilter(clause)
     })
-    const audience = {
-        name: 'Imported Rule',
-        filters: {
-            filters,
-            operator: OperatorType.and
-        }
-    }
+    const audience = getAudience('Imported Rule', filters)
 
-    if (rule.variation === undefined) {
-        throw new Error('Rule is missing a variation')
+    let distribution
+    if (rule.variation !== undefined) {
+        distribution = getDistribution(feature, rule.variation)
+    } else if (rule.rollout) {
+        distribution = getDistributionFromRollout(rule.rollout, feature)
     }
-
-    const distribution = [{
-        _variation: getVariationKey(feature, rule.variation),
-        percentage: 1
-    }]
+    if (!distribution) {
+        throw new Error('Rule must have either a variation or rollout')
+    }
 
     return { audience, distribution }
 }
 
 export function buildTargetingRulesFromFallthrough(fallthrough: Fallthrough, feature: Feature): TargetingRule {
-    const audience = {
-        name: 'Imported Fallthrough',
-        filters: {
-            filters: [createAllUsersFilter()],
-            operator: OperatorType.and
-        }
-    }
+    const filters = [createAllUsersFilter()]
+    const audience = getAudience('Imported Fallthrough', filters)
+
     let distribution
     if (fallthrough.variation !== undefined) {
-        distribution = [{
-            _variation: getVariationKey(feature, fallthrough.variation),
-            percentage: 1
-        }]
+        distribution = getDistribution(feature, fallthrough.variation)
     } else if (fallthrough.rollout) {
-        distribution = fallthrough.rollout.variations.map(({ variation, weight }) => ({
-            _variation: getVariationKey(feature, variation),
-            percentage: getPercentageFromWeight(weight)
-        }))
+        distribution = getDistributionFromRollout(fallthrough.rollout, feature)
     }
     if (!distribution) {
         throw new Error('Fallthrough must have either a variation or rollout')

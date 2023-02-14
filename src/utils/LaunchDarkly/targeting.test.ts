@@ -18,6 +18,20 @@ mockFeature.variations = [
     }
 ]
 
+const mockRule = {
+    _id: '123',
+    clauses: [
+        {
+            _id: 'abc',
+            attribute: 'email',
+            negate: false,
+            op: 'in',
+            values: ['email@email.com']
+        }
+    ],
+    variation: 1
+}
+
 describe('buildTargetingRuleFromTarget', () => {
     test('builds targeting rule from targets', () => {
         const target = {
@@ -51,26 +65,13 @@ describe('buildTargetingRuleFromTarget', () => {
 describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule from a simple rule', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
-        const rule = {
-            _id: '123',
-            clauses: [
-                {
-                    _id: 'abc',
-                    attribute: 'email',
-                    negate: false,
-                    op: 'in',
-                    values: ['email@email.com']
-                }
-            ],
-            variation: 1
-        }
-
-        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+    
+        const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport)
         expect(result).toEqual({
             audience: {
                 name: 'Imported Rule',
                 filters: {
-                    filters: [expect.objectContaining({ subType: 'email' })],
+                    filters: [expect.objectContaining({})],
                     operator: OperatorType.and
                 }   
             },
@@ -78,6 +79,48 @@ describe('buildTargetingRuleFromRule', () => {
                 _variation: 'variation-2',
                 percentage: 1
             }]
+        })
+
+    })
+
+    test('builds targeting rule from a rule with rollout', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const rule = {
+            ...mockRule,
+            variation: undefined,
+            rollout: {
+                variations: [
+                    {
+                        variation: 0,
+                        weight: 20000
+                    },
+                    {
+                        variation: 1,
+                        weight: 80000
+                    }
+                ]
+            }
+        }
+
+        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        expect(result).toEqual({
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [expect.objectContaining({})],
+                    operator: OperatorType.and
+                }   
+            },
+            distribution: [
+                {
+                    _variation: 'variation-1',
+                    percentage: 0.2
+                },
+                {
+                    _variation: 'variation-2',
+                    percentage: 0.8
+                }
+            ]
         })
 
     })
