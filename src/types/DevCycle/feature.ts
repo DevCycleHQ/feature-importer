@@ -4,7 +4,7 @@ export type Feature = {
     name?: string
     description?: string
     key: string
-    type?: 'release' | 'experiment' | 'permission' | 'ops'
+    type?: FeatureType
     variations?: Variation[]
     variables?: Variable[]
     tags?: string[]
@@ -15,7 +15,7 @@ export type Variable = {
     description?: string
     key: string
     _feature?: string
-    type: 'String' | 'Number' | 'Boolean' | 'JSON'
+    type: VariableType
     defaultValue?: object
 }
 
@@ -32,4 +32,11 @@ export enum VariableType {
     number = 'Number',
     boolean = 'Boolean',
     json = 'JSON',
+}
+
+export enum FeatureType {
+    release = 'release',
+    experiment = 'experiment',
+    permission = 'permission',
+    ops = 'ops',
 }

@@ -15,7 +15,7 @@ export type Feature = {
     variations: {
         name?: string
         _id: string
-        value: boolean
+        value: any
     }[]
     temporary?: boolean
     tags?: string[]
@@ -36,8 +36,6 @@ export type Feature = {
 }
 
 export enum FeatureKind {
-    string = 'string',
-    number = 'number',
     boolean = 'boolean',
-    json = 'json',
+    multivariate = 'multivariate',
 }
