@@ -9,14 +9,12 @@ import {
     mockLDFeaturesFlags,
     mockLDFeaturesMappedToDVC
 } from '../../api/__mocks__/MockResponses'
+import { LDAudienceImporter } from '../audiences'
 
 const mockLD = LD as jest.Mocked<typeof LD>
 const mockDVC = DVC as jest.Mocked<typeof DVC>
 
-const mockAudiences = {
-    audiencesByKey: {},
-    errorsByKey: {}
-}
+const audienceImport = new LDAudienceImporter(mockConfig)
 
 describe('LDFeatureImporter', () => {
     describe('getFeaturesToImport', () => {
@@ -33,7 +31,7 @@ describe('LDFeatureImporter', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            const featureImporter = new LDFeatureImporter(config, audienceImport)
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
@@ -58,7 +56,7 @@ describe('LDFeatureImporter', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            const featureImporter = new LDFeatureImporter(config, audienceImport)
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
@@ -84,7 +82,7 @@ describe('LDFeatureImporter', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            const featureImporter = new LDFeatureImporter(config, audienceImport)
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
@@ -110,7 +108,7 @@ describe('LDFeatureImporter', () => {
             mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
-            const featureImporter = new LDFeatureImporter(config, mockAudiences)
+            const featureImporter = new LDFeatureImporter(config, audienceImport)
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
@@ -144,7 +142,7 @@ describe('LDFeatureImporter', () => {
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -166,7 +164,7 @@ describe('LDFeatureImporter', () => {
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -191,7 +189,7 @@ describe('LDFeatureImporter', () => {
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -216,7 +214,7 @@ describe('LDFeatureImporter', () => {
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, mockAudiences)
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
