@@ -38,6 +38,7 @@
     "@types/inquirer": "^9.0.3",
     "@types/lodash": "^4.14.191",
     "dotenv": "^16.0.3",
+    "i18n-iso-countries": "^7.5.0",
     "inquirer": "^8.0.1",
     "jest": "^29.4.2",
     "lodash": "^4.17.21",

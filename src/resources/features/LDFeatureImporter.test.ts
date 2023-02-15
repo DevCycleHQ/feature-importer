@@ -373,7 +373,7 @@ describe('LDFeatureImporter', () => {
                                 name: 'Imported Rule'
                             }, distribution:
                                 [{
-                                    _variation: `variation-${featureRule.variation + 1}`,
+                                    _variation: 'variation-1',
                                     percentage: 1
                                 }]
                         }]
@@ -452,7 +452,7 @@ describe('LDFeatureImporter', () => {
                                 name: 'Imported Rule'
                             }, distribution:
                                 [{
-                                    _variation: `variation-${featureRule.variation + 1}`,
+                                    _variation: 'variation-1',
                                     percentage: 1
                                 }]
                         }]
@@ -684,7 +684,84 @@ describe('LDFeatureImporter', () => {
                                 name: 'Imported Rule'
                             }, distribution:
                                 [{
-                                    _variation: `variation-${featureRule.variation + 1}`,
+                                    _variation: 'variation-1',
+                                    percentage: 1
+                                }]
+                        }]
+                    }
+                }]
+            )
+        })
+        test('create feature config for supported country code lowercase', async () => {
+            const envKey = 'production'
+            const featureRule = {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'country',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            'ca',
+                            'uk',
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            }
+
+            const createFeature = {
+                ...mockFeature,
+                environments: {
+                    [envKey]: {
+                        'on': true,
+                        'rules': [featureRule],
+                        'targets': [],
+                    },
+
+                }
+
+            }
+            const mockFeaturesToImport: FeaturesToImport = {
+                [createFeature.key]: {
+                    action: FeatureImportAction.Update,
+                    feature: mapLDFeatureToDVCFeature(createFeature),
+                },
+            }
+            const mockLdFeatures = [createFeature]
+
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            featureImporter.featuresToImport = mockFeaturesToImport
+            featureImporter.sourceFeatures = mockLdFeatures
+
+            const result = await featureImporter['getFeatureConfigsToImport']()
+
+            const { configs } = result[createFeature.key]
+            expect(configs).toEqual(
+                [{
+                    environment: envKey,
+                    targetingRules: {
+                        status: 'active',
+                        targets: [{
+                            audience: {
+                                filters: {
+                                    filters: [{
+                                        comparator: 'contain',
+                                        subType: featureRule.clauses[0].attribute,
+                                        type: 'user',
+                                        values:
+                                            ['CA', 'UK']
+                                    }],
+                                    operator: 'and'
+                                },
+                                name: 'Imported Rule'
+                            }, distribution:
+                                [{
+                                    _variation: 'variation-1',
                                     percentage: 1
                                 }]
                         }]
