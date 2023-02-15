@@ -75,8 +75,6 @@ export class LDFeatureImporter {
             this.featuresToImport[feature.key].configs ??= []
 
             Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
-                console.error(environmentConfig.rules && environmentConfig.rules.length > 0
-                    && environmentConfig.rules[0].clauses[0])
                 try {
                     if (environmentConfig.prerequisites?.length) {
                         throw new Error(`Unable to import prerequisite in "${environment}" environment`)

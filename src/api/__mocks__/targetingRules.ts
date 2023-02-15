@@ -1,4 +1,4 @@
-import { FeatureConfiguration } from '../../types/DevCycle'
+import { FeatureConfiguration, OperatorType } from '../../types/DevCycle'
 import { Feature, FeatureKind } from '../../types/LaunchDarkly'
 
 export const mockFeature = {
@@ -175,4 +175,15 @@ export const skipFeature: Feature = {
     ...mockFeature,
     'key': 'skip-feature',
     'environments': environmentWithRule,
+}
+
+export const mockAudience = {
+    'seg-1-production': {
+        _id: 'id_123',
+        _project: 'project_123',
+        name: 'segment 1',
+        key: 'project-key',
+        description: 'audience description',
+        filters: { operator: OperatorType.or, filters: [] }
+    }
 }

@@ -133,7 +133,6 @@ export function buildTargetingRuleFromRule(
 ): { targetingRule: TargetingRule, customPropertiesToImport: CustomPropertyFromFilter[] } {
     let customProperties: CustomPropertyFromFilter[] = []
     const filters = rule.clauses.map((clause) => {
-        console.log(audienceImport)
         if (clause.op === 'segmentMatch') {
             const audienceIds = clause.values.map((segKey) => {
                 const audienceKey = `${segKey}-${environmentKey}`
