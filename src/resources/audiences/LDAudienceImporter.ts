@@ -14,7 +14,7 @@ export class LDAudienceImporter {
     }
 
     async import(environmentKeys: string[]): Promise<Record<string, AudienceResponse>> {
-        const { projectKey, overwriteDuplicates } = this.config
+        const { projectKey, overwriteDuplicates, operationMap } = this.config
 
         this.audiences = await DVC.getAudiences(projectKey).then((audiences) => (
             audiences.reduce((map: Record<string, AudienceResponse>, audience) => {
@@ -31,7 +31,7 @@ export class LDAudienceImporter {
     
                 let filters: AudiencePayload['filters']
                 try {
-                    filters = mapSegmentToFilters(segment)
+                    filters = mapSegmentToFilters(segment, operationMap)
                 } catch (err) {
                     const errorMessage = err instanceof Error ? err.message : 'Error creating segment filters'
                     this.errors[key] = `Error in segment ${segment.key}: ${errorMessage}`

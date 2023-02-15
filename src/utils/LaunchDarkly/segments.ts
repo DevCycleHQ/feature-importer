@@ -3,9 +3,12 @@ import { Segment, SegmentRule } from '../../types/LaunchDarkly'
 import { createUserFilter } from '../DevCycle'
 import { mapClauseToFilter } from './targeting'
 
-export function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'] {
+export function mapSegmentToFilters(
+    segment: Segment,
+    operationMap: { [key: string]: string } | undefined
+): AudiencePayload['filters'] {
     const rulesFilters = segment.rules?.length
-        ? segment.rules.map(mapSegmentRuleToFilter)
+        ? segment.rules.map((rule) => mapSegmentRuleToFilter(rule, operationMap))
         : []
 
     if (segment.included?.length) {
@@ -29,7 +32,10 @@ export function mapSegmentToFilters(segment: Segment): AudiencePayload['filters'
     return filters
 }
 
-function mapSegmentRuleToFilter(rule: SegmentRule): FilterOrOperator {
+function mapSegmentRuleToFilter(
+    rule: SegmentRule,
+    operationMap: { [key: string]: string } | undefined
+): FilterOrOperator {
     if (rule.weight) {
         throw new Error('Weighted rules are not supported in segments')
     }
@@ -37,7 +43,7 @@ function mapSegmentRuleToFilter(rule: SegmentRule): FilterOrOperator {
         if (clause.attribute === 'segmentMatch') {
             throw new Error('Segment match rules are not supported in segments')
         }
-        return mapClauseToFilter(clause)
+        return mapClauseToFilter(clause, operationMap)
     })
 
     if (filters.length === 1) {

@@ -68,6 +68,7 @@ export class LDFeatureImporter {
     }
 
     private async getFeatureConfigsToImport(): Promise<FeaturesToImport> {
+        const { operationMap } = this.config
         for (const feature of this.sourceFeatures) {
             const { action, feature: dvcFeature } = this.featuresToImport[feature.key]
             if (action === FeatureImportAction.Skip) continue
@@ -79,7 +80,10 @@ export class LDFeatureImporter {
                     if (environmentConfig.prerequisites?.length) {
                         throw new Error(`Unable to import prerequisite in "${environment}" environment`)
                     }
-                    const { targetingRules: targets, customPropertiesToImport: newCustomProperties } = buildTargetingRules(feature, environment, this.audienceImport)
+                    const { 
+                        targetingRules: targets,
+                        customPropertiesToImport: newCustomProperties
+                    } = buildTargetingRules(feature, environment, this.audienceImport, operationMap)
                     this.customPropertiesToImport = this.customPropertiesToImport.concat(newCustomProperties)
 
                     const targetingRules: FeatureConfiguration = {
