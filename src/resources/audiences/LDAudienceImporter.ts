@@ -54,7 +54,7 @@ export class LDAudienceImporter {
                     console.log(`Updating audience "${key}" in DevCycle`)
                     this.audiences[key] = await DVC.updateAudience(projectKey, key, audiencePayload)
                 } else {
-                    console.log('Skipping audience creation because it already exists')
+                    console.log(`Skipping audience "${key}" creation because it already exists`)
                 }
             }
         }

@@ -116,12 +116,15 @@ export class LDFeatureImporter {
 
             try {
                 if (action === FeatureImportAction.Create) {
+                    console.log(`Creating feature "${feature.key}" in DevCycle`)
                     await DVC.createFeature(projectKey, feature)
                     createdCount += 1
                 } else if (action === FeatureImportAction.Update) {
+                    console.log(`Updating feature "${feature.key}" in DevCycle`)
                     await DVC.updateFeature(projectKey, feature)
                     updatedCount += 1
                 } else {
+                    console.log(`Skipping feature "${feature.key}" creation`)
                     skippedCount += 1
                 }
             } catch (e) {
