@@ -1,4 +1,4 @@
-import { FeatureConfiguration, OperatorType } from '../../types/DevCycle'
+import { CustomProperties, CustomPropertyType, FeatureConfiguration, OperatorType } from '../../types/DevCycle'
 import { Feature, FeatureKind } from '../../types/LaunchDarkly'
 
 export const mockFeature = {
@@ -67,6 +67,96 @@ const environmentWithRule = {
                         'op': 'contains',
                         'values': [
                             'gmail'
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            },
+        ],
+        'targets': [],
+    },
+}
+
+const environmentWithCustomPropertyRule = {
+    'production': {
+        'on': true,
+        'rules': [
+            {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            'gmail'
+                        ]
+                    },
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp2',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            0
+                        ]
+                    },
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp3',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            false
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            },
+        ],
+        'targets': [],
+    },
+}
+
+const environmentWithInvalidRule = {
+    'production': {
+        'on': true,
+        'rules': [
+            {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            { 'should': 'fail' }
+                        ]
+                    },
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp2',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            0
+                        ]
+                    },
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'customProp3',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            false
                         ]
                     },
                 ],
@@ -150,6 +240,16 @@ export const createFeatureWithRule: Feature = {
     environments: environmentWithRule
 }
 
+export const createFeatureWithCustomPropertyRule: Feature = {
+    ...createFeatureWithTarget,
+    environments: environmentWithCustomPropertyRule
+}
+
+export const createFeatureWithInvalidRule: Feature = {
+    ...createFeatureWithTarget,
+    environments: environmentWithInvalidRule
+}
+
 export const createFeatureWithSegmentMatch: Feature = {
     ...createFeatureWithTarget,
     environments: environmentWithSegmentMatch
@@ -187,3 +287,40 @@ export const mockAudience = {
         filters: { operator: OperatorType.or, filters: [] }
     }
 }
+
+export const mockGetCustomProperties: CustomProperties[] = [
+    {
+        _id: 'test',
+        _project: 'project_123',
+        key: 'custom-prop',
+        type: CustomPropertyType.String,
+        name: 'customProp',
+        propertyKey: 'customProp',
+        _createdBy: 'user_123',
+        createdAt: 'test-created-at-date',
+        updatedAt: 'test-updated-at-date',
+    },
+    {
+        _id: 'test2',
+        _project: 'project_123',
+        key: 'custom-prop-2',
+        type: CustomPropertyType.Number,
+        name: 'customProp2',
+        propertyKey: 'customProp2',
+        _createdBy: 'user_123',
+        createdAt: 'test-created-at-date',
+        updatedAt: 'test-updated-at-date',
+    },
+    {
+        _id: 'test3',
+        _project: 'project_123',
+        key: 'custom-prop-3',
+        type: CustomPropertyType.Boolean,
+        name: 'customProp3',
+        propertyKey: 'customProp3',
+        _createdBy: 'user_123',
+        createdAt: 'test-created-at-date',
+        updatedAt: 'test-updated-at-date',
+    },
+
+]
