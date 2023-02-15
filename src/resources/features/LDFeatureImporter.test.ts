@@ -4,7 +4,6 @@ import { LD, DVC } from '../../api'
 import { LDFeatureImporter } from '.'
 import { FeatureImportAction, FeaturesToImport } from './types'
 import {
-    mockAudienceResponse,
     mockConfig,
     mockDVCFeaturesResponse,
     mockLDFeaturesFlags,
@@ -18,10 +17,10 @@ import {
     skipFeature,
     updateFeatureWithUnsupportedRule,
     featureConfigResponse,
-    createFeatureWithRule
+    createFeatureWithRule,
+    mockAudience
 } from '../../api/__mocks__/targetingRules'
 import { getComparator, mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
-import { Operator, OperatorType } from '../../types/DevCycle'
 
 const mockLD = LD as jest.Mocked<typeof LD>
 const mockDVC = DVC as jest.Mocked<typeof DVC>
@@ -259,11 +258,7 @@ describe('LDFeatureImporter', () => {
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
-            console.log('featureImporter.featuresToImport', featureImporter.featuresToImport)
-            const featureTarget = createFeatureWithTarget &&
-                createFeatureWithTarget.environments && createFeatureWithTarget.environments.production &&
-                createFeatureWithTarget.environments.production.targets &&
-                createFeatureWithTarget.environments.production.targets[0] || {
+            const featureTarget = createFeatureWithTarget.environments.production?.targets?.[0] || {
                 values: ['test1', 'test2'],
                 variation: 0
             }
@@ -356,8 +351,7 @@ describe('LDFeatureImporter', () => {
             )
         })
 
-        //WIP trying to fix the test which is failing with unknown error
-        test.skip('target rules created for feature with segmentMatch', async () => {
+        test('target rules created for feature with segmentMatch', async () => {
             const mockFeaturesToImport: FeaturesToImport = {
                 [createFeatureWithSegmentMatch.key]: {
                     action: FeatureImportAction.Create,
@@ -366,41 +360,9 @@ describe('LDFeatureImporter', () => {
             }
             const mockLdFeatures = [createFeatureWithSegmentMatch]
 
-            const validSegment = {
-                name: 'segment 1',
-                key: 'seg-1',
-                description: 'my segment',
-                tags: ['tag1', 'tag2'],
-                creationDate: 123456789,
-                rules: []
-            }
-            const mockDvcAudienceResponse = {
-                _id: 'id_123',
-                _project: 'project_123',
-                name: 'audience name',
-                key: 'audience-key',
-                description: 'audience description',
-                filters: {
-                    filters: [],
-                    operator: 'and' as Operator['operator']
-                },
-            }
-
-            const config = { ...mockConfig }
             const envKey = 'production'
-            const ldSegment = { ...validSegment }
-            const expectedFilters = {
-                operator: OperatorType.or,
-                filters: []
-            }
-            const createResponse = {
-                ...mockDvcAudienceResponse,
-                name: ldSegment.name,
-                key: config.projectKey,
-                filters: expectedFilters
-            }
-            audienceImport.import = jest.fn().mockResolvedValue(createResponse)
-            const audiences = await audienceImport.import([envKey])
+
+            audienceImport.audiences = mockAudience
 
             const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
             featureImporter.featuresToImport = mockFeaturesToImport
@@ -420,11 +382,9 @@ describe('LDFeatureImporter', () => {
                 ],
                 variation: 0
             }
-            const featureEnvs = Object.keys(createFeatureWithSegmentMatch.environments)
 
             const result = await featureImporter['getFeatureConfigsToImport']()
 
-            console.error(result)
             const { configs } = result[createFeatureWithSegmentMatch.key]
             expect(configs).toEqual(
                 [{
@@ -438,7 +398,7 @@ describe('LDFeatureImporter', () => {
                                         comparator: getComparator(featureRules.clauses[0]),
                                         type: 'audienceMatch',
                                         _audiences: [
-                                            audiences._id
+                                            mockAudience['seg-1-production']._id
                                         ]
                                     }],
                                     operator: 'and'
