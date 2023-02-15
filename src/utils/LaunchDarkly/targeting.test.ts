@@ -11,7 +11,7 @@ mockFeature.variations = [
         _id: 'variation-1',
         value: false,
     },
- 
+
     {
         _id: 'variation-2',
         value: true,
@@ -65,22 +65,24 @@ describe('buildTargetingRuleFromTarget', () => {
 describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule from a simple rule', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
-    
+
         const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport)
         expect(result).toEqual({
-            audience: {
-                name: 'Imported Rule',
-                filters: {
-                    filters: [expect.objectContaining({})],
-                    operator: OperatorType.and
-                }   
-            },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [expect.objectContaining({})],
+                        operator: OperatorType.and
+                    }
+                },
+                distribution: [{
+                    _variation: 'variation-2',
+                    percentage: 1
+                }]
+            }
         })
-
     })
 
     test('builds targeting rule from a rule with rollout', () => {
@@ -104,23 +106,26 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
         expect(result).toEqual({
-            audience: {
-                name: 'Imported Rule',
-                filters: {
-                    filters: [expect.objectContaining({})],
-                    operator: OperatorType.and
-                }   
-            },
-            distribution: [
-                {
-                    _variation: 'variation-1',
-                    percentage: 0.2
+            customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [expect.objectContaining({})],
+                        operator: OperatorType.and
+                    }
                 },
-                {
-                    _variation: 'variation-2',
-                    percentage: 0.8
-                }
-            ]
+                distribution: [
+                    {
+                        _variation: 'variation-1',
+                        percentage: 0.2
+                    },
+                    {
+                        _variation: 'variation-2',
+                        percentage: 0.8
+                    }
+                ]
+            }
         })
 
     })
@@ -150,23 +155,25 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
         expect(result).toEqual({
-            audience: {
-                name: 'Imported Rule',
-                filters: {
-                    filters: [{
-                        type: 'audienceMatch',
-                        comparator: '=',
-                        _audiences: ['audienceId']
-                    }],
-                    operator: OperatorType.and
-                }
-            },
-            distribution: [{
-                _variation: 'variation-1',
-                percentage: 1
-            }]
+            customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [{
+                            type: 'audienceMatch',
+                            comparator: '=',
+                            _audiences: ['audienceId']
+                        }],
+                        operator: OperatorType.and
+                    }
+                },
+                distribution: [{
+                    _variation: 'variation-1',
+                    percentage: 1
+                }]
+            }
         })
-
     })
 
     test('throws error if an error occured while creating audience', () => {
