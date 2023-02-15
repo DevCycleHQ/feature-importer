@@ -21,6 +21,7 @@ export const getConfigs = (): ParsedImporterConfig => {
     if (process.env.EXCLUDE_FEATURES) configs.excludeFeatures = parseMapFromArray(process.env.EXCLUDE_FEATURES)
     if (process.env.OVERWRITE_DUPLICATES)
         configs.overwriteDuplicates = getOptionalBoolean(process.env.OVERWRITE_DUPLICATES)
+    if (process.env.OPERATION_MAP) configs.operationMap = JSON.parse(process.env.OPERATION_MAP)
 
     validateConfigs(configs)
 
@@ -86,4 +87,8 @@ export type ParsedImporterConfig = {
     // it will be overwritten
     // By default, the importer will skip duplicates
     overwriteDuplicates?: boolean,
+
+    // [Optional] A map of LD operations to map to DevCycle operations
+    // By default, the importer will skip unsupported operations
+    operationMap?: { [key: string]: string },
 }

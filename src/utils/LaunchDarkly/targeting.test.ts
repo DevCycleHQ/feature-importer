@@ -50,6 +50,20 @@ const mockRuleWithCustomProperty = {
     ],
 }
 
+const mockUnsupportedOpRule = {
+    _id: '123',
+    clauses: [
+        {
+            _id: 'abc',
+            attribute: 'email',
+            negate: false,
+            op: 'endsWith',
+            values: ['email.com']
+        }
+    ],
+    variation: 1
+}
+
 describe('buildTargetingRuleFromTarget', () => {
     test('builds targeting rule from targets', () => {
         const target = {
@@ -84,7 +98,7 @@ describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule from a simple rule', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
 
-        const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport)
+        const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
             customPropertiesToImport: [],
             targetingRule: {
@@ -106,7 +120,7 @@ describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule with custom property', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
 
-        const result = buildTargetingRuleFromRule(mockRuleWithCustomProperty, mockFeature, 'prod', audienceImport)
+        const result = buildTargetingRuleFromRule(mockRuleWithCustomProperty, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
             customPropertiesToImport: [{
                 dataKey: mockRuleWithCustomProperty.clauses[0].attribute,
@@ -147,7 +161,7 @@ describe('buildTargetingRuleFromRule', () => {
             }
         }
 
-        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
             customPropertiesToImport: [],
             targetingRule: {
@@ -196,7 +210,7 @@ describe('buildTargetingRuleFromRule', () => {
             variation: 0
         }
 
-        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
             customPropertiesToImport: [],
             targetingRule: {
@@ -238,8 +252,60 @@ describe('buildTargetingRuleFromRule', () => {
             variation: 0
         }
 
-        const methodCall = () => buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport)
+        const methodCall = () => buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
         expect(methodCall).toThrowError('an error occured')
+    })
+
+    test('builds targeting rule with an op overrided in operationMap', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const operationMap = {
+            endsWith: 'contain',
+        }
+
+        const result = buildTargetingRuleFromRule(
+            mockUnsupportedOpRule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            operationMap,
+        )
+        expect(result).toEqual({
+            customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [{
+                            comparator: 'contain',
+                            type: 'user',
+                            subType: 'email',
+                            values: ['email.com']
+                        }],
+                        operator: OperatorType.and
+                    }
+                },
+                distribution: [{
+                    _variation: 'variation-2',
+                    percentage: 1
+                }]
+            }
+        })
+    })
+
+    test('throws error if unsupported operation is not in operationMap', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const operationMap = {
+            startsWith: 'contain'
+        }
+
+        const methodCall = () => buildTargetingRuleFromRule(
+            mockUnsupportedOpRule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            operationMap,
+        )
+        expect(methodCall).toThrowError('Unsupported operation: endsWith')
     })
 })
 

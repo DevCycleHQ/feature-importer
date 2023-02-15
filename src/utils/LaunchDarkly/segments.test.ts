@@ -29,7 +29,7 @@ describe('mapSegmentToFilters', () => {
                 ]
             }]
         }
-        const filters = mapSegmentToFilters(segment)
+        const filters = mapSegmentToFilters(segment, {})
         expect(filters).toEqual({
             operator: OperatorType.and,
             filters: [
@@ -56,6 +56,39 @@ describe('mapSegmentToFilters', () => {
                         }
                     ]
                 }
+            ]
+        })
+    })
+
+    test('maps a segment containing a rule with an op overrided in operationMap', () => {
+        const segment = {
+            ...validSegment,
+            rules: [{
+                clauses: [
+                    {
+                        'attribute': 'email',
+                        'negate': false,
+                        'op': 'endsWith',
+                        'values': [
+                            'email.com'
+                        ]
+                    }
+                ]
+            }]
+        }
+        const operationMap = {
+            'endsWith': 'contain'
+        }
+        const filters = mapSegmentToFilters(segment, operationMap)
+        expect(filters).toEqual({
+            operator: OperatorType.or,
+            filters: [
+                {
+                    type: 'user',
+                    subType: 'email',
+                    comparator: 'contain',
+                    values: ['email.com']
+                },
             ]
         })
     })
@@ -98,7 +131,7 @@ describe('mapSegmentToFilters', () => {
                 }
             ]
         }
-        const filters = mapSegmentToFilters(segment)
+        const filters = mapSegmentToFilters(segment, {})
         expect(filters).toEqual({
             operator: OperatorType.or,
             filters: [
@@ -149,7 +182,7 @@ describe('mapSegmentToFilters', () => {
                 }
             ]
         }
-        expect(() => mapSegmentToFilters(segment)).toThrowError('Segment match rules are not supported in segments')
+        expect(() => mapSegmentToFilters(segment, {})).toThrowError('Segment match rules are not supported in segments')
     })
 
     test('throws an error if segment contains a weighted rule', () => {
@@ -169,6 +202,6 @@ describe('mapSegmentToFilters', () => {
                 }
             ]
         }
-        expect(() => mapSegmentToFilters(segment)).toThrowError('Weighted rules are not supported in segments')
+        expect(() => mapSegmentToFilters(segment, {})).toThrowError('Weighted rules are not supported in segments')
     })
 })

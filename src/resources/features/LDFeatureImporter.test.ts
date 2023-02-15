@@ -331,7 +331,7 @@ describe('LDFeatureImporter', () => {
                             audience: {
                                 filters: {
                                     filters: [{
-                                        comparator: getComparator(featureRules.clauses[0]),
+                                        comparator: getComparator(featureRules.clauses[0], {}),
                                         subType: featureRules.clauses[0].attribute,
                                         type: 'user',
                                         values:
@@ -395,7 +395,7 @@ describe('LDFeatureImporter', () => {
                             audience: {
                                 filters: {
                                     filters: [{
-                                        comparator: getComparator(featureRules.clauses[0]),
+                                        comparator: getComparator(featureRules.clauses[0], {}),
                                         type: 'audienceMatch',
                                         _audiences: [
                                             mockAudience['seg-1-production']._id
