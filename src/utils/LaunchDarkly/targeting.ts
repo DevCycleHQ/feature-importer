@@ -13,12 +13,12 @@ import {
     createAudienceMatchFilter,
     createCustomDataFilter,
     createUserFilter,
-    getNegatedOperator,
+    getNegatedComparator,
 } from '../../utils/DevCycle/targeting'
 import { getVariationKey } from './variation'
 import { CustomPropertyFromFilter } from '../../resources/features/types'
 
-export function mapClauseToFilter(clause: Clause, operationMap: { [key: string]: string } | undefined): Filter {
+export function mapClauseToFilter(clause: Clause, operationMap: { [key: string]: string }): Filter {
     const { attribute, values } = clause
     const attributeMap = {
         country: 'country',
@@ -37,7 +37,7 @@ export function mapClauseToFilter(clause: Clause, operationMap: { [key: string]:
         )
 }
 
-export function getComparator(clause: Clause, customOperationMap: { [key: string]: string } | undefined = {}): string {
+export function getComparator(clause: Clause, customOperationMap: { [key: string]: string } = {}): string {
     const { op, negate } = clause
     const operationMap = {
         in: (neg: boolean) => neg ? '!=' : '=',
@@ -52,7 +52,7 @@ export function getComparator(clause: Clause, customOperationMap: { [key: string
     }
 
     if (op in customOperationMap) {
-        return negate ? getNegatedOperator(customOperationMap[op]) : customOperationMap[op]
+        return negate ? getNegatedComparator(customOperationMap[op]) : customOperationMap[op]
     }
 
     if (!(op in operationMap)) {
@@ -95,7 +95,7 @@ export function buildTargetingRules(
     feature: LDFeature,
     environmentKey: string,
     audienceImport: LDAudienceImporter,
-    operationMap: { [key: string]: string } | undefined,
+    operationMap: { [key: string]: string } = {},
 ): { targetingRules: TargetingRule[], customPropertiesToImport: CustomPropertyFromFilter[] } {
     const targetingRules: TargetingRule[] = []
     const { targets = [], rules = [], fallthrough } = feature.environments[environmentKey]
@@ -137,7 +137,7 @@ export function buildTargetingRuleFromRule(
     feature: Feature,
     environmentKey: string,
     audienceImport: LDAudienceImporter,
-    operationMap: { [key: string]: string } | undefined,
+    operationMap: { [key: string]: string },
 ): { targetingRule: TargetingRule, customPropertiesToImport: CustomPropertyFromFilter[] } {
     let customProperties: CustomPropertyFromFilter[] = []
     const filters = rule.clauses.map((clause) => {
