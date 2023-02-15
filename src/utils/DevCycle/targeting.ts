@@ -1,4 +1,9 @@
 export function createUserFilter(subType: string, comparator: string, values: string[]) {
+    if (subType === 'country') {
+        if (values.every((value) => value.length !== 2)) {
+            throw new Error(`Country values should be 2-letter ISO codes: ${values.join(', ')}`)
+        }
+    }
     return {
         type: 'user',
         subType,
