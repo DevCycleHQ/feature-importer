@@ -46,7 +46,7 @@ By default the config is read from `configs.json` in the project root, this can 
   - Equivalent env var: OVERWRITE_DUPLICATES
 - <b>operationMap</b>: <i>Map<string, string></i>
   - A map of LD operations to map to DevCycle operations
-  - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `true`, `false`, `contain`, `!contain`, `exist`, `!exist`
+  - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`
   - Equivalent env var: OPERATION_MAP
 
 Sample configs.json

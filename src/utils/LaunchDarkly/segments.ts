@@ -5,7 +5,7 @@ import { mapClauseToFilter } from './targeting'
 
 export function mapSegmentToFilters(
     segment: Segment,
-    operationMap: { [key: string]: string } | undefined
+    operationMap: { [key: string]: string } = {}
 ): AudiencePayload['filters'] {
     const rulesFilters = segment.rules?.length
         ? segment.rules.map((rule) => mapSegmentRuleToFilter(rule, operationMap))
@@ -34,7 +34,7 @@ export function mapSegmentToFilters(
 
 function mapSegmentRuleToFilter(
     rule: SegmentRule,
-    operationMap: { [key: string]: string } | undefined
+    operationMap: { [key: string]: string }
 ): FilterOrOperator {
     if (rule.weight) {
         throw new Error('Weighted rules are not supported in segments')
