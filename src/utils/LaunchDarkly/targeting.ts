@@ -13,6 +13,7 @@ import {
     createAudienceMatchFilter,
     createCustomDataFilter,
     createUserFilter,
+    getNegatedOperator,
 } from '../../utils/DevCycle/targeting'
 import { getVariationKey } from './variation'
 import { CustomPropertyFromFilter } from '../../resources/features/types'
@@ -36,7 +37,7 @@ export function mapClauseToFilter(clause: Clause, operationMap: { [key: string]:
         )
 }
 
-export function getComparator(clause: Clause, customOperationMap: { [key: string]: string } | undefined): string {
+export function getComparator(clause: Clause, customOperationMap: { [key: string]: string } | undefined = {}): string {
     const { op, negate } = clause
     const operationMap = {
         in: (neg: boolean) => neg ? '!=' : '=',
@@ -50,8 +51,8 @@ export function getComparator(clause: Clause, customOperationMap: { [key: string
         after: () => '>',
     }
 
-    if (customOperationMap && op in customOperationMap) {
-        return customOperationMap[op]
+    if (op in customOperationMap) {
+        return negate ? getNegatedOperator(customOperationMap[op]) : customOperationMap[op]
     }
 
     if (!(op in operationMap)) {

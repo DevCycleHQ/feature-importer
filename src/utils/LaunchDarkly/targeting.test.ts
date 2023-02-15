@@ -292,6 +292,54 @@ describe('buildTargetingRuleFromRule', () => {
         })
     })
 
+    test('builds targeting rule with a negated op overrided in operationMap', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const operationMap = {
+            endsWith: 'contain',
+        }
+        const mockUnsupportedNegatedOpRule = {
+            ...mockUnsupportedOpRule,
+            clauses: [
+                {
+                    _id: 'abc',
+                    attribute: 'email',
+                    negate: true,
+                    op: 'endsWith',
+                    values: ['email.com']
+                }
+            ]
+        }
+
+        const result = buildTargetingRuleFromRule(
+            mockUnsupportedNegatedOpRule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            operationMap,
+        )
+        expect(result).toEqual({
+            customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [{
+                            comparator: '!contain',
+                            type: 'user',
+                            subType: 'email',
+                            values: ['email.com']
+                        }],
+                        operator: OperatorType.and
+                    }
+                },
+                distribution: [{
+                    _variation: 'variation-2',
+                    percentage: 1
+                }]
+            }
+        })
+    })
+
     test('throws error if unsupported operation is not in operationMap', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
         const operationMap = {

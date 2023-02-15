@@ -45,3 +45,24 @@ export function getDataType(values: any[]) {
     }
     return typeMap[type as keyof typeof typeMap] // we've already checked that type is a key of typeMap
 }
+
+export function getNegatedOperator(operator: string) {
+    const operatorMap = {
+        '=': '!=',
+        '!=': '=',
+        '<': '>=',
+        '>=': '<',
+        '>': '<=',
+        '<=': '>',
+        'contain': '!contain',
+        '!contain': 'contain',
+        'exist': '!exist',
+        '!exist': 'exist',
+        'true': 'false',
+        'false': 'true',
+    }
+    if (!(operator in operatorMap)) {
+        throw new Error(`Unsupported operator: ${operator}`)
+    }
+    return operatorMap[operator as keyof typeof operatorMap]
+}
