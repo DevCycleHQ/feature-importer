@@ -78,6 +78,63 @@ const environmentWithRule = {
     },
 }
 
+const environmentWithInvalidCountryRule = {
+    'production': {
+        'on': true,
+        'rules': [
+            {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'country',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            'canada',
+                            'usa',
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            },
+        ],
+        'targets': [],
+    },
+}
+
+const environmentWithValidCountryRule = {
+    'production': {
+        'on': true,
+        'rules': [
+            {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'country',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            'CA',
+                            'USA',
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            },
+        ],
+        'targets': [],
+    },
+}
+
+
 const environmentWithCustomPropertyRule = {
     'production': {
         'on': true,
@@ -238,6 +295,16 @@ export const createFeatureWithTarget: Feature = {
 export const createFeatureWithRule: Feature = {
     ...createFeatureWithTarget,
     environments: environmentWithRule
+}
+
+export const createFeatureWithValidCountryRule: Feature = {
+    ...createFeatureWithTarget,
+    environments: environmentWithValidCountryRule
+}
+
+export const createFeatureWithInvalidCountryRule: Feature = {
+    ...createFeatureWithTarget,
+    environments: environmentWithInvalidCountryRule
 }
 
 export const createFeatureWithCustomPropertyRule: Feature = {

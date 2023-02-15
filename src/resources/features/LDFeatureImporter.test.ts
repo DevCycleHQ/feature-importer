@@ -21,7 +21,9 @@ import {
     createFeatureWithCustomPropertyRule,
     mockAudience,
     mockGetCustomProperties,
-    createFeatureWithInvalidRule
+    createFeatureWithInvalidRule,
+    createFeatureWithInvalidCountryRule,
+    createFeatureWithValidCountryRule
 } from '../../api/__mocks__/targetingRules'
 import { getComparator, mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
 
@@ -452,6 +454,81 @@ describe('LDFeatureImporter', () => {
             expect(result[updateFeatureWithUnsupportedRule.key].action).toBe(FeatureImportAction.Unsupported)
             expect(result[updateFeatureWithUnsupportedRule.key].configs).toHaveLength(0)
         })
+
+        test('do not create feature config for invalid country code', async () => {
+            const mockFeaturesToImport: FeaturesToImport = {
+                [createFeatureWithInvalidCountryRule.key]: {
+                    action: FeatureImportAction.Update,
+                    feature: mapLDFeatureToDVCFeature(createFeatureWithInvalidCountryRule),
+                },
+            }
+            const mockLdFeatures = [createFeatureWithInvalidCountryRule]
+
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            featureImporter.featuresToImport = mockFeaturesToImport
+            featureImporter.sourceFeatures = mockLdFeatures
+
+            const result = await featureImporter['getFeatureConfigsToImport']()
+            expect(result[createFeatureWithInvalidCountryRule.key].action).toBe(FeatureImportAction.Unsupported)
+            expect(result[createFeatureWithInvalidCountryRule.key].configs).toHaveLength(0)
+        })
+
+        test('create feature config for supported country code', async () => {
+            const mockFeaturesToImport: FeaturesToImport = {
+                [createFeatureWithValidCountryRule.key]: {
+                    action: FeatureImportAction.Update,
+                    feature: mapLDFeatureToDVCFeature(createFeatureWithValidCountryRule),
+                },
+            }
+            const mockLdFeatures = [createFeatureWithValidCountryRule]
+
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            featureImporter.featuresToImport = mockFeaturesToImport
+            featureImporter.sourceFeatures = mockLdFeatures
+
+            const featureEnvs = Object.keys(createFeatureWithValidCountryRule.environments)
+            const featureRules = createFeatureWithValidCountryRule.environments.production?.rules?.[0] || {
+                clauses: [{
+                    attribute: 'key',
+                    op: 'in',
+                    values: ['value'],
+                    negate: false,
+                }],
+                variation: 0
+            }
+
+            const result = await featureImporter['getFeatureConfigsToImport']()
+
+            const { configs } = result[createFeatureWithValidCountryRule.key]
+            expect(configs).toEqual(
+                [{
+                    environment: featureEnvs[0],
+                    targetingRules: {
+                        status: 'active',
+                        targets: [{
+                            audience: {
+                                filters: {
+                                    filters: [{
+                                        comparator: getComparator(featureRules.clauses[0]),
+                                        subType: featureRules.clauses[0].attribute,
+                                        type: 'user',
+                                        values:
+                                            featureRules.clauses[0].values
+                                    }],
+                                    operator: 'and'
+                                },
+                                name: 'Imported Rule'
+                            }, distribution:
+                                [{
+                                    _variation: `variation-${featureRules.variation ? featureRules.variation + 1 : 1}`,
+                                    percentage: 1
+                                }]
+                        }]
+                    }
+                }]
+            )
+        })
+
     })
 
     describe('importFeatureConfigs', () => {
@@ -559,124 +636,134 @@ describe('LDFeatureImporter', () => {
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
         })
 
-        test('does not update custom properties if they already exists in the DevCycle Project when overwriteDuplicates=false', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
-            const mockFeaturesToImport: FeaturesToImport = {
-                [createFeatureWithCustomPropertyRule.key]: {
-                    action: FeatureImportAction.Create,
-                    feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
-                },
-            }
-            const mockLdFeatures = [createFeatureWithCustomPropertyRule]
+        test(
+            'does not update custom properties if they already exists in the DVC when overwriteDuplicates=false',
+            async () => {
+                mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
+                const mockFeaturesToImport: FeaturesToImport = {
+                    [createFeatureWithCustomPropertyRule.key]: {
+                        action: FeatureImportAction.Create,
+                        feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
+                    },
+                }
+                const mockLdFeatures = [createFeatureWithCustomPropertyRule]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
-            featureImporter.featuresToImport = mockFeaturesToImport
-            featureImporter.sourceFeatures = mockLdFeatures
-            await featureImporter['getFeatureConfigsToImport']()
-            expect(featureImporter.customPropertiesToImport).toHaveLength(3)
-            await featureImporter['importFeatureConfigs']()
-            await featureImporter['importCustomProperties']()
+                const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+                featureImporter.featuresToImport = mockFeaturesToImport
+                featureImporter.sourceFeatures = mockLdFeatures
+                await featureImporter['getFeatureConfigsToImport']()
+                expect(featureImporter.customPropertiesToImport).toHaveLength(3)
+                await featureImporter['importFeatureConfigs']()
+                await featureImporter['importCustomProperties']()
 
-            expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
-            expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
-        })
+                expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
+                expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
+            })
 
-        test('update custom properties if they already exists in the DevCycle Project when overwriteDuplicates=true', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
-            const mockFeaturesToImport: FeaturesToImport = {
-                [createFeatureWithCustomPropertyRule.key]: {
-                    action: FeatureImportAction.Create,
-                    feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
-                },
-            }
-            const mockLdFeatures = [createFeatureWithCustomPropertyRule]
+        test(
+            'update custom properties if they already exists in the DVC when overwriteDuplicates=true',
+            async () => {
+                mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
+                const mockFeaturesToImport: FeaturesToImport = {
+                    [createFeatureWithCustomPropertyRule.key]: {
+                        action: FeatureImportAction.Create,
+                        feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
+                    },
+                }
+                const mockLdFeatures = [createFeatureWithCustomPropertyRule]
 
-            const featureImporter = new LDFeatureImporter({ 
-                ...mockConfig,
-                overwriteDuplicates: true
-            }, audienceImport)
-            featureImporter.featuresToImport = mockFeaturesToImport
-            featureImporter.sourceFeatures = mockLdFeatures
-            await featureImporter['getFeatureConfigsToImport']()
-            expect(featureImporter.customPropertiesToImport).toHaveLength(3)
-            await featureImporter['importFeatureConfigs']()
-            await featureImporter['importCustomProperties']()
+                const featureImporter = new LDFeatureImporter({
+                    ...mockConfig,
+                    overwriteDuplicates: true
+                }, audienceImport)
+                featureImporter.featuresToImport = mockFeaturesToImport
+                featureImporter.sourceFeatures = mockLdFeatures
+                await featureImporter['getFeatureConfigsToImport']()
+                expect(featureImporter.customPropertiesToImport).toHaveLength(3)
+                await featureImporter['importFeatureConfigs']()
+                await featureImporter['importCustomProperties']()
 
-            expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
-            expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(3)
-        })
+                expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
+                expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(3)
+            })
 
-        test('create missing custom properties if they don\'t exist in the DevCycle Project and not update any when overwriteDuplicates=false', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
-            const mockFeaturesToImport: FeaturesToImport = {
-                [createFeatureWithCustomPropertyRule.key]: {
-                    action: FeatureImportAction.Create,
-                    feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
-                },
-            }
-            const mockLdFeatures = [createFeatureWithCustomPropertyRule]
+        test(
+            'create missing custom properties if they don\'t exist in DVC but not update (overwriteDuplicates=false)',
+            async () => {
+                mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
+                const mockFeaturesToImport: FeaturesToImport = {
+                    [createFeatureWithCustomPropertyRule.key]: {
+                        action: FeatureImportAction.Create,
+                        feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
+                    },
+                }
+                const mockLdFeatures = [createFeatureWithCustomPropertyRule]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
-            featureImporter.featuresToImport = mockFeaturesToImport
-            featureImporter.sourceFeatures = mockLdFeatures
-            await featureImporter['getFeatureConfigsToImport']()
-            expect(featureImporter.customPropertiesToImport).toHaveLength(3)
-            await featureImporter['importFeatureConfigs']()
-            await featureImporter['importCustomProperties']()
+                const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+                featureImporter.featuresToImport = mockFeaturesToImport
+                featureImporter.sourceFeatures = mockLdFeatures
+                await featureImporter['getFeatureConfigsToImport']()
+                expect(featureImporter.customPropertiesToImport).toHaveLength(3)
+                await featureImporter['importFeatureConfigs']()
+                await featureImporter['importCustomProperties']()
 
-            expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
-            expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
-        })
+                expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
+                expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
+            })
 
-        test('create missing custom properties if they don\'t exist in the DevCycle Project and not update any when overwriteDuplicates=true', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
-            const mockFeaturesToImport: FeaturesToImport = {
-                [createFeatureWithCustomPropertyRule.key]: {
-                    action: FeatureImportAction.Create,
-                    feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
-                },
-            }
-            const mockLdFeatures = [createFeatureWithCustomPropertyRule]
+        test(
+            'create missing custom properties if they don\'t exist in DVC and update (overwriteDuplicates=true)',
+            async () => {
+                mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
+                const mockFeaturesToImport: FeaturesToImport = {
+                    [createFeatureWithCustomPropertyRule.key]: {
+                        action: FeatureImportAction.Create,
+                        feature: mapLDFeatureToDVCFeature(createFeatureWithCustomPropertyRule),
+                    },
+                }
+                const mockLdFeatures = [createFeatureWithCustomPropertyRule]
 
-            const featureImporter = new LDFeatureImporter({ 
-                ...mockConfig,
-                overwriteDuplicates: true
-            }, audienceImport)
-            featureImporter.featuresToImport = mockFeaturesToImport
-            featureImporter.sourceFeatures = mockLdFeatures
-            await featureImporter['getFeatureConfigsToImport']()
-            expect(featureImporter.customPropertiesToImport).toHaveLength(3)
-            await featureImporter['importFeatureConfigs']()
-            await featureImporter['importCustomProperties']()
+                const featureImporter = new LDFeatureImporter({
+                    ...mockConfig,
+                    overwriteDuplicates: true
+                }, audienceImport)
+                featureImporter.featuresToImport = mockFeaturesToImport
+                featureImporter.sourceFeatures = mockLdFeatures
+                await featureImporter['getFeatureConfigsToImport']()
+                expect(featureImporter.customPropertiesToImport).toHaveLength(3)
+                await featureImporter['importFeatureConfigs']()
+                await featureImporter['importCustomProperties']()
 
-            expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
-            expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(1)
-        })
+                expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
+                expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(1)
+            })
 
-        test('fails to getFeatureConfigsToImport when an invalid value (type: JSON) is used in a targeting rule', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
-            const mockFeaturesToImport: FeaturesToImport = {
-                [createFeatureWithInvalidRule.key]: {
-                    action: FeatureImportAction.Create,
-                    feature: mapLDFeatureToDVCFeature(createFeatureWithInvalidRule),
-                },
-            }
-            const mockLdFeatures = [createFeatureWithInvalidRule]
+        test(
+            'fails to getFeatureConfigsToImport when an invalid value (type: JSON) is used in a targeting rule',
+            async () => {
+                mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
+                const mockFeaturesToImport: FeaturesToImport = {
+                    [createFeatureWithInvalidRule.key]: {
+                        action: FeatureImportAction.Create,
+                        feature: mapLDFeatureToDVCFeature(createFeatureWithInvalidRule),
+                    },
+                }
+                const mockLdFeatures = [createFeatureWithInvalidRule]
 
-            const featureImporter = new LDFeatureImporter({ 
-                ...mockConfig,
-                overwriteDuplicates: true
-            }, audienceImport)
-            featureImporter.featuresToImport = mockFeaturesToImport
-            featureImporter.sourceFeatures = mockLdFeatures
-            await featureImporter['getFeatureConfigsToImport']()
-            expect(featureImporter.customPropertiesToImport).toHaveLength(0)
-            await featureImporter['importFeatureConfigs']()
-            await featureImporter['importCustomProperties']()
+                const featureImporter = new LDFeatureImporter({
+                    ...mockConfig,
+                    overwriteDuplicates: true
+                }, audienceImport)
+                featureImporter.featuresToImport = mockFeaturesToImport
+                featureImporter.sourceFeatures = mockLdFeatures
+                await featureImporter['getFeatureConfigsToImport']()
+                expect(featureImporter.customPropertiesToImport).toHaveLength(0)
+                await featureImporter['importFeatureConfigs']()
+                await featureImporter['importCustomProperties']()
 
-            expect(mockDVC.updateFeatureConfigurations).not.toHaveBeenCalled()
-            expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
-            expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
-        })
+                expect(mockDVC.updateFeatureConfigurations).not.toHaveBeenCalled()
+                expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
+                expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
+            })
     })
 })
