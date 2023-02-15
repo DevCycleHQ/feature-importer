@@ -1,14 +1,20 @@
+import * as countries from 'i18n-iso-countries'
+const countryCodes = Object.keys(countries.getAlpha2Codes()) as countries.Alpha2Code[]
+
 export function createUserFilter(subType: string, comparator: string, values: string[]) {
+    let normalizedValue = values
     if (subType === 'country') {
-        if (values.every((value) => value.length !== 2)) {
+        if (values.every((value) => value.length !== 2) &&
+            !values.every((value) => countryCodes.includes(value.toUpperCase() as countries.Alpha2Code))) {
             throw new Error(`Country values should be 2-letter ISO codes: ${values.join(', ')}`)
         }
+        normalizedValue = values.map((value) => value.toUpperCase())
     }
     return {
         type: 'user',
         subType,
         comparator,
-        values
+        values: normalizedValue
     }
 }
 
