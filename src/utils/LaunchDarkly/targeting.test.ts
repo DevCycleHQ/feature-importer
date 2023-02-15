@@ -3,7 +3,12 @@ jest.mock('../../api')
 import { mockLDFeaturesFlags, mockConfig } from '../../api/__mocks__/MockResponses'
 import { LDAudienceImporter } from '../../resources/audiences'
 import { OperatorType } from '../../types/DevCycle'
-import { buildTargetingRuleFromRule, buildTargetingRuleFromTarget, buildTargetingRulesFromFallthrough } from './targeting'
+import { getDataType } from '../DevCycle'
+import {
+    buildTargetingRuleFromRule,
+    buildTargetingRuleFromTarget,
+    buildTargetingRulesFromFallthrough
+} from './targeting'
 
 const mockFeature = mockLDFeaturesFlags.items[0]
 mockFeature.variations = [
@@ -30,6 +35,19 @@ const mockRule = {
         }
     ],
     variation: 1
+}
+
+const mockRuleWithCustomProperty = {
+    ...mockRule,
+    clauses: [
+        {
+            _id: 'abc',
+            attribute: 'customProperty',
+            negate: false,
+            op: 'in',
+            values: ['email@email.com']
+        }
+    ],
 }
 
 describe('buildTargetingRuleFromTarget', () => {
@@ -69,6 +87,31 @@ describe('buildTargetingRuleFromRule', () => {
         const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport)
         expect(result).toEqual({
             customPropertiesToImport: [],
+            targetingRule: {
+                audience: {
+                    name: 'Imported Rule',
+                    filters: {
+                        filters: [expect.objectContaining({})],
+                        operator: OperatorType.and
+                    }
+                },
+                distribution: [{
+                    _variation: 'variation-2',
+                    percentage: 1
+                }]
+            }
+        })
+    })
+
+    test('builds targeting rule with custom property', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+
+        const result = buildTargetingRuleFromRule(mockRuleWithCustomProperty, mockFeature, 'prod', audienceImport)
+        expect(result).toEqual({
+            customPropertiesToImport: [{
+                dataKey: mockRuleWithCustomProperty.clauses[0].attribute,
+                dataKeyType: getDataType(mockRuleWithCustomProperty.clauses[0].values)
+            }],
             targetingRule: {
                 audience: {
                     name: 'Imported Rule',

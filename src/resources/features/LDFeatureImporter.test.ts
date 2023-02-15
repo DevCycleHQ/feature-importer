@@ -342,7 +342,7 @@ describe('LDFeatureImporter', () => {
                                 name: 'Imported Rule'
                             }, distribution:
                                 [{
-                                    _variation: `variation-${featureRules.variation + 1}`,
+                                    _variation: `variation-${featureRules.variation ? featureRules.variation + 1 : 1}`,
                                     percentage: 1
                                 }]
                         }]
@@ -406,7 +406,7 @@ describe('LDFeatureImporter', () => {
                                 name: 'Imported Rule'
                             }, distribution:
                                 [{
-                                    _variation: `variation-${featureRules.variation + 1}`,
+                                    _variation: `variation-${featureRules.variation ? featureRules.variation + 1 : 1}`,
                                     percentage: 1
                                 }]
                         }]
