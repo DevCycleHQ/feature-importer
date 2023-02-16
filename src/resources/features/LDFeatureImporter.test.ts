@@ -758,7 +758,7 @@ describe('LDFeatureImporter', () => {
                         'op': 'contains',
                         'values': [
                             'ca',
-                            'uk',
+                            'us',
                         ]
                     },
                 ],
@@ -806,7 +806,7 @@ describe('LDFeatureImporter', () => {
                                         subType: featureRule.clauses[0].attribute,
                                         type: 'user',
                                         values:
-                                            ['CA', 'UK']
+                                            ['CA', 'US']
                                     }],
                                     operator: 'and'
                                 },
