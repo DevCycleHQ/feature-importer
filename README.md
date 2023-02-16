@@ -8,7 +8,7 @@ The importer is intended to be run on a single project and will create or update
 - [Configuration](#configuration)
   - [Required](#required)
   - [Optional](#optional)
-- [Changes Necessary when Migrating Code](#changes-necessary-when-migrating-code)
+- [Code Migration](#code-migration)
 
 ## Setup
 1. Run `yarn` to install dependencies
@@ -80,5 +80,10 @@ OVERWRITE_DUPLICATES=false
 OPERATION_MAP='{"endsWith":"contain","startsWith":"contain"}'
 ```
 
-## Changes Necessary when Migrating Code
-- For rules where the attribute is a date and using the before/after operators, the value needs to be converted to a long instead of sending as a date.
+## Code Migration
+### Migrating Code from LaunchDarkly
+- In LD the primary identifier is `key`, in DVC the equivalent value should be passed as `user_id`
+- DVC supports the following top-level properties on the user object: see [DVC User Object](https://docs.devcycle.com/docs/sdk/client-side-sdks/javascript#dvc-user-object).
+  Any other properties used for targeting should be passed within the `customData` map.
+- If you are passing a date to be used with LD's before/after operators, the value should to be converted to a long when passed to DVC. The importer will convert `before` & `after` operators to `<` & `>` in DVC.
+- DVC doesn't support targeting by the top-level `isAnonymous` property. If you are using LD's targeting with the `anonymous` attribute, make sure to include an `anonymous` property in the user's `customData`
