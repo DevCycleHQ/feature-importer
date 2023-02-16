@@ -1,19 +1,27 @@
 import * as countries from 'i18n-iso-countries'
 const countryCodes = countries.getAlpha2Codes()
 
-export function createUserFilter(subType: string, comparator: string, values: string[]) {
-    let normalizedValue = values
+
+export function createUserFilter(subType: string, comparator: string, values: any[]) {
+    const stringifySubTypes = ['user_id', 'country', 'email']
+    let normalizedValues = values
+
+    if (stringifySubTypes.includes(subType)) {
+        normalizedValues = normalizedValues.map(value => value.toString())
+    }
+
     if (subType === 'country') {
-        if (values.some((value) => value.length !== 2 || countryCodes[(value.toUpperCase())] === undefined)) {
+        if (normalizedValues.some((value) => value.length !== 2 || countryCodes[(value.toUpperCase())] === undefined)) {
             throw new Error(`Country values should be 2-letter ISO codes: ${values.join(', ')}`)
         }
-        normalizedValue = values.map((value) => value.toUpperCase())
+        normalizedValues = normalizedValues.map((value) => value.toUpperCase())
     }
+    
     return {
         type: 'user',
         subType,
         comparator,
-        values: normalizedValue
+        values: normalizedValues
     }
 }
 
