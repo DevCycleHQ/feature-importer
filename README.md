@@ -17,7 +17,7 @@ The importer is intended to be run on a single project and will create or update
 
 ## Configuration
 The feature importer can be configured using environment variables or a JSON config file. 
-By default the config is read from `configs.json` in the project root, this can be overwritten using `CONFIG_FILE_PATH`.
+By default the config is read from `config.json` in the project root, this can be overwritten using `CONFIG_FILE_PATH`.
 ### Required
 
 - <b>ldAccessToken</b>: <i>string</i>
@@ -49,7 +49,7 @@ By default the config is read from `configs.json` in the project root, this can 
   - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`
   - Equivalent env var: OPERATION_MAP
 
-Sample configs.json
+Sample config.json
 
 ```json
 {

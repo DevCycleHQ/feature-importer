@@ -4,7 +4,7 @@ import fs from 'fs'
 export const getConfigs = (): ParsedImporterConfig => {
 
     dotenv.config()
-    const defaultConfigsFilePath = './configs.json'
+    const defaultConfigsFilePath = './config.json'
     const configFilePath = process.env.CONFIG_FILE_PATH || defaultConfigsFilePath
     const configs = fs.existsSync(configFilePath)
         ? JSON.parse(fs.readFileSync(configFilePath, 'utf8'))
