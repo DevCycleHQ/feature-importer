@@ -25,6 +25,7 @@ export default class DevCycleApiWrapper {
 
     private async getApiToken(): Promise<string> {
         if (this.apiToken) return this.apiToken
+        console.log('Fetching DevCycle API token')
         const response = await fetch('https://auth.devcycle.com/oauth/token', {
             method: 'POST',
             headers: {
@@ -39,7 +40,8 @@ export default class DevCycleApiWrapper {
             ),
         })
         const data = await response.json()
-        return data.access_token
+        this.apiToken = data.access_token
+        return this.apiToken
     }
 
     private async getHeaders() {
