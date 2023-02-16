@@ -615,6 +615,58 @@ describe('LDFeatureImporter', () => {
             expect(result[createFeature.key].configs).toHaveLength(0)
         })
 
+        test('do not create feature config for some invalid country code', async () => {
+            const envKey = 'production'
+            const featureRule = {
+                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                'description': 'gmail',
+                'clauses': [
+                    {
+                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        'attribute': 'country',
+                        'negate': false,
+                        'op': 'contains',
+                        'values': [
+                            'CA',
+                            'america',
+                        ]
+                    },
+                ],
+                'variation': 0,
+                trackEvents: false
+            }
+
+            const createFeature = {
+                ...mockFeature,
+                environments: {
+                    [envKey]: {
+                        'on': true,
+                        'rules': [featureRule],
+                        'targets': [],
+                    },
+
+                }
+
+            }
+
+            const mockFeaturesToImport: FeaturesToImport = {
+                [createFeature.key]: {
+                    action: FeatureImportAction.Update,
+                    feature: mapLDFeatureToDVCFeature(createFeature),
+                },
+            }
+            const mockLdFeatures = [createFeature]
+
+            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            featureImporter.featuresToImport = mockFeaturesToImport
+            featureImporter.sourceFeatures = mockLdFeatures
+
+            const result = await featureImporter['getFeatureConfigsToImport']()
+            expect(result[createFeature.key].action).toBe(FeatureImportAction.Unsupported)
+            expect(result[createFeature.key].configs).toHaveLength(0)
+        })
+
         test('create feature config for supported country code', async () => {
             const envKey = 'production'
             const featureRule = {
