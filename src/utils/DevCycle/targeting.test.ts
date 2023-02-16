@@ -33,13 +33,7 @@ describe('createUserFilters', () => {
         })
     })
 
-    test('catch errors thrown with invalid data', () => {
-        expect(() => createUserFilter('country', 'or', ['usa'])).toThrow()
+    test.each([['usa'], ['zz']])('catch errors thrown with invalid data', (values) => {
+        expect(() => createUserFilter('country', 'or', JSON.parse(values))).toThrow()
     })
-
-    test('catch errors thrown with invalid data', () => {
-        expect(() => createUserFilter('country', 'or', ['zz'])).toThrow()
-    })
-
 })
-
