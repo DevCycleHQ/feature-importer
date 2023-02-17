@@ -1,4 +1,4 @@
-import { FeatureType } from '../../../types/DevCycle'
+import { FeatureType, OperatorType } from '../../../types/DevCycle'
 
 export const mockDVCFeaturesResponse = [{
     _id: '123',
@@ -22,3 +22,16 @@ export const mockDVCFeaturesResponse = [{
     variables: [],
     tags: []
 }]
+
+export const mockAudience = {
+    _id: '123',
+    _project: 'project',
+    name: 'audience 1',
+    key: 'aud-1',
+    description: 'a new audience',
+    filters: {
+        filters: [],
+        operator: OperatorType.and
+    },
+    tags: ['tag1']
+}
