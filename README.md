@@ -57,7 +57,7 @@ Sample config.json
   "dvcClientId": "clientId",
   "dvcClientSecret": "clientSecret",
   "projectKey": "project-key",
-  "includeFeatures": ["feat-1"],
+  "includeFeatures": ["feat-1", "feat-2"],
   "excludeFeatures": [],
   "overwriteDuplicates": false,
   "operationMap": {
@@ -74,7 +74,7 @@ LD_ACCESS_TOKEN="api-key"
 DVC_CLIENT_ID="clientId"
 DVC_CLIENT_SECRET="clientSecret"
 PROJECT_KEY="project-key"
-INCLUDE_FEATURES=["feat-1"]
+INCLUDE_FEATURES=[feat-1,feat-2]
 EXCLUDE_FEATURES=[]
 OVERWRITE_DUPLICATES=false
 OPERATION_MAP='{"endsWith":"contain","startsWith":"contain"}'
