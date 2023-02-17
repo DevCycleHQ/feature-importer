@@ -1,4 +1,7 @@
 jest.mock('../../api')
+jest.mock('./utils', () => ({
+    promptToGetEnvironmentType: jest.fn()
+}))
 
 import { LDEnvironmentImporter } from '.'
 import { DVC } from '../../api'
@@ -9,10 +12,6 @@ import { promptToGetEnvironmentType } from './utils'
 
 const mockDVC = DVC as jest.Mocked<typeof DVC>
 const mockPromptToGetEnvironmentType = promptToGetEnvironmentType as jest.MockedFunction<typeof promptToGetEnvironmentType>
-
-jest.mock('./utils', () => ({
-    promptToGetEnvironmentType: jest.fn()
-}))
 
 const mockDvcEnvironmentResponse: DVCEnvironmentResponse = {
     _id: 'id_123',
@@ -72,7 +71,6 @@ describe('LDEnvironmentImporter', () => {
     test("environment is updated if it already exists and overwriteDuplicates is true", async () => {
         mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
         config.overwriteDuplicates = true
-        mockPromptToGetEnvironmentType.mockResolvedValue(DVCEnvironmentType.Dev)
         await importEnvironment()
 
         const { key, name, color } = mockLDEnvironment.items[0]
@@ -83,7 +81,7 @@ describe('LDEnvironmentImporter', () => {
                 key,
                 name,
                 color: `#${color}`,
-                type: DVCEnvironmentType.Dev
+                type: mockDvcEnvironmentResponse.type
             }
         )
         expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
@@ -96,5 +94,34 @@ describe('LDEnvironmentImporter', () => {
 
         expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
         expect(mockDVC.updateEnvironment).not.toHaveBeenCalled()
+    })
+
+    test('if environment already exists, use existing type', async () => {
+        mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
+        config.overwriteDuplicates = true
+        await importEnvironment()
+
+        expect(mockDVC.updateEnvironment).toHaveBeenCalledWith(
+            config.projectKey,
+            mockDvcEnvironmentResponse.key,
+            expect.objectContaining({
+                type: mockDvcEnvironmentResponse.type
+            })
+        )
+        expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
+        expect(mockPromptToGetEnvironmentType).not.toHaveBeenCalled()
+    })
+
+    test('if environment key matches a type option, use as type', async () => {
+        mockLDEnvironment.items[0].key = 'production'
+        await importEnvironment()
+
+        expect(mockDVC.createEnvironment).toHaveBeenCalledWith(
+            config.projectKey,
+            expect.objectContaining({
+                type: 'production'
+            })
+        )
+        expect(mockPromptToGetEnvironmentType).not.toHaveBeenCalled()
     })
 })
