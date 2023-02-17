@@ -1,5 +1,4 @@
 import { AudiencePayload } from './audience'
-import { Feature } from './feature'
 
 export type TargetingRule = {
     _id?: string

@@ -96,10 +96,9 @@ export function buildTargetingRules(
     environmentKey: string,
     audienceImport: LDAudienceImporter,
     operationMap: { [key: string]: string } = {},
-): { targetingRules: TargetingRule[], customPropertiesToImport: CustomPropertyFromFilter[] } {
+): TargetingRule[] {
     const targetingRules: TargetingRule[] = []
     const { targets = [], rules = [], fallthrough } = feature.environments[environmentKey]
-    let customPropertiesToImport: CustomPropertyFromFilter[] = []
 
     for (const target of targets) {
         targetingRules.push(
@@ -108,11 +107,8 @@ export function buildTargetingRules(
     }
 
     for (const rule of rules) {
-        const {
-            targetingRule, customPropertiesToImport: customPropertiesForTargeting
-        } = buildTargetingRuleFromRule(rule, feature, environmentKey, audienceImport, operationMap)
+        const targetingRule = buildTargetingRuleFromRule(rule, feature, environmentKey, audienceImport, operationMap)
         targetingRules.push(targetingRule)
-        customPropertiesToImport = [...customPropertiesToImport, ...customPropertiesForTargeting]
     }
 
     if (fallthrough) {
@@ -121,7 +117,7 @@ export function buildTargetingRules(
         )
     }
 
-    return { targetingRules, customPropertiesToImport }
+    return targetingRules
 }
 
 export function buildTargetingRuleFromTarget(target: Target, feature: Feature): TargetingRule {
@@ -138,8 +134,7 @@ export function buildTargetingRuleFromRule(
     environmentKey: string,
     audienceImport: LDAudienceImporter,
     operationMap: { [key: string]: string },
-): { targetingRule: TargetingRule, customPropertiesToImport: CustomPropertyFromFilter[] } {
-    let customProperties: CustomPropertyFromFilter[] = []
+): TargetingRule {
     const filters = rule.clauses.map((clause) => {
         if (clause.op === 'segmentMatch') {
             const audienceIds = clause.values.map((segKey) => {
@@ -160,13 +155,6 @@ export function buildTargetingRuleFromRule(
     })
     const audience = getAudience('Imported Rule', filters)
 
-    customProperties = filters.filter((filter: Filter) => filter?.subType === 'customData').map((filter: Filter) => {
-        return {
-            dataKey: filter.dataKey || '',
-            dataKeyType: convertDataKeyTypeToCustomPropertyType(filter.dataKeyType)
-        }
-    })
-
     let distribution
     if (rule.variation !== undefined) {
         distribution = getDistribution(feature, rule.variation)
@@ -177,7 +165,7 @@ export function buildTargetingRuleFromRule(
         throw new Error('Rule must have either a variation or rollout')
     }
 
-    return { targetingRule: { audience, distribution }, customPropertiesToImport: customProperties }
+    return { audience, distribution }
 }
 
 export function buildTargetingRulesFromFallthrough(fallthrough: Fallthrough, feature: Feature): TargetingRule {
@@ -194,15 +182,4 @@ export function buildTargetingRulesFromFallthrough(fallthrough: Fallthrough, fea
         throw new Error('Fallthrough must have either a variation or rollout')
     }
     return { audience, distribution }
-}
-
-const convertDataKeyTypeToCustomPropertyType = (dataKeyType?: string): CustomPropertyType => {
-    switch (dataKeyType) {
-        case 'Boolean':
-            return CustomPropertyType.Boolean
-        case 'Number':
-            return CustomPropertyType.Number
-        default:
-            return CustomPropertyType.String
-    }
 }

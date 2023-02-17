@@ -1,7 +1,7 @@
 import { getConfigs } from './configs'
 
 import { FeatureSummary } from './resources/features/types'
-import { LDFeatureImporter } from './resources/features'
+import { CustomPropertiesImporter, LDFeatureImporter } from './resources/features'
 import { LDProjectImporter } from './resources/projects'
 import { LDAudienceImporter } from './resources/audiences'
 import { LDEnvironmentImporter } from './resources/environments'
@@ -25,6 +25,12 @@ async function run() {
 
     const featureImporter = new LDFeatureImporter(config, audienceImporter)
     const featureSummary = await featureImporter.import()
+
+    const customPropertiesImporter = new CustomPropertiesImporter(config)
+    await customPropertiesImporter.import(
+        featureImporter.featuresToImport,
+        Object.values(audienceImporter.audiences)
+    )
 
     printSummary(featureSummary)
 }

@@ -100,20 +100,17 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
-            customPropertiesToImport: [],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [expect.objectContaining({})],
-                        operator: OperatorType.and
-                    }
-                },
-                distribution: [{
-                    _variation: 'variation-2',
-                    percentage: 1
-                }]
-            }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [expect.objectContaining({})],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
         })
     })
 
@@ -122,23 +119,17 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(mockRuleWithCustomProperty, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
-            customPropertiesToImport: [{
-                dataKey: mockRuleWithCustomProperty.clauses[0].attribute,
-                dataKeyType: getDataType(mockRuleWithCustomProperty.clauses[0].values)
-            }],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [expect.objectContaining({})],
-                        operator: OperatorType.and
-                    }
-                },
-                distribution: [{
-                    _variation: 'variation-2',
-                    percentage: 1
-                }]
-            }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [expect.objectContaining({})],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
         })
     })
 
@@ -163,26 +154,23 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
-            customPropertiesToImport: [],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [expect.objectContaining({})],
-                        operator: OperatorType.and
-                    }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [expect.objectContaining({})],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [
+                {
+                    _variation: 'variation-1',
+                    percentage: 0.2
                 },
-                distribution: [
-                    {
-                        _variation: 'variation-1',
-                        percentage: 0.2
-                    },
-                    {
-                        _variation: 'variation-2',
-                        percentage: 0.8
-                    }
-                ]
-            }
+                {
+                    _variation: 'variation-2',
+                    percentage: 0.8
+                }
+            ]
         })
 
     })
@@ -212,24 +200,21 @@ describe('buildTargetingRuleFromRule', () => {
 
         const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
         expect(result).toEqual({
-            customPropertiesToImport: [],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [{
-                            type: 'audienceMatch',
-                            comparator: '=',
-                            _audiences: ['audienceId']
-                        }],
-                        operator: OperatorType.and
-                    }
-                },
-                distribution: [{
-                    _variation: 'variation-1',
-                    percentage: 1
-                }]
-            }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [{
+                        type: 'audienceMatch',
+                        comparator: '=',
+                        _audiences: ['audienceId']
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-1',
+                percentage: 1
+            }]
         })
     })
 
@@ -270,25 +255,22 @@ describe('buildTargetingRuleFromRule', () => {
             operationMap,
         )
         expect(result).toEqual({
-            customPropertiesToImport: [],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [{
-                            comparator: 'contain',
-                            type: 'user',
-                            subType: 'email',
-                            values: ['email.com']
-                        }],
-                        operator: OperatorType.and
-                    }
-                },
-                distribution: [{
-                    _variation: 'variation-2',
-                    percentage: 1
-                }]
-            }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [{
+                        comparator: 'contain',
+                        type: 'user',
+                        subType: 'email',
+                        values: ['email.com']
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
         })
     })
 
@@ -318,25 +300,22 @@ describe('buildTargetingRuleFromRule', () => {
             operationMap,
         )
         expect(result).toEqual({
-            customPropertiesToImport: [],
-            targetingRule: {
-                audience: {
-                    name: 'Imported Rule',
-                    filters: {
-                        filters: [{
-                            comparator: '!contain',
-                            type: 'user',
-                            subType: 'email',
-                            values: ['email.com']
-                        }],
-                        operator: OperatorType.and
-                    }
-                },
-                distribution: [{
-                    _variation: 'variation-2',
-                    percentage: 1
-                }]
-            }
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [{
+                        comparator: '!contain',
+                        type: 'user',
+                        subType: 'email',
+                        values: ['email.com']
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
         })
     })
 
