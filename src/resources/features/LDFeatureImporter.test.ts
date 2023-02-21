@@ -180,7 +180,7 @@ describe('LDFeatureImporter', () => {
                 errored: {},
             })
             expect(mockDVC.createFeature).toHaveBeenCalledWith(
-                mockConfig.projectKey,
+                mockConfig.targetProjectKey,
                 featuresToImport['feature-key'].feature
             )
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()
@@ -205,7 +205,7 @@ describe('LDFeatureImporter', () => {
                 errored: {},
             })
             expect(mockDVC.updateFeature).toHaveBeenCalledWith(
-                mockConfig.projectKey,
+                mockConfig.targetProjectKey,
                 featuresToImport['feature-key'].feature
             )
             expect(mockDVC.createFeature).not.toHaveBeenCalled()

@@ -57,7 +57,7 @@ describe('LDEnvironmentImporter', () => {
 
         const { key, name, color } = mockLDEnvironment.items[0]
         expect(mockDVC.createEnvironment).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             {
                 key,
                 name,
@@ -75,7 +75,7 @@ describe('LDEnvironmentImporter', () => {
 
         const { key, name, color } = mockLDEnvironment.items[0]
         expect(mockDVC.updateEnvironment).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             key,
             {
                 key,
@@ -102,7 +102,7 @@ describe('LDEnvironmentImporter', () => {
         await importEnvironment()
 
         expect(mockDVC.updateEnvironment).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             mockDvcEnvironmentResponse.key,
             expect.objectContaining({
                 type: mockDvcEnvironmentResponse.type
@@ -117,7 +117,7 @@ describe('LDEnvironmentImporter', () => {
         await importEnvironment()
 
         expect(mockDVC.createEnvironment).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             expect.objectContaining({
                 type: 'production'
             })

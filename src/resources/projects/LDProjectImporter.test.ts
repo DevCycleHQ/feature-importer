@@ -10,7 +10,8 @@ const mockConfig = {
     ldAccessToken: '123',
     dvcClientId: 'dvcid',
     dvcClientSecret: 'dvcsecret',
-    projectKey: 'project-key',
+    sourceProjectKey: 'project-key',
+    targetProjectKey: 'project-key',
 }
 
 const mockDvcProjectResponse = {
