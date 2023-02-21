@@ -5,6 +5,7 @@ import { buildTargetingRules, mapLDFeatureToDVCFeature } from '../../utils/Launc
 import { ParsedImporterConfig } from '../../configs'
 import { FeatureImportAction, FeaturesToImport } from './types'
 import { LDAudienceImporter } from '../audiences'
+import { formatKey } from '../../utils/DevCycle'
 
 export class LDFeatureImporter {
     private config: ParsedImporterConfig
@@ -66,10 +67,11 @@ export class LDFeatureImporter {
     private async getFeatureConfigsToImport(): Promise<FeaturesToImport> {
         const { operationMap } = this.config
         for (const feature of this.sourceFeatures) {
-            const { action, feature: dvcFeature } = this.featuresToImport[feature.key]
+            const featureKey = formatKey(feature.key)
+            const { action, feature: dvcFeature } = this.featuresToImport[featureKey]
             if (action === FeatureImportAction.Skip) continue
 
-            this.featuresToImport[feature.key].configs ??= []
+            this.featuresToImport[featureKey].configs ??= []
 
             Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
                 try {

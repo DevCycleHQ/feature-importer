@@ -1,6 +1,7 @@
 import { DVC, LD } from '../../api'
 import { ParsedImporterConfig } from '../../configs'
 import { AudiencePayload, AudienceResponse } from '../../types/DevCycle'
+import { formatKey } from '../../utils/DevCycle'
 import { mapSegmentToFilters } from '../../utils/LaunchDarkly/segments'
 
 export class LDAudienceImporter {
@@ -26,7 +27,7 @@ export class LDAudienceImporter {
             const ldSegments = await LD.getSegments(projectKey, environmentKey)
     
             for (const segment of ldSegments.items) {
-                const key = `${segment.key}-${environmentKey}`
+                const key = formatKey(`${segment.key}-${environmentKey}`)
                 const isDuplicate = Boolean(this.audiences[key])
     
                 let filters: AudiencePayload['filters']

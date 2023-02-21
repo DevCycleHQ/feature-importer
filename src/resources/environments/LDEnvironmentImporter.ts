@@ -2,6 +2,7 @@ import { DVC } from '../../api'
 import { ParsedImporterConfig } from '../../configs'
 import { EnvironmentPayload, EnvironmentResponse, EnvironmentType } from '../../types/DevCycle'
 import { Environments as LDEnvironments, Environment as LDEnvironment } from '../../types/LaunchDarkly'
+import { formatKey } from '../../utils/DevCycle'
 import { promptToGetEnvironmentType } from './utils'
 
 export class LDEnvironmentImporter {
@@ -32,7 +33,7 @@ export class LDEnvironmentImporter {
             type = await promptToGetEnvironmentType(key)
         }
         const environmentPayload = {
-            key,
+            key: formatKey(key),
             name,
             color: `#${color}`,
             type
@@ -45,7 +46,7 @@ export class LDEnvironmentImporter {
         await this.getExistingEnvironmentByKey(projectKey)
     
         for (const environment of environments.items) {
-            const { key } = environment
+            const key = formatKey(environment.key)
             const isDuplicate = Boolean(this.environmentsByKey[key])
     
             if (!isDuplicate) {

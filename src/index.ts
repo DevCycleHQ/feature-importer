@@ -9,23 +9,28 @@ import { LDEnvironmentImporter } from './resources/environments'
 const config = getConfigs()
 
 async function run() {
+    console.log('Importing project...')
     const projectImporter = new LDProjectImporter(config)
     await projectImporter.import()
 
     const sourceProject = projectImporter.sourceProject
 
+    console.log('Importing environments...')
     const environmentImporter = new LDEnvironmentImporter(config)
     await environmentImporter.import(sourceProject.environments)
 
     const ldEnvironments = sourceProject.environments.items
     const environmentKeys = ldEnvironments.map((env: Record<string, any>) => env.key)
 
+    console.log('Importing audiences...')
     const audienceImporter = new LDAudienceImporter(config)
     await audienceImporter.import(environmentKeys)
 
+    console.log('Importing features...')
     const featureImporter = new LDFeatureImporter(config, audienceImporter)
     const featureSummary = await featureImporter.import()
 
+    console.log('Importing custom properties...')
     const customPropertiesImporter = new CustomPropertiesImporter(config)
     await customPropertiesImporter.import(
         featureImporter.featuresToImport,
