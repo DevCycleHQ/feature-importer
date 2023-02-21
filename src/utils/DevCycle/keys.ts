@@ -1,0 +1,1 @@
+export const formatKey = (key: string) => key.toLowerCase()

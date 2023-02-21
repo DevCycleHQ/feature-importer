@@ -1,7 +1,6 @@
 import { LDAudienceImporter } from '../../resources/audiences'
 import {
     AudiencePayload,
-    CustomPropertyType,
     Filter,
     FilterOrOperator,
     OperatorType,
@@ -16,7 +15,7 @@ import {
     getNegatedComparator,
 } from '../../utils/DevCycle/targeting'
 import { getVariationKey } from './variation'
-import { CustomPropertyFromFilter } from '../../resources/features/types'
+import { formatKey } from '../DevCycle'
 
 export function mapClauseToFilter(clause: Clause, operationMap: { [key: string]: string }): Filter {
     const { attribute, values } = clause
@@ -138,7 +137,7 @@ export function buildTargetingRuleFromRule(
     const filters = rule.clauses.map((clause) => {
         if (clause.op === 'segmentMatch') {
             const audienceIds = clause.values.map((segKey) => {
-                const audienceKey = `${segKey}-${environmentKey}`
+                const audienceKey = formatKey(`${segKey}-${environmentKey}`)
                 if (audienceImport.errors[audienceKey] || !audienceImport.audiences[audienceKey]) {
                     const errorMessage = audienceImport.errors[audienceKey] || 'unknown error'
                     throw new Error(errorMessage)

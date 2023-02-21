@@ -1,9 +1,11 @@
 import { Feature as DVCFeature, Variation, Variable, VariableType, FeatureType } from '../../types/DevCycle'
 import { Feature as LDFeature } from '../../types/LaunchDarkly'
+import { formatKey } from '../DevCycle'
 import { getVariationKey, getVariationName } from './variation'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
-    const { name, description, key, kind, variations, tags } = feature
+    const { name, description, variations, tags } = feature
+    const key = formatKey(feature.key)
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
         const variationName = getVariationName(feature, index)
