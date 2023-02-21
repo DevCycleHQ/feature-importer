@@ -11,9 +11,9 @@ The importer is intended to be run on a single project and will create or update
 - [Code Migration](#code-migration)
 
 ## Setup
-1. Run `yarn` to install dependencies
+1. Run `npm install` to install dependencies
 2. Setup [configuration file](#configuration)
-3. Run `yarn start` to start import
+3. Run `npm start` to start import
 
 ## Configuration
 The feature importer can be configured using environment variables or a JSON config file. 
