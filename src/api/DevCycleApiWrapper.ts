@@ -95,7 +95,7 @@ export default class DevCycleApiWrapper {
         projectKey: string
     ): Promise<AudienceResponse[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences?perPage=1000`, {
             method: 'GET',
             headers,
         })
@@ -155,7 +155,7 @@ export default class DevCycleApiWrapper {
 
     async getFeaturesForProject(projectKey: string): Promise<Feature[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features?perPage=1000`, {
             headers,
         })
         await this.handleErrors(response)
@@ -236,7 +236,7 @@ export default class DevCycleApiWrapper {
 
     async getCustomPropertiesForProject(projectKey: string): Promise<CustomProperties[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties`, {
+        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties?perPage=1000`, {
             headers,
         })
         await this.handleErrors(response)
