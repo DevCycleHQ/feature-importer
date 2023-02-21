@@ -26,10 +26,16 @@ export class LDFeatureImporter {
     }
 
     private async getFeaturesToImport(): Promise<FeaturesToImport> {
-        const { includeFeatures, excludeFeatures, overwriteDuplicates, projectKey } = this.config
+        const {
+            includeFeatures,
+            excludeFeatures,
+            overwriteDuplicates,
+            sourceProjectKey,
+            targetProjectKey
+        } = this.config
 
-        const existingFeatures = await DVC.getFeaturesForProject(projectKey)
-        const { items: ldFeatures } = await LD.getFeatureFlagsForProject(projectKey)
+        const existingFeatures = await DVC.getFeaturesForProject(targetProjectKey)
+        const { items: ldFeatures } = await LD.getFeatureFlagsForProject(sourceProjectKey)
 
         const featuresToImport: FeaturesToImport = {}
 
@@ -102,7 +108,7 @@ export class LDFeatureImporter {
     }
 
     private async importFeatures() {
-        const { projectKey } = this.config
+        const { targetProjectKey } = this.config
         let createdCount = 0
         let updatedCount = 0
         let skippedCount = 0
@@ -114,11 +120,11 @@ export class LDFeatureImporter {
             try {
                 if (action === FeatureImportAction.Create) {
                     console.log(`Creating feature "${feature.key}" in DevCycle`)
-                    await DVC.createFeature(projectKey, feature)
+                    await DVC.createFeature(targetProjectKey, feature)
                     createdCount += 1
                 } else if (action === FeatureImportAction.Update) {
                     console.log(`Updating feature "${feature.key}" in DevCycle`)
-                    await DVC.updateFeature(projectKey, feature)
+                    await DVC.updateFeature(targetProjectKey, feature)
                     updatedCount += 1
                 } else {
                     console.log(`Skipping feature "${feature.key}" creation`)
@@ -138,7 +144,7 @@ export class LDFeatureImporter {
     }
 
     private async importFeatureConfigs() {
-        const { projectKey, overwriteDuplicates } = this.config
+        const { targetProjectKey, overwriteDuplicates } = this.config
         for (const featureKey in this.featuresToImport) {
             const { action, feature, configs = [] } = this.featuresToImport[featureKey]
             if (this.errors[feature.key]) continue
@@ -149,7 +155,7 @@ export class LDFeatureImporter {
                     if ((action === FeatureImportAction.Create) ||
                         (action === FeatureImportAction.Update && overwriteDuplicates)) {
                         await DVC.updateFeatureConfigurations(
-                            projectKey, feature.key, config.environment, config.targetingRules
+                            targetProjectKey, feature.key, config.environment, config.targetingRules
                         )
                     }
                 } catch (e) {

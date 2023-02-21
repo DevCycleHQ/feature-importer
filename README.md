@@ -29,12 +29,15 @@ By default the config is read from `config.json` in the project root, this can b
 - <b>dvcClientSecret</b>: <i>string</i>
   - DevCycle client secret, used for fetching API credentials
   - Equivalent env var: DVC_CLIENT_SECRET
-- <b>projectKey</b>: <i>string</i>
-  - LaunchDarkly's project key, a project will be created with the same details in DevCycle
-  - Equivalent env var: PROJECT_KEY
+- <b>sourceProjectKey</b>: <i>string</i>
+  - LaunchDarkly's project key, resources will be pulled from this project
+  - Equivalent env var: SOURCE_PROJECT_KEY
 
 ### Optional
-
+- <b>targetProjectKey</b>: <i>string</i>
+  - A DevCycle project key, resources will be created within this project. A project will be created with this key if it does not already exist.
+  - If not specified, the target project key will be used
+  - Equivalent env var: TARGET_PROJECT_KEY
 - <b>includeFeatures</b>: <i>string[]</i>
   - An array of LD feature flag keys to be imported. By default, the importer will attempt to migrate all features.
   - Equivalent env var: INCLUDE_FEATURES
@@ -56,7 +59,7 @@ Sample config.json
   "ldAccessToken": "api-key",
   "dvcClientId": "clientId",
   "dvcClientSecret": "clientSecret",
-  "projectKey": "project-key",
+  "sourceProjectKey": "project-key",
   "includeFeatures": ["feat-1", "feat-2"],
   "excludeFeatures": [],
   "overwriteDuplicates": false,
@@ -73,7 +76,7 @@ Sample .env file
 LD_ACCESS_TOKEN="api-key"
 DVC_CLIENT_ID="clientId"
 DVC_CLIENT_SECRET="clientSecret"
-PROJECT_KEY="project-key"
+SOURCE_PROJECT_KEY="project-key"
 INCLUDE_FEATURES=[feat-1,feat-2]
 EXCLUDE_FEATURES=[]
 OVERWRITE_DUPLICATES=false

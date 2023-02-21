@@ -2,8 +2,8 @@ import * as dotenv from 'dotenv'
 import fs from 'fs'
 
 export const getConfigs = (): ParsedImporterConfig => {
-
     dotenv.config()
+
     const defaultConfigsFilePath = './config.json'
     const configFilePath = process.env.CONFIG_FILE_PATH || defaultConfigsFilePath
     const configs = fs.existsSync(configFilePath)
@@ -16,12 +16,15 @@ export const getConfigs = (): ParsedImporterConfig => {
     if (process.env.LD_ACCESS_TOKEN) configs.ldAccessToken = process.env.LD_ACCESS_TOKEN
     if (process.env.DVC_CLIENT_ID) configs.dvcClientId = process.env.DVC_CLIENT_ID
     if (process.env.DVC_CLIENT_SECRET) configs.dvcClientSecret = process.env.DVC_CLIENT_SECRET
-    if (process.env.PROJECT_KEY) configs.projectKey = process.env.PROJECT_KEY
+    if (process.env.SOURCE_PROJECT_KEY) configs.sourceProjectKey = process.env.SOURCE_PROJECT_KEY
+    if (process.env.TARGET_PROJECT_KEY) configs.targetProjectKey = process.env.TARGET_PROJECT_KEY
     if (process.env.INCLUDE_FEATURES) configs.includeFeatures = parseMapFromArray(process.env.INCLUDE_FEATURES)
     if (process.env.EXCLUDE_FEATURES) configs.excludeFeatures = parseMapFromArray(process.env.EXCLUDE_FEATURES)
     if (process.env.OVERWRITE_DUPLICATES)
         configs.overwriteDuplicates = getOptionalBoolean(process.env.OVERWRITE_DUPLICATES)
     if (process.env.OPERATION_MAP) configs.operationMap = JSON.parse(process.env.OPERATION_MAP)
+
+    if (!configs.targetProjectKey) configs.targetProjectKey = configs.sourceProjectKey
 
     validateConfigs(configs)
 
@@ -35,8 +38,8 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
         throw Error('dvcClientId cannot be empty')
     if (configs.dvcClientSecret === '' || configs.dvcClientSecret === undefined)
         throw Error('dvcClientSecret cannot be empty')
-    if (configs.projectKey === '' || configs.projectKey === undefined)
-        throw Error('projectKey cannot be empty')
+    if (configs.sourceProjectKey === '' || configs.sourceProjectKey === undefined)
+        throw Error('sourceProjectKey cannot be empty')
 }
 
 const parseMapFromArray = (value: string | string[] | undefined): Map<string, boolean> | undefined => {
@@ -73,8 +76,12 @@ export type ParsedImporterConfig = {
     dvcClientId: string,
     dvcClientSecret: string,
 
-    // DevCycle project key, features will be created within this project
-    projectKey: string,
+    // Source project key, features will be pulled from this project
+    sourceProjectKey: string,
+
+    // [Optional] DevCycle project key, features will be created within this project
+    // By default, the source project key will be used
+    targetProjectKey: string,
 
     // [Optional] A map of LD feature flag keys to be imported
     // By default, the importer will attempt to migrate all features

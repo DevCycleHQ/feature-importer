@@ -42,8 +42,8 @@ export class LDEnvironmentImporter {
     }
 
     async import(environments: LDEnvironments) {
-        const { projectKey, overwriteDuplicates } = this.config
-        await this.getExistingEnvironmentByKey(projectKey)
+        const { targetProjectKey, overwriteDuplicates } = this.config
+        await this.getExistingEnvironmentByKey(targetProjectKey)
     
         for (const environment of environments.items) {
             const key = formatKey(environment.key)
@@ -52,12 +52,12 @@ export class LDEnvironmentImporter {
             if (!isDuplicate) {
                 const environmentPayload = await this.getEnvironmentPayload(environment)
     
-                this.environmentsByKey[key] = await DVC.createEnvironment(projectKey, environmentPayload)
+                this.environmentsByKey[key] = await DVC.createEnvironment(targetProjectKey, environmentPayload)
                 console.log(`Creating environment "${key}" in DevCycle`)
             } else if (overwriteDuplicates) {
                 const environmentPayload = await this.getEnvironmentPayload(environment)
     
-                this.environmentsByKey[key] = await DVC.updateEnvironment(projectKey, key, environmentPayload)
+                this.environmentsByKey[key] = await DVC.updateEnvironment(targetProjectKey, key, environmentPayload)
                 console.log(`Updating environment "${key}" in DevCycle`)
             } else {
                 console.log(`Skipping environment "${key}" creation because it already exists`)

@@ -45,8 +45,8 @@ export class CustomPropertiesImporter {
     }
 
     private async importCustomProperties() {
-        const { overwriteDuplicates, projectKey } = this.config
-        const existingCustomPropertiesMap = await DVC.getCustomPropertiesForProject(projectKey)
+        const { overwriteDuplicates, targetProjectKey } = this.config
+        const existingCustomPropertiesMap = await DVC.getCustomPropertiesForProject(targetProjectKey)
             .then((existingCustomProperties) => existingCustomProperties.reduce((map: Record<string, CustomProperties>, cp) => {
                 map[cp.propertyKey] = cp
                 return map
@@ -61,10 +61,10 @@ export class CustomPropertiesImporter {
             const isDuplicate = existingCustomPropertiesMap[customPropertyToCreate.propertyKey] !== undefined
             try {
                 if (!isDuplicate) {
-                    await DVC.createCustomProperty(projectKey, customPropertyToCreate)
+                    await DVC.createCustomProperty(targetProjectKey, customPropertyToCreate)
                     console.log(`Creating custom property "${customPropertyToCreate.propertyKey}"`)
                 } else if (overwriteDuplicates) {
-                    await DVC.updateCustomProperty(projectKey, customPropertyToCreate)
+                    await DVC.updateCustomProperty(targetProjectKey, customPropertyToCreate)
                     console.log(`Updating custom property "${customPropertyToCreate.propertyKey}"`)
                 }
             } catch (e) {

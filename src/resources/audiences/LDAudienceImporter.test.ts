@@ -11,7 +11,8 @@ const mockConfig = {
     ldAccessToken: '123',
     dvcClientId: 'dvcid',
     dvcClientSecret: 'dvcsecret',
-    projectKey: 'project-key',
+    sourceProjectKey: 'project-key',
+    targetProjectKey: 'target-project-key',
 }
 
 const mockDvcAudienceResponse = {
@@ -51,7 +52,7 @@ describe('LDAudienceImporter', () => {
         const createResponse = {
             ...mockDvcAudienceResponse,
             name: ldSegment.name,
-            key: config.projectKey,
+            key: config.targetProjectKey,
             filters: expectedFilters
         }
         mockLD.getSegments.mockResolvedValue({ items: [ldSegment] })
@@ -66,7 +67,7 @@ describe('LDAudienceImporter', () => {
         })
         expect(audienceImporter.errors).toEqual({})
         expect(mockDVC.createAudience).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             {
                 name: ldSegment.name,
                 key: `${ldSegment.key}-${envKey}`,
@@ -115,7 +116,7 @@ describe('LDAudienceImporter', () => {
         const updateResponse = {
             ...mockDvcAudienceResponse,
             name: ldSegment.name,
-            key: config.projectKey,
+            key: config.targetProjectKey,
             filters: expectedFilters
         }
         mockLD.getSegments.mockResolvedValue({ items: [ldSegment] })
@@ -130,7 +131,7 @@ describe('LDAudienceImporter', () => {
         })
         expect(audienceImporter.errors).toEqual({})
         expect(mockDVC.updateAudience).toHaveBeenCalledWith(
-            config.projectKey,
+            config.targetProjectKey,
             `${ldSegment.key}-${envKey}`,
             {
                 name: ldSegment.name,
