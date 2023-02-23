@@ -14,7 +14,7 @@ export class LDProjectImporter {
 
     async import() {
         const { sourceProjectKey, targetProjectKey, overwriteDuplicates } = this.config
-        const ldProject = await LD.getProject(sourceProjectKey)
+        this.sourceProject = await LD.getProject(sourceProjectKey)
     
         let isDuplicate
         try {
@@ -24,8 +24,11 @@ export class LDProjectImporter {
             isDuplicate = false
         }
     
+        const name = sourceProjectKey !== targetProjectKey && this.dvcProject?.name
+            ? this.dvcProject.name
+            : this.sourceProject.name
         const projectPayload = {
-            name: ldProject.name,
+            name,
             key: targetProjectKey
         }
     
@@ -38,8 +41,6 @@ export class LDProjectImporter {
         } else {
             console.log('Skipping project creation because it already exists')
         }
-
-        this.sourceProject = ldProject
     
         return this.dvcProject
     }
