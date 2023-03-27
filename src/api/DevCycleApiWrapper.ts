@@ -15,13 +15,15 @@ import { FeatureConfiguration } from '../types/DevCycle/targeting'
 const DVC_BASE_URL = process.env.DVC_BASE_URL || 'https://api.devcycle.com/v1'
 
 export default class DevCycleApiWrapper {
-    constructor(dvcClientId: string, dvcClientSecret: string) {
+    constructor(dvcClientId: string, dvcClientSecret: string, provider?: string) {
         this.dvcClientId = dvcClientId
         this.dvcClientSecret = dvcClientSecret
+        this.provider = provider ?? 'launchdarkly'
     }
     dvcClientId: string
     dvcClientSecret: string
     apiToken: string
+    provider: string 
 
     private async getApiToken(): Promise<string> {
         if (this.apiToken) return this.apiToken
@@ -48,7 +50,11 @@ export default class DevCycleApiWrapper {
         const token = await this.getApiToken()
         return {
             Authorization: token,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'dvc-referrer': 'importer',
+            'dvc-referrer-metadata': JSON.stringify({
+                provider: this.provider,
+            }),
         }
     }
 

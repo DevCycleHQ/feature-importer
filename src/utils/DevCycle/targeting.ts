@@ -1,13 +1,12 @@
 import * as countries from 'i18n-iso-countries'
 const countryCodes = countries.getAlpha2Codes()
 
-
 export function createUserFilter(subType: string, comparator: string, values: any[]) {
     const stringifySubTypes = ['user_id', 'country', 'email']
     let normalizedValues = values
 
     if (stringifySubTypes.includes(subType)) {
-        normalizedValues = normalizedValues.map(value => value.toString())
+        normalizedValues = normalizedValues.map((value) => value.toString())
     }
 
     if (subType === 'country') {
