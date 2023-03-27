@@ -26,6 +26,8 @@ export const getConfigs = (): ParsedImporterConfig => {
 
     if (!configs.targetProjectKey) configs.targetProjectKey = configs.sourceProjectKey
 
+    if (process.env.PROVIDER) configs.provider = process.env.PROVIDER
+
     validateConfigs(configs)
 
     return configs
@@ -98,4 +100,8 @@ export type ParsedImporterConfig = {
     // [Optional] A map of LD operations to map to DevCycle operations
     // By default, the importer will skip unsupported operations
     operationMap?: { [key: string]: string },
+
+    // [Optional] the provider to get the features from 
+    // Be deafault, this will be launchdarkly
+    provider?: string,
 }

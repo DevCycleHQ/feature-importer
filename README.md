@@ -51,6 +51,8 @@ By default the config is read from `config.json` in the project root, this can b
   - A map of LD operations to map to DevCycle operations
   - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`
   - Equivalent env var: OPERATION_MAP
+- <b>provider</b>: <i>string</i>
+  - The provider to import the feature flags from
 
 Sample config.json
 
@@ -66,7 +68,8 @@ Sample config.json
   "operationMap": {
 		"startsWith": "contain",
 		"endsWith": "contain"
-	}
+	},
+  "provider":"launchdarkly"
 }
 ```
 
@@ -81,6 +84,7 @@ INCLUDE_FEATURES=[feat-1,feat-2]
 EXCLUDE_FEATURES=[]
 OVERWRITE_DUPLICATES=false
 OPERATION_MAP='{"endsWith":"contain","startsWith":"contain"}'
+PROVIDER='launchdarkly'
 ```
 
 ## Code Migration
