@@ -102,6 +102,7 @@ export type ParsedImporterConfig = {
     operationMap?: { [key: string]: string },
 
     // [Optional] the provider to get the features from 
-    // Be deafault, this will be launchdarkly
-    provider?: string,
+    // Be default, this will be launchdarkly
+    // TODO: add other providers when they are supported as a union type
+    provider?: 'launchdarkly',
 }
