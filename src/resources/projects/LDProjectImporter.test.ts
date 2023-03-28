@@ -25,7 +25,6 @@ const mockDvcProjectResponse = {
     hasJiraIntegration: false
 }
 
-
 describe('LDProjectImporter', () => {
     const ldProject = {
         _id: 'abc',

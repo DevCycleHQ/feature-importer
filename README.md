@@ -52,7 +52,8 @@ By default the config is read from `config.json` in the project root, this can b
   - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`
   - Equivalent env var: OPERATION_MAP
 - <b>provider</b>: <i>string</i>
-  - The provider to import the feature flags from
+  - The provider to import the feature flags from.
+  - currently only `launchdarkly` is supported but this will extend with support
 
 Sample config.json
 
