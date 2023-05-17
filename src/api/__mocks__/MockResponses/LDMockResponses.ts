@@ -36,6 +36,10 @@ export const mockLDFeaturesFlags = {
                     targets: [],
                     rules: []
                 }
+            },
+            clientSideAvailability: {
+                usingEnvironmentIds: true,
+                usingMobileKey: false
             }
         },
         {
@@ -135,7 +139,12 @@ export const mockLDFeaturesMappedToDVC = [
                 'type': VariableType.boolean
             }
         ],
-        'tags': []
+        'tags': [],
+        'sdkVisibility': {
+            'mobile': false,
+            'client': true,
+            'server': true
+        }
     },
     {
         'name': 'feature name 2',
@@ -164,7 +173,12 @@ export const mockLDFeaturesMappedToDVC = [
                 'type': VariableType.string
             }
         ],
-        'tags': []
+        'tags': [],
+        'sdkVisibility': {
+            'mobile': true,
+            'client': true,
+            'server': true
+        }
     },
     {
         'name': 'duplicate feature name',
@@ -193,6 +207,11 @@ export const mockLDFeaturesMappedToDVC = [
                 'type': VariableType.boolean
             }
         ],
-        'tags': []
+        'tags': [],
+        'sdkVisibility': {
+            'mobile': true,
+            'client': true,
+            'server': true
+        }
     }
 ]

@@ -4,7 +4,7 @@ import { formatKey } from '../DevCycle'
 import { getVariationKey, getVariationName } from './variation'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
-    const { name, description, variations, tags } = feature
+    const { name, description, variations, tags, clientSideAvailability } = feature
     const key = formatKey(feature.key)
 
     const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
@@ -32,6 +32,7 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
         variations: dvcVariations,
         variables: dvcVariables,
         tags,
+        sdkVisibility: mapSDKVisibility(clientSideAvailability)
     }
 
     return dvcFeature
@@ -53,4 +54,14 @@ const getVariableType = (variations: any[]) => {
     }
 
     return VariableType.json
+}
+
+const mapSDKVisibility = (clientSideAvailability: LDFeature['clientSideAvailability']) => {
+    const sdkVisibility: DVCFeature['sdkVisibility'] = {
+        mobile: clientSideAvailability?.usingMobileKey ?? true,
+        client: clientSideAvailability?.usingEnvironmentIds ?? true,
+        server: true,
+    }
+
+    return sdkVisibility
 }

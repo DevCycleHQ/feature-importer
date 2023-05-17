@@ -8,6 +8,7 @@ export type Feature = {
     variations?: Variation[]
     variables?: Variable[]
     tags?: string[]
+    sdkVisibility?: SDKVisibility
 }
 
 export type Variable = {
@@ -39,4 +40,10 @@ export enum FeatureType {
     experiment = 'experiment',
     permission = 'permission',
     ops = 'ops',
+}
+
+type SDKVisibility = {
+    mobile: boolean
+    client: boolean
+    server: boolean
 }
