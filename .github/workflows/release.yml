@@ -37,7 +37,7 @@ jobs:
           token: ${{ secrets.AUTOMATION_USER_TOKEN }}
           fetch-depth: 0
 
-      - uses: DevCycleHQ/release-action/prepare-release@main
+      - uses: DevCycleHQ/release-action/prepare-release@v2
         id: prepare-release
         with:
           github-token: ${{ secrets.AUTOMATION_USER_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
           draft: ${{ github.event.inputs.draft }}
           version-increment-type: ${{ github.event.inputs.version-increment-type }}
 
-      - uses: DevCycleHQ/release-action/create-release@main
+      - uses: DevCycleHQ/release-action/create-release@v2
         id: create-release
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
