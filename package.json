@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@types/inquirer": "^9.0.3",
-    "@types/lodash": "^4.14.191",
+    "@types/lodash": "^4.14.200",
     "dotenv": "^16.0.3",
     "i18n-iso-countries": "^7.5.0",
     "inquirer": "^8.0.1",
