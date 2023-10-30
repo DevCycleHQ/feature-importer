@@ -37,7 +37,7 @@
   "dependencies": {
     "@types/inquirer": "^9.0.6",
     "@types/lodash": "^4.14.200",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "i18n-iso-countries": "^7.7.0",
     "inquirer": "^9.2.11",
     "jest": "^29.7.0",
