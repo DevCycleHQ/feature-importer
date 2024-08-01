@@ -18,6 +18,11 @@ The importer is intended to be run on a single project and will create or update
 ## Configuration
 The feature importer can be configured using environment variables or a JSON config file. 
 By default the config is read from `config.json` in the project root, this can be overwritten using `CONFIG_FILE_PATH`.
+
+```
+Note: This feature importer only supports LaunchDarkly API Version `20220603`. Please select this version when creating an API access token in LaunchDarkly.
+```
+
 ### Required
 
 - <b>ldAccessToken</b>: <i>string</i>
