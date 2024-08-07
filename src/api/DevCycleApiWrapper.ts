@@ -52,6 +52,7 @@ export default class DevCycleApiWrapper {
             Authorization: token,
             'Content-Type': 'application/json',
             'dvc-referrer': 'importer',
+            'X-Requested-With': 'DevCycle-Feature-Importer',
             'dvc-referrer-metadata': JSON.stringify({
                 provider: this.provider,
             }),
