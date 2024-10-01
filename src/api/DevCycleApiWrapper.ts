@@ -13,6 +13,7 @@ import {
 import { FeatureConfiguration } from '../types/DevCycle/targeting'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || 'https://api.devcycle.com/v1'
+const DVC_BASE_URL_V2 = process.env.DVC_BASE_URL_V2 || 'https://api.devcycle.com/v2'
 
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string, provider?: string) {
@@ -23,7 +24,7 @@ export default class DevCycleApiWrapper {
     dvcClientId: string
     dvcClientSecret: string
     apiToken: string
-    provider: string 
+    provider: string
 
     private async getApiToken(): Promise<string> {
         if (this.apiToken) return this.apiToken
@@ -140,7 +141,7 @@ export default class DevCycleApiWrapper {
 
     async createFeature(projectKey: string, feature: Feature): Promise<Feature> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features`, {
+        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features`, {
             method: 'POST',
             body: JSON.stringify(feature),
             headers,
@@ -151,7 +152,7 @@ export default class DevCycleApiWrapper {
 
     async updateFeature(projectKey: string, feature: Feature): Promise<Feature> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features/${feature.key}`, {
+        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}`, {
             method: 'PATCH',
             body: JSON.stringify(feature),
             headers,
@@ -162,7 +163,7 @@ export default class DevCycleApiWrapper {
 
     async getFeaturesForProject(projectKey: string): Promise<Feature[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/features?perPage=1000`, {
+        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features?perPage=1000`, {
             headers,
         })
         await this.handleErrors(response)
@@ -210,17 +211,19 @@ export default class DevCycleApiWrapper {
 
     async updateFeatureConfigurations(
         projectKey: string,
-        featureKey: string,
-        environment: string,
-        configurations: FeatureConfiguration,
+        feature: Feature,
+        configurations: FeatureConfiguration[],
         options: { throwOnError: boolean } = { throwOnError: true }
     ): Promise<FeatureConfiguration> {
         const headers = await this.getHeaders()
         const response = await fetch(
-            `${DVC_BASE_URL}/projects/${projectKey}/features/${featureKey}/configurations?environment=${environment}`,
+            `${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}/`,
             {
                 method: 'PATCH',
-                body: JSON.stringify(configurations),
+                body: JSON.stringify({
+                    ...feature,
+                    configurations
+                }),
                 headers,
             })
         if (options.throwOnError) await this.handleErrors(response)

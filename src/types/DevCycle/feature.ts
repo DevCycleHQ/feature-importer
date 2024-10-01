@@ -1,3 +1,5 @@
+import { FeatureConfiguration } from './targeting'
+
 export type Feature = {
     _id?: string
     _project?: string
@@ -9,6 +11,7 @@ export type Feature = {
     variables?: Variable[]
     tags?: string[]
     sdkVisibility?: SDKVisibility
+    configurations?: FeatureConfiguration[]
 }
 
 export type Variable = {
