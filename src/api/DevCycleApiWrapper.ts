@@ -217,7 +217,7 @@ export default class DevCycleApiWrapper {
     ): Promise<FeatureConfiguration> {
         const headers = await this.getHeaders()
         const response = await fetch(
-            `${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}/`,
+            `${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}`,
             {
                 method: 'PATCH',
                 body: JSON.stringify({
