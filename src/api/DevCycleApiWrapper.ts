@@ -212,7 +212,7 @@ export default class DevCycleApiWrapper {
     async updateFeatureConfigurations(
         projectKey: string,
         feature: Feature,
-        configurations: FeatureConfiguration[],
+        configurations: Record<string, FeatureConfiguration>,
         options: { throwOnError: boolean } = { throwOnError: true }
     ): Promise<FeatureConfiguration> {
         const headers = await this.getHeaders()
