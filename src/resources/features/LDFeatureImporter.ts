@@ -149,18 +149,19 @@ export class LDFeatureImporter {
             const { action, feature, configs = [] } = this.featuresToImport[featureKey]
             if (this.errors[feature.key]) continue
             if (action === FeatureImportAction.Skip) continue
-
-            for (const config of configs) {
-                try {
-                    if ((action === FeatureImportAction.Create) ||
-                        (action === FeatureImportAction.Update && overwriteDuplicates)) {
-                        await DVC.updateFeatureConfigurations(
-                            targetProjectKey, feature.key, config.environment, config.targetingRules
-                        )
-                    }
-                } catch (e) {
-                    this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
+            const configurations: Record<string, FeatureConfiguration> = {}
+            configs.forEach((config) => {
+                configurations[config.environment] = config.targetingRules
+            })
+            try {
+                if ((action === FeatureImportAction.Create) ||
+                    (action === FeatureImportAction.Update && overwriteDuplicates)) {
+                    await DVC.updateFeatureConfigurations(
+                        targetProjectKey, feature, configurations
+                    )
                 }
+            } catch (e) {
+                this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
             }
         }
     }

@@ -54,7 +54,7 @@ Note: This feature importer only supports LaunchDarkly API Version `20220603`. P
   - Equivalent env var: OVERWRITE_DUPLICATES
 - <b>operationMap</b>: <i>Map<string, string></i>
   - A map of LD operations to map to DevCycle operations
-  - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`
+  - DevCycle operations: `=`, `!=`, `>`, `<`, `>=`, `<=`, `contain`, `!contain`, `exist`, `!exist`, `startWith`, `!startWith`, `endWith`, `!endWith`
   - Equivalent env var: OPERATION_MAP
 - <b>provider</b>: <i>string</i>
   - The provider to import the feature flags from.

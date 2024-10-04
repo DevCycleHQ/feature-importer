@@ -41,6 +41,8 @@ export function getComparator(clause: Clause, customOperationMap: { [key: string
     const operationMap = {
         in: (neg: boolean) => neg ? '!=' : '=',
         contains: (neg: boolean) => neg ? '!contain' : 'contain',
+        startsWith: (neg: boolean) => neg ? '!startWith' : 'startWith',
+        endsWith: (neg: boolean) => neg ? '!endWith' : 'endWith',
         lessThan: (neg: boolean) => '<',
         lessThanOrEqual: (neg: boolean) => '<=',
         greaterThan: (neg: boolean) => '>',

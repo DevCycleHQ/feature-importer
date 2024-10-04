@@ -15,7 +15,7 @@ export function createUserFilter(subType: string, comparator: string, values: an
         }
         normalizedValues = normalizedValues.map((value) => value.toUpperCase())
     }
-    
+
     return {
         type: 'user',
         subType,
@@ -75,6 +75,10 @@ export function getNegatedComparator(operator: string) {
         '!contain': 'contain',
         'exist': '!exist',
         '!exist': 'exist',
+        'startWith': '!startWith',
+        '!startWith': 'startWith',
+        '!endWith': 'endWith',
+        'endWith': '!endWith',
     }
     if (!(operator in negateComparatorMap)) {
         throw new Error(`Unsupported operator: ${operator}`)

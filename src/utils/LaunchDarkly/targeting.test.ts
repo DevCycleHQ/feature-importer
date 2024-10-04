@@ -57,7 +57,7 @@ const mockUnsupportedOpRule = {
             _id: 'abc',
             attribute: 'email',
             negate: false,
-            op: 'endsWith',
+            op: 'rhymesWith',
             values: ['email.com']
         }
     ],
@@ -244,7 +244,7 @@ describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule with an op overrided in operationMap', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
         const operationMap = {
-            endsWith: 'contain',
+            rhymesWith: 'contain',
         }
 
         const result = buildTargetingRuleFromRule(
@@ -274,11 +274,9 @@ describe('buildTargetingRuleFromRule', () => {
         })
     })
 
-    test('builds targeting rule with a negated op overrided in operationMap', () => {
+    test('builds targeting rule with endsWith', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
-        const operationMap = {
-            endsWith: 'contain',
-        }
+        const operationMap = {}
         const mockUnsupportedNegatedOpRule = {
             ...mockUnsupportedOpRule,
             clauses: [
@@ -287,6 +285,51 @@ describe('buildTargetingRuleFromRule', () => {
                     attribute: 'email',
                     negate: true,
                     op: 'endsWith',
+                    values: ['email.com']
+                }
+            ]
+        }
+
+        const result = buildTargetingRuleFromRule(
+            mockUnsupportedNegatedOpRule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            operationMap,
+        )
+        expect(result).toEqual({
+            audience: {
+                name: 'Imported Rule',
+                filters: {
+                    filters: [{
+                        comparator: '!endWith',
+                        type: 'user',
+                        subType: 'email',
+                        values: ['email.com']
+                    }],
+                    operator: OperatorType.and
+                }
+            },
+            distribution: [{
+                _variation: 'variation-2',
+                percentage: 1
+            }]
+        })
+    })
+
+    test('builds targeting rule with a negated op overrided in operationMap', () => {
+        const audienceImport = new LDAudienceImporter(mockConfig)
+        const operationMap = {
+            rhymesWith: 'contain',
+        }
+        const mockUnsupportedNegatedOpRule = {
+            ...mockUnsupportedOpRule,
+            clauses: [
+                {
+                    _id: 'abc',
+                    attribute: 'email',
+                    negate: true,
+                    op: 'rhymesWith',
                     values: ['email.com']
                 }
             ]
@@ -332,7 +375,7 @@ describe('buildTargetingRuleFromRule', () => {
             audienceImport,
             operationMap,
         )
-        expect(methodCall).toThrowError('Unsupported operation: endsWith')
+        expect(methodCall).toThrowError('Unsupported operation: rhymesWith')
     })
 })
 
