@@ -51,7 +51,7 @@ describe('LDEnvironmentImporter', () => {
         mockDVC.getEnvironments.mockResolvedValue([mockDvcEnvironmentResponse])
     })
 
-    test("environment is created when it doesn't exist yet", async () => {
+    test('environment is created when it doesn\'t exist yet', async () => {
         mockPromptToGetEnvironmentType.mockResolvedValue(DVCEnvironmentType.Dev)
         await importEnvironment()
 
@@ -68,7 +68,7 @@ describe('LDEnvironmentImporter', () => {
         expect(mockDVC.updateEnvironment).not.toHaveBeenCalled()
     })
 
-    test("environment is updated if it already exists and overwriteDuplicates is true", async () => {
+    test('environment is updated if it already exists and overwriteDuplicates is true', async () => {
         mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
         config.overwriteDuplicates = true
         await importEnvironment()
@@ -87,7 +87,7 @@ describe('LDEnvironmentImporter', () => {
         expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
     })
 
-    test("environment is skipped if it already exists and overwriteDuplicates is false", async () => {
+    test('environment is skipped if it already exists and overwriteDuplicates is false', async () => {
         mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
         config.overwriteDuplicates = false
         await importEnvironment()

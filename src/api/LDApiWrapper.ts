@@ -1,4 +1,8 @@
-import { ProjectResponse, SegmentResponse } from "../types/LaunchDarkly";
+import {
+  ProjectResponse,
+  SegmentResponse,
+  Feature,
+} from "../types/LaunchDarkly";
 import { handleErrors } from "./utils";
 
 const LD_BASE_URL = "https://app.launchdarkly.com/api/v2";
@@ -56,7 +60,7 @@ export default class LDApiWrapper {
     projectKey: string,
     environmentKey: string
   ): Promise<SegmentResponse> {
-    const allSegments: any[] = [];
+    const allSegments: SegmentResponse["items"] = [];
     let offset = 0;
     const limit = 20;
     let hasMore = true;
@@ -94,7 +98,7 @@ export default class LDApiWrapper {
   }
 
   async getAllFeatureFlagsForProject(projectKey: string) {
-    const allFlags: any[] = [];
+    const allFlags: Feature[] = [];
     let offset = 0;
     const limit = 20;
     let hasMore = true;
