@@ -14,7 +14,6 @@ import { OperatorType } from '../../types/DevCycle'
 
 const mockDVC = DVC as jest.Mocked<typeof DVC>
 
-
 describe('CustomPropertiesImporter', () => {
     const mockFeature = { key: 'feature-1' }
     const mockCustomDataAudience = {
