@@ -1,7 +1,15 @@
 import { LD, DVC } from '../../api'
-import { Feature as DVCFeature, FeatureConfiguration } from '../../types/DevCycle'
-import { Feature as LDFeature } from '../../types/LaunchDarkly'
-import { buildTargetingRules, mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
+import {
+    Feature as DVCFeature,
+    FeatureConfiguration,
+} from '../../types/DevCycle'
+import {
+    Feature as LDFeature,
+} from '../../types/LaunchDarkly'
+import {
+    buildTargetingRules,
+    mapLDFeatureToDVCFeature,
+} from '../../utils/LaunchDarkly'
 import { ParsedImporterConfig } from '../../configs'
 import { FeatureImportAction, FeaturesToImport } from './types'
 import { LDAudienceImporter } from '../audiences'
@@ -20,7 +28,10 @@ export class LDFeatureImporter {
     // List of LD feature flags
     sourceFeatures: LDFeature[]
 
-    constructor(config: ParsedImporterConfig, audienceImport: LDAudienceImporter) {
+    constructor(
+        config: ParsedImporterConfig,
+        audienceImport: LDAudienceImporter,
+    ) {
         this.config = config
         this.audienceImport = audienceImport
     }
@@ -31,30 +42,40 @@ export class LDFeatureImporter {
             excludeFeatures,
             overwriteDuplicates,
             sourceProjectKey,
-            targetProjectKey
+            targetProjectKey,
         } = this.config
 
         const existingFeatures = await DVC.getFeaturesForProject(targetProjectKey)
-        const { items: ldFeatures } = await LD.getFeatureFlagsForProject(sourceProjectKey)
+        const { items: ldFeatures } = await LD.getFeatureFlagsForProject(
+            sourceProjectKey
+        )
 
         const featuresToImport: FeaturesToImport = {}
 
-        const existingFeaturesMap = existingFeatures.reduce((map: Record<string, DVCFeature>, feature) => {
-            map[feature.key] = feature
-            return map
-        }, {})
+        const existingFeaturesMap = existingFeatures.reduce(
+            (map: Record<string, DVCFeature>, feature) => {
+                map[feature.key] = feature
+                return map
+            },
+            {}
+        )
 
         for (const feature of ldFeatures) {
             const mappedFeature = mapLDFeatureToDVCFeature(feature)
             const isDuplicate = existingFeaturesMap[mappedFeature.key] !== undefined
-            const includeFeature = (includeFeatures && includeFeatures.size > 0) ?
-                includeFeatures.get(mappedFeature.key) :
-                true
-            const excludeFeature = (excludeFeatures && excludeFeatures.size > 0) ?
-                excludeFeatures.get(mappedFeature.key) :
-                false
+            const includeFeature =
+        includeFeatures && includeFeatures.size > 0
+            ? includeFeatures.get(mappedFeature.key)
+            : true
+            const excludeFeature =
+        excludeFeatures && excludeFeatures.size > 0
+            ? excludeFeatures.get(mappedFeature.key)
+            : false
 
-            featuresToImport[mappedFeature.key] = { feature: mappedFeature, action: FeatureImportAction.Skip }
+            featuresToImport[mappedFeature.key] = {
+                feature: mappedFeature,
+                action: FeatureImportAction.Skip,
+            }
 
             if (!includeFeature || excludeFeature) continue
 
@@ -79,30 +100,48 @@ export class LDFeatureImporter {
 
             this.featuresToImport[featureKey].configs ??= []
 
-            Object.entries(feature.environments).forEach(([environment, environmentConfig]) => {
-                try {
-                    if (environmentConfig.prerequisites?.length) {
-                        throw new Error(`Unable to import prerequisite in "${environment}" environment`)
-                    }
-                    const targets = buildTargetingRules(feature, environment, this.audienceImport, operationMap)
+            if (!feature.environments) {
+                throw new Error(
+                    `Feature "${feature.key}" is missing environments, this is likely due to an api version mismatch.`
+                     + ' Please use API version 20240415 when creating the API access token.'
+                )
+            }
 
-                    const targetingRules: FeatureConfiguration = {
-                        targets,
-                        status: environmentConfig.on ? 'active' : 'inactive',
-                    }
-                    if (targets.length > 0) {
-                        this.featuresToImport[dvcFeature.key].configs?.push({
+            Object.entries(feature.environments).forEach(
+                ([environment, environmentConfig]) => {
+                    try {
+                        if (environmentConfig.prerequisites?.length) {
+                            throw new Error(
+                                `Unable to import prerequisite in "${environment}" environment`
+                            )
+                        }
+                        const targets = buildTargetingRules(
+                            feature,
                             environment,
-                            targetingRules,
-                        })
+                            this.audienceImport,
+                            operationMap
+                        )
+
+                        const targetingRules: FeatureConfiguration = {
+                            targets,
+                            status: environmentConfig.on ? 'active' : 'inactive',
+                        }
+                        if (targets.length > 0) {
+                            this.featuresToImport[dvcFeature.key].configs?.push({
+                                environment,
+                                targetingRules,
+                            })
+                        }
+                    } catch (err) {
+                        this.featuresToImport[dvcFeature.key].action =
+              FeatureImportAction.Unsupported
+                        const errorMessage =
+              err instanceof Error ? err.message : 'unknown error'
+                        this.errors[dvcFeature.key] = errorMessage
+                        console.log(`Skipping feature "${dvcFeature.key}":`, errorMessage)
                     }
-                } catch (err) {
-                    this.featuresToImport[dvcFeature.key].action = FeatureImportAction.Unsupported
-                    const errorMessage = err instanceof Error ? err.message : 'unknown error'
-                    this.errors[dvcFeature.key] = errorMessage
-                    console.log(`Skipping feature "${dvcFeature.key}":`, errorMessage)
                 }
-            })
+            )
         }
         return this.featuresToImport
     }
@@ -131,7 +170,8 @@ export class LDFeatureImporter {
                     skippedCount += 1
                 }
             } catch (e) {
-                this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
+                this.errors[feature.key] =
+          e instanceof Error ? e.message : 'unknown error'
             }
         }
 
@@ -146,7 +186,11 @@ export class LDFeatureImporter {
     private async importFeatureConfigs() {
         const { targetProjectKey, overwriteDuplicates } = this.config
         for (const featureKey in this.featuresToImport) {
-            const { action, feature, configs = [] } = this.featuresToImport[featureKey]
+            const {
+                action,
+                feature,
+                configs = [],
+            } = this.featuresToImport[featureKey]
             if (this.errors[feature.key]) continue
             if (action === FeatureImportAction.Skip) continue
             const configurations: Record<string, FeatureConfiguration> = {}
@@ -154,14 +198,19 @@ export class LDFeatureImporter {
                 configurations[config.environment] = config.targetingRules
             })
             try {
-                if ((action === FeatureImportAction.Create) ||
-                    (action === FeatureImportAction.Update && overwriteDuplicates)) {
+                if (
+                    action === FeatureImportAction.Create ||
+          (action === FeatureImportAction.Update && overwriteDuplicates)
+                ) {
                     await DVC.updateFeatureConfigurations(
-                        targetProjectKey, feature, configurations
+                        targetProjectKey,
+                        feature,
+                        configurations
                     )
                 }
             } catch (e) {
-                this.errors[feature.key] = e instanceof Error ? e.message : 'unknown error'
+                this.errors[feature.key] =
+          e instanceof Error ? e.message : 'unknown error'
             }
         }
     }
@@ -169,7 +218,8 @@ export class LDFeatureImporter {
     public async import() {
         await this.getFeaturesToImport()
         await this.getFeatureConfigsToImport()
-        const { createdCount, updatedCount, skippedCount } = await this.importFeatures()
+        const { createdCount, updatedCount, skippedCount } =
+      await this.importFeatures()
         await this.importFeatureConfigs()
         return {
             createdCount,

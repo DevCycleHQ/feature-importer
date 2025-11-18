@@ -1,7 +1,10 @@
 import { getConfigs } from './configs'
 
 import { FeatureSummary } from './resources/features/types'
-import { CustomPropertiesImporter, LDFeatureImporter } from './resources/features'
+import {
+    CustomPropertiesImporter,
+    LDFeatureImporter,
+} from './resources/features'
 import { LDProjectImporter } from './resources/projects'
 import { LDAudienceImporter } from './resources/audiences'
 import { LDEnvironmentImporter } from './resources/environments'
@@ -20,7 +23,9 @@ async function run() {
     await environmentImporter.import(sourceProject.environments)
 
     const ldEnvironments = sourceProject.environments.items
-    const environmentKeys = ldEnvironments.map((env: Record<string, any>) => env.key)
+    const environmentKeys = ldEnvironments.map(
+        (env: Record<string, any>) => env.key
+    )
 
     console.log('Importing audiences...')
     const audienceImporter = new LDAudienceImporter(config)
@@ -41,12 +46,7 @@ async function run() {
 }
 
 function printSummary(featureSummary: FeatureSummary) {
-    const {
-        createdCount,
-        updatedCount,
-        skippedCount,
-        errored
-    } = featureSummary
+    const { createdCount, updatedCount, skippedCount, errored } = featureSummary
 
     console.log('-------------------------------------------')
     console.log(`Created ${createdCount} features in DevCycle`)
@@ -56,8 +56,7 @@ function printSummary(featureSummary: FeatureSummary) {
         console.log('-------------------------------------------')
         console.error(
             'Failed to import the following features:',
-            Object
-                .entries(errored)
+            Object.entries(errored)
                 .map(([key, error]) => `\n\t- ${key}: ${error}`)
                 .join('')
         )
@@ -66,4 +65,3 @@ function printSummary(featureSummary: FeatureSummary) {
 }
 
 run()
-
