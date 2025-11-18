@@ -33,6 +33,30 @@ export const getConfigs = (): ParsedImporterConfig => {
     return configs
 }
 
+/**
+ * Validates and sanitizes a key to prevent injection attacks in URL construction
+ * Keys should only contain alphanumeric characters, hyphens, underscores, and periods
+ * Returns the URL-encoded version of the key
+ */
+const validateAndSanitizeKey = (key: string, keyName: string): string => {
+    if (!key || typeof key !== 'string') {
+        throw Error(`${keyName} must be a non-empty string`)
+    }
+    
+    // Pattern for safe keys: alphanumeric, hyphens, underscores, periods
+    const validKeyPattern = /^[a-zA-Z0-9._-]+$/
+    
+    if (!validKeyPattern.test(key)) {
+        throw Error(
+            `${keyName} contains invalid characters. Only alphanumeric characters, ` +
+            'hyphens, underscores, and periods are allowed. This prevents injection attacks.'
+        )
+    }
+    
+    // URL encode the key to prevent any URL manipulation
+    return encodeURIComponent(key)
+}
+
 const validateConfigs = (configs: ParsedImporterConfig) => {
     if (configs.ldAccessToken === '' || configs.ldAccessToken === undefined)
         throw Error('ldAccessToken cannot be empty')
@@ -42,6 +66,13 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
         throw Error('dvcClientSecret cannot be empty')
     if (configs.sourceProjectKey === '' || configs.sourceProjectKey === undefined)
         throw Error('sourceProjectKey cannot be empty')
+    
+    // Validate and sanitize project keys to prevent security issues with file data in network requests
+    // The keys are URL-encoded here so they're safe to use in API calls
+    configs.sourceProjectKey = validateAndSanitizeKey(configs.sourceProjectKey, 'sourceProjectKey')
+    if (configs.targetProjectKey) {
+        configs.targetProjectKey = validateAndSanitizeKey(configs.targetProjectKey, 'targetProjectKey')
+    }
 }
 
 const parseMapFromArray = (value: string | string[] | undefined): Map<string, boolean> | undefined => {

@@ -38,7 +38,7 @@ export default class LDApiWrapper {
     ): Promise<SegmentResponse> {
         const headers = await this.getHeaders()
         const response = await fetch(
-            `${LD_BASE_URL}/segments/${projectKey}/${environmentKey}`,
+            `${LD_BASE_URL}/segments/${projectKey}/${encodeURIComponent(environmentKey)}`,
             {
                 method: 'GET',
                 headers,
