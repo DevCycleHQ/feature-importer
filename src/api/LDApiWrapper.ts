@@ -11,6 +11,7 @@ export default class LDApiWrapper {
     private async getHeaders() {
         return {
             Authorization: this.apiToken,
+            'LD-API-Version': '20220603',
         }
     }
 
