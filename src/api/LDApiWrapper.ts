@@ -2,6 +2,7 @@ import { ProjectResponse, SegmentResponse } from '../types/LaunchDarkly'
 import { handleErrors } from './utils'
 
 const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
+const LD_API_VERSION = '20220603'
 export default class LDApiWrapper {
     constructor(apiToken: string) {
         this.apiToken = apiToken
@@ -11,7 +12,7 @@ export default class LDApiWrapper {
     private async getHeaders() {
         return {
             Authorization: this.apiToken,
-            'LD-API-Version': '20220603',
+            'LD-API-Version': LD_API_VERSION,
         }
     }
 

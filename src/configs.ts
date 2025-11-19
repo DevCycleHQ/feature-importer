@@ -35,20 +35,20 @@ export const getConfigs = (): ParsedImporterConfig => {
 
 /**
  * Validates a key to prevent injection attacks in URL construction
- * Keys should only contain alphanumeric characters, hyphens, underscores, and periods
+ * Keys should only contain lowercase alphanumeric characters, hyphens, underscores, and periods
  */
 const validateKey = (key: string, keyName: string): void => {
     if (!key || typeof key !== 'string') {
         throw Error(`${keyName} must be a non-empty string`)
     }
     
-    // Pattern for safe keys: alphanumeric, hyphens, underscores, periods
-    const validKeyPattern = /^[a-zA-Z0-9._-]+$/
+    // Pattern for safe keys: lowercase alphanumeric, hyphens, underscores, periods
+    const validKeyPattern = /^[a-z0-9._-]+$/
     
     if (!validKeyPattern.test(key)) {
         throw Error(
-            `${keyName} contains invalid characters. Only alphanumeric characters, ` +
-            'hyphens, underscores, and periods are allowed. This prevents injection attacks.'
+            `${keyName} contains invalid characters. Only lowercase alphanumeric characters, ` +
+            'hyphens, underscores, and periods are allowed.'
         )
     }
 }
