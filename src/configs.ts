@@ -41,7 +41,6 @@ const validateKey = (key: string, keyName: string): void => {
     if (!key || typeof key !== 'string') {
         throw Error(`${keyName} must be a non-empty string`)
     }
-    
     // Pattern for safe keys: lowercase alphanumeric, hyphens, underscores, periods
     const validKeyPattern = /^[a-z0-9._-]+$/
     

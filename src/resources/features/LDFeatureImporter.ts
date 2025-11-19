@@ -184,7 +184,6 @@ export class LDFeatureImporter {
                 this.errors[feature.key] =
           e instanceof Error ? e.message : 'unknown error'
             }
-            
             await this.delay(250) // 250ms delay
         }
 
