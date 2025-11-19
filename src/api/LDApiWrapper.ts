@@ -21,8 +21,9 @@ export default class LDApiWrapper {
 
     async getProject(projectKey: string): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
+        const encodedProjectKey = encodeURIComponent(projectKey)
         const response = await fetch(
-            `${LD_BASE_URL}/projects/${projectKey}?expand=environments`,
+            `${LD_BASE_URL}/projects/${encodedProjectKey}?expand=environments`,
             {
                 method: 'GET',
                 headers,
@@ -37,8 +38,10 @@ export default class LDApiWrapper {
         environmentKey: string
     ): Promise<SegmentResponse> {
         const headers = await this.getHeaders()
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedEnvironmentKey = encodeURIComponent(environmentKey)
         const response = await fetch(
-            `${LD_BASE_URL}/segments/${projectKey}/${encodeURIComponent(environmentKey)}`,
+            `${LD_BASE_URL}/segments/${encodedProjectKey}/${encodedEnvironmentKey}`,
             {
                 method: 'GET',
                 headers,
@@ -50,8 +53,9 @@ export default class LDApiWrapper {
 
     async getFeatureFlagsForProject(projectKey: string) {
         const headers = await this.getHeaders()
+        const encodedProjectKey = encodeURIComponent(projectKey)
         const response = await fetch(
-            `${LD_BASE_URL}/flags/${projectKey}?summary=0`,
+            `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`,
             {
                 method: 'GET',
                 headers,

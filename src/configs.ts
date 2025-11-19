@@ -34,11 +34,10 @@ export const getConfigs = (): ParsedImporterConfig => {
 }
 
 /**
- * Validates and sanitizes a key to prevent injection attacks in URL construction
+ * Validates a key to prevent injection attacks in URL construction
  * Keys should only contain alphanumeric characters, hyphens, underscores, and periods
- * Returns the URL-encoded version of the key
  */
-const validateAndSanitizeKey = (key: string, keyName: string): string => {
+const validateKey = (key: string, keyName: string): void => {
     if (!key || typeof key !== 'string') {
         throw Error(`${keyName} must be a non-empty string`)
     }
@@ -52,9 +51,6 @@ const validateAndSanitizeKey = (key: string, keyName: string): string => {
             'hyphens, underscores, and periods are allowed. This prevents injection attacks.'
         )
     }
-    
-    // URL encode the key to prevent any URL manipulation
-    return encodeURIComponent(key)
 }
 
 const validateConfigs = (configs: ParsedImporterConfig) => {
@@ -67,11 +63,10 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
     if (configs.sourceProjectKey === '' || configs.sourceProjectKey === undefined)
         throw Error('sourceProjectKey cannot be empty')
     
-    // Validate and sanitize project keys to prevent security issues with file data in network requests
-    // The keys are URL-encoded here so they're safe to use in API calls
-    configs.sourceProjectKey = validateAndSanitizeKey(configs.sourceProjectKey, 'sourceProjectKey')
+    // Validate project keys to prevent security issues with file data in network requests
+    validateKey(configs.sourceProjectKey, 'sourceProjectKey')
     if (configs.targetProjectKey) {
-        configs.targetProjectKey = validateAndSanitizeKey(configs.targetProjectKey, 'targetProjectKey')
+        validateKey(configs.targetProjectKey, 'targetProjectKey')
     }
 }
 
