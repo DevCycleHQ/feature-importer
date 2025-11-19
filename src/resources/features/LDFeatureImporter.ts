@@ -70,15 +70,12 @@ export class LDFeatureImporter {
         for (const feature of ldFeatures) {
             const mappedFeature = mapLDFeatureToDVCFeature(feature)
             const isDuplicate = existingFeaturesMap[mappedFeature.key] !== undefined
-            const includeFeature = includeFeatures && includeFeatures.size > 0
-                && includeFeatures.get(mappedFeature.key) !== undefined
-                ? includeFeatures.get(mappedFeature.key)
-                : true
-            const excludeFeature = excludeFeatures && excludeFeatures.size > 0
-                && excludeFeatures.get(mappedFeature.key) !== undefined
-                ? excludeFeatures.get(mappedFeature.key)
-                : false
-
+            const includeFeature = (includeFeatures && includeFeatures.size > 0) ?
+                includeFeatures.get(mappedFeature.key) :
+                true
+            const excludeFeature = (excludeFeatures && excludeFeatures.size > 0) ?
+                excludeFeatures.get(mappedFeature.key) :
+                false
             featuresToImport[mappedFeature.key] = {
                 feature: mappedFeature,
                 action: FeatureImportAction.Skip,
