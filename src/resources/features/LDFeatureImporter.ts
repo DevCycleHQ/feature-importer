@@ -36,6 +36,13 @@ export class LDFeatureImporter {
         this.audienceImport = audienceImport
     }
 
+    /**
+     * Helper method to add a delay between API calls to avoid rate limiting
+     */
+    private delay(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+
     private async getFeaturesToImport(): Promise<FeaturesToImport> {
         const {
             includeFeatures,
@@ -153,17 +160,21 @@ export class LDFeatureImporter {
         let skippedCount = 0
 
         for (const featurekey in this.featuresToImport) {
-            const { feature, action } = this.featuresToImport[featurekey]
+            const { feature, action, configs=[] } = this.featuresToImport[featurekey]
             if (this.errors[feature.key]) continue
+            const configurations: Record<string, FeatureConfiguration> = {}
+            configs.forEach((config) => {
+                configurations[config.environment] = config.targetingRules
+            })
 
             try {
                 if (action === FeatureImportAction.Create) {
                     console.log(`Creating feature "${feature.key}" in DevCycle`)
-                    await DVC.createFeature(targetProjectKey, feature)
+                    await DVC.createFeature(targetProjectKey, feature, configurations)
                     createdCount += 1
                 } else if (action === FeatureImportAction.Update) {
                     console.log(`Updating feature "${feature.key}" in DevCycle`)
-                    await DVC.updateFeature(targetProjectKey, feature)
+                    await DVC.updateFeature(targetProjectKey, feature, configurations)
                     updatedCount += 1
                 } else {
                     console.log(`Skipping feature "${feature.key}" creation`)
@@ -173,6 +184,8 @@ export class LDFeatureImporter {
                 this.errors[feature.key] =
           e instanceof Error ? e.message : 'unknown error'
             }
+            
+            await this.delay(250) // 250ms delay
         }
 
         return {
@@ -183,44 +196,11 @@ export class LDFeatureImporter {
         }
     }
 
-    private async importFeatureConfigs() {
-        const { targetProjectKey, overwriteDuplicates } = this.config
-        for (const featureKey in this.featuresToImport) {
-            const {
-                action,
-                feature,
-                configs = [],
-            } = this.featuresToImport[featureKey]
-            if (this.errors[feature.key]) continue
-            if (action === FeatureImportAction.Skip) continue
-            const configurations: Record<string, FeatureConfiguration> = {}
-            configs.forEach((config) => {
-                configurations[config.environment] = config.targetingRules
-            })
-            try {
-                if (
-                    action === FeatureImportAction.Create ||
-          (action === FeatureImportAction.Update && overwriteDuplicates)
-                ) {
-                    await DVC.updateFeatureConfigurations(
-                        targetProjectKey,
-                        feature,
-                        configurations
-                    )
-                }
-            } catch (e) {
-                this.errors[feature.key] =
-          e instanceof Error ? e.message : 'unknown error'
-            }
-        }
-    }
-
     public async import() {
         await this.getFeaturesToImport()
         await this.getFeatureConfigsToImport()
         const { createdCount, updatedCount, skippedCount } =
       await this.importFeatures()
-        await this.importFeatureConfigs()
         return {
             createdCount,
             updatedCount,
