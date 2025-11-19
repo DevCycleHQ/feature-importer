@@ -2,7 +2,7 @@ import { ProjectResponse, SegmentResponse } from '../types/LaunchDarkly'
 import { handleErrors } from './utils'
 
 const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
-
+const LD_API_VERSION = '20220603'
 export default class LDApiWrapper {
     constructor(apiToken: string) {
         this.apiToken = apiToken
@@ -12,6 +12,7 @@ export default class LDApiWrapper {
     private async getHeaders() {
         return {
             Authorization: this.apiToken,
+            'LD-API-Version': LD_API_VERSION,
         }
     }
 
@@ -21,10 +22,14 @@ export default class LDApiWrapper {
 
     async getProject(projectKey: string): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/projects/${projectKey}?expand=environments`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${LD_BASE_URL}/projects/${encodedProjectKey}?expand=environments`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
@@ -34,20 +39,29 @@ export default class LDApiWrapper {
         environmentKey: string
     ): Promise<SegmentResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/segments/${projectKey}/${environmentKey}`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedEnvironmentKey = encodeURIComponent(environmentKey)
+        const response = await fetch(
+            `${LD_BASE_URL}/segments/${encodedProjectKey}/${encodedEnvironmentKey}`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
 
     async getFeatureFlagsForProject(projectKey: string) {
         const headers = await this.getHeaders()
-        const response = await fetch(`${LD_BASE_URL}/flags/${projectKey}?summary=0`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }

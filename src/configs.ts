@@ -33,6 +33,25 @@ export const getConfigs = (): ParsedImporterConfig => {
     return configs
 }
 
+/**
+ * Validates a key to prevent injection attacks in URL construction
+ * Keys should only contain lowercase alphanumeric characters, hyphens, underscores, and periods
+ */
+const validateKey = (key: string, keyName: string): void => {
+    if (!key || typeof key !== 'string') {
+        throw Error(`${keyName} must be a non-empty string`)
+    }
+    // Pattern for safe keys: lowercase alphanumeric, hyphens, underscores, periods
+    const validKeyPattern = /^[a-z0-9._-]+$/
+    
+    if (!validKeyPattern.test(key)) {
+        throw Error(
+            `${keyName} contains invalid characters. Only lowercase alphanumeric characters, ` +
+            'hyphens, underscores, and periods are allowed.'
+        )
+    }
+}
+
 const validateConfigs = (configs: ParsedImporterConfig) => {
     if (configs.ldAccessToken === '' || configs.ldAccessToken === undefined)
         throw Error('ldAccessToken cannot be empty')
@@ -42,6 +61,12 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
         throw Error('dvcClientSecret cannot be empty')
     if (configs.sourceProjectKey === '' || configs.sourceProjectKey === undefined)
         throw Error('sourceProjectKey cannot be empty')
+    
+    // Validate project keys to prevent security issues with file data in network requests
+    validateKey(configs.sourceProjectKey, 'sourceProjectKey')
+    if (configs.targetProjectKey) {
+        validateKey(configs.targetProjectKey, 'targetProjectKey')
+    }
 }
 
 const parseMapFromArray = (value: string | string[] | undefined): Map<string, boolean> | undefined => {

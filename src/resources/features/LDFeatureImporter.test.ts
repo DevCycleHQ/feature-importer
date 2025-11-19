@@ -181,7 +181,8 @@ describe('LDFeatureImporter', () => {
             })
             expect(mockDVC.createFeature).toHaveBeenCalledWith(
                 mockConfig.targetProjectKey,
-                featuresToImport['feature-key'].feature
+                featuresToImport['feature-key'].feature,
+                {}
             )
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()
         })
@@ -206,7 +207,8 @@ describe('LDFeatureImporter', () => {
             })
             expect(mockDVC.updateFeature).toHaveBeenCalledWith(
                 mockConfig.targetProjectKey,
-                featuresToImport['feature-key'].feature
+                featuresToImport['feature-key'].feature,
+                {}
             )
             expect(mockDVC.createFeature).not.toHaveBeenCalled()
         })
@@ -589,8 +591,6 @@ describe('LDFeatureImporter', () => {
                 }
             }
 
-            mockDVC.updateFeatureConfigurations.mockResolvedValue(featureConfigResponse)
-
             const mockFeaturesToImport: FeaturesToImport = {
                 [createFeature.key]: {
                     action: FeatureImportAction.Create,
@@ -603,9 +603,9 @@ describe('LDFeatureImporter', () => {
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
-            await featureImporter['importFeatureConfigs']()
+            await featureImporter['importFeatures']()
 
-            expect(mockDVC.updateFeatureConfigurations).toHaveBeenCalledTimes(1)
+            expect(mockDVC.createFeature).toHaveBeenCalledTimes(1)
         })
 
         test('do not create feature config for update with default configs overwriteDuplicates=false', async () => {
@@ -640,9 +640,9 @@ describe('LDFeatureImporter', () => {
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
-            await featureImporter['importFeatureConfigs']()
+            await featureImporter['importFeatures']()
 
-            expect(mockDVC.updateFeatureConfigurations).toHaveBeenCalledTimes(0)
+            expect(mockDVC.createFeature).toHaveBeenCalledTimes(0)
 
         })
 
@@ -678,9 +678,9 @@ describe('LDFeatureImporter', () => {
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
-            await featureImporter['importFeatureConfigs']()
+            await featureImporter['importFeatures']()
 
-            expect(mockDVC.updateFeatureConfigurations).toHaveBeenCalledTimes(0)
+            expect(mockDVC.createFeature).toHaveBeenCalledTimes(0)
         })
 
         test('do not create feature config for unsupported feature', async () => {
@@ -715,9 +715,9 @@ describe('LDFeatureImporter', () => {
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
-            await featureImporter['importFeatureConfigs']()
+            await featureImporter['importFeatures']()
 
-            expect(mockDVC.updateFeatureConfigurations).toHaveBeenCalledTimes(0)
+            expect(mockDVC.createFeature).toHaveBeenCalledTimes(0)
         })
     })
 })

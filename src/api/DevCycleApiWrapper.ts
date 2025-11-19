@@ -8,12 +8,13 @@ import {
     EnvironmentResponse,
     Feature,
     ProjectPayload,
-    ProjectResponse
+    ProjectResponse,
 } from '../types/DevCycle'
 import { FeatureConfiguration } from '../types/DevCycle/targeting'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || 'https://api.devcycle.com/v1'
-const DVC_BASE_URL_V2 = process.env.DVC_BASE_URL_V2 || 'https://api.devcycle.com/v2'
+const DVC_BASE_URL_V2 =
+  process.env.DVC_BASE_URL_V2 || 'https://api.devcycle.com/v2'
 
 export default class DevCycleApiWrapper {
     constructor(dvcClientId: string, dvcClientSecret: string, provider?: string) {
@@ -39,8 +40,7 @@ export default class DevCycleApiWrapper {
                 audience: 'https://api.devcycle.com/',
                 client_id: this.dvcClientId,
                 client_secret: this.dvcClientSecret,
-            }
-            ),
+            }),
         })
         const data = await response.json()
         this.apiToken = data.access_token
@@ -66,10 +66,14 @@ export default class DevCycleApiWrapper {
 
     async getProject(projectKey: string): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
@@ -90,23 +94,29 @@ export default class DevCycleApiWrapper {
         payload: ProjectPayload
     ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}`, {
-            method: 'PATCH',
-            body: JSON.stringify(payload),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify(payload),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
 
-    async getAudiences(
-        projectKey: string
-    ): Promise<AudienceResponse[]> {
+    async getAudiences(projectKey: string): Promise<AudienceResponse[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences?perPage=1000`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/audiences?perPage=1000`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         return response.json()
     }
 
@@ -115,11 +125,15 @@ export default class DevCycleApiWrapper {
         payload: AudiencePayload
     ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences`, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/audiences`,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
@@ -130,52 +144,88 @@ export default class DevCycleApiWrapper {
         payload: AudiencePayload
     ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/audiences/${audienceKey}`, {
-            method: 'PATCH',
-            body: JSON.stringify(payload),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedAudienceKey = encodeURIComponent(audienceKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/audiences/${encodedAudienceKey}`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify(payload),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
 
-    async createFeature(projectKey: string, feature: Feature): Promise<Feature> {
+    async createFeature(
+        projectKey: string,
+        feature: Feature,
+        configurations: Record<string, FeatureConfiguration>
+    ): Promise<Feature> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features`, {
-            method: 'POST',
-            body: JSON.stringify(feature),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL_V2}/projects/${encodedProjectKey}/features`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    ...feature,
+                    configurations,
+                }),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return await response.json()
     }
 
-    async updateFeature(projectKey: string, feature: Feature): Promise<Feature> {
+    async updateFeature(
+        projectKey: string,
+        feature: Feature,
+        configurations: Record<string, FeatureConfiguration>
+    ): Promise<Feature> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}`, {
-            method: 'PATCH',
-            body: JSON.stringify(feature),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedFeatureKey = encodeURIComponent(feature.key)
+        const response = await fetch(
+            `${DVC_BASE_URL_V2}/projects/${encodedProjectKey}/features/${encodedFeatureKey}`,
+            {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    ...feature,
+                    configurations,
+                }),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return await response.json()
     }
 
     async getFeaturesForProject(projectKey: string): Promise<Feature[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL_V2}/projects/${projectKey}/features?perPage=1000`, {
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL_V2}/projects/${encodedProjectKey}/features?perPage=1000`,
+            {
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return await response.json()
     }
 
     async getEnvironments(projectKey: string): Promise<EnvironmentResponse[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
-            method: 'GET',
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/environments`,
+            {
+                method: 'GET',
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
@@ -185,11 +235,15 @@ export default class DevCycleApiWrapper {
         environment: EnvironmentPayload
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments`, {
-            method: 'POST',
-            body: JSON.stringify(environment),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/environments`,
+            {
+                method: 'POST',
+                body: JSON.stringify(environment),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
@@ -200,33 +254,17 @@ export default class DevCycleApiWrapper {
         environment: EnvironmentPayload
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/environments/${environmentKey}`, {
-            method: 'PATCH',
-            body: JSON.stringify(environment),
-            headers,
-        })
-        await this.handleErrors(response)
-        return response.json()
-    }
-
-    async updateFeatureConfigurations(
-        projectKey: string,
-        feature: Feature,
-        configurations: Record<string, FeatureConfiguration>,
-        options: { throwOnError: boolean } = { throwOnError: true }
-    ): Promise<FeatureConfiguration> {
-        const headers = await this.getHeaders()
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedEnvKey = encodeURIComponent(environmentKey)
         const response = await fetch(
-            `${DVC_BASE_URL_V2}/projects/${projectKey}/features/${feature.key}`,
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/environments/${encodedEnvKey}`,
             {
                 method: 'PATCH',
-                body: JSON.stringify({
-                    ...feature,
-                    configurations
-                }),
+                body: JSON.stringify(environment),
                 headers,
-            })
-        if (options.throwOnError) await this.handleErrors(response)
+            }
+        )
+        await this.handleErrors(response)
         return response.json()
     }
 
@@ -235,27 +273,43 @@ export default class DevCycleApiWrapper {
         customProperty: CustomPropertiesPayload
     ): Promise<CustomProperties> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties`, {
-            method: 'POST',
-            body: JSON.stringify(customProperty),
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/customProperties`,
+            {
+                method: 'POST',
+                body: JSON.stringify(customProperty),
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return response.json()
     }
 
-    async getCustomPropertiesForProject(projectKey: string): Promise<CustomProperties[]> {
+    async getCustomPropertiesForProject(
+        projectKey: string
+    ): Promise<CustomProperties[]> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties?perPage=1000`, {
-            headers,
-        })
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const response = await fetch(
+            `${DVC_BASE_URL}/projects/${encodedProjectKey}/customProperties?perPage=1000`,
+            {
+                headers,
+            }
+        )
         await this.handleErrors(response)
         return await response.json()
     }
 
-    async updateCustomProperty(projectKey: string, customProperty: CustomPropertiesPayload): Promise<CustomProperties> {
+    async updateCustomProperty(
+        projectKey: string,
+        customProperty: CustomPropertiesPayload
+    ): Promise<CustomProperties> {
         const headers = await this.getHeaders()
-        const response = await fetch(`${DVC_BASE_URL}/projects/${projectKey}/customProperties/${customProperty.key}`, {
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        const encodedCustomPropKey = encodeURIComponent(customProperty.key)
+        const url = `${DVC_BASE_URL}/projects/${encodedProjectKey}/customProperties/${encodedCustomPropKey}`
+        const response = await fetch(url, {
             method: 'PATCH',
             body: JSON.stringify(customProperty),
             headers,
