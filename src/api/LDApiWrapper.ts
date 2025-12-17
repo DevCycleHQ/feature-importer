@@ -73,18 +73,19 @@ export default class LDApiWrapper {
             }
         )
         await this.handleErrors(response)
-        const environments = await response.json()
-        this.cachedEnvironments = environments.items.map((env: { key: string }) => env.key) ?? []
+        const environmentResponse = await response.json()
+        this.cachedEnvironments = environmentResponse?.items?.map((env: { key: string }) => env.key)
     }
 
     async getFeatureFlagsForProject(projectKey: string) {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
+        let url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`
+        
         if (!this.cachedEnvironments) {
             await this.getEnvironments(projectKey)
         }
         
-        let url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`
         if (this.cachedEnvironments && this.cachedEnvironments.length > 0) {
             const envParams = this.cachedEnvironments
                 .map((key) => `env=${encodeURIComponent(key)}`)
