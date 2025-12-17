@@ -6,9 +6,10 @@ const LD_API_VERSION = '20240415'
 export default class LDApiWrapper {
     constructor(apiToken: string) {
         this.apiToken = apiToken
+        this.cachedEnvironments = null
     }
     apiToken: string
-    private cachedEnvironments: string[]
+    private cachedEnvironments: string[] | null
 
     private async getHeaders() {
         return {
@@ -36,7 +37,7 @@ export default class LDApiWrapper {
         
         // Cache environment keys for use in feature flag requests
         if (project.environments?.items) {
-            this.cachedEnvironments = project.environments.items.map(
+            this.cachedEnvironments = project.environments?.items.map(
                 (env: { key: string }) => env.key
             )
         }
