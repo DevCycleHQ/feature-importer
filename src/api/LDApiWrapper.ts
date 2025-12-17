@@ -6,10 +6,10 @@ const LD_API_VERSION = '20240415'
 export default class LDApiWrapper {
     constructor(apiToken: string) {
         this.apiToken = apiToken
-        this.cachedEnvironments = null
+        this.cachedEnvironments = {}
     }
     apiToken: string
-    private cachedEnvironments: string[] | null
+    private cachedEnvironments: Record<string, string[]>
 
     private async getHeaders() {
         return {
@@ -37,7 +37,7 @@ export default class LDApiWrapper {
         
         // Cache environment keys for use in feature flag requests
         if (project.environments?.items) {
-            this.cachedEnvironments = project.environments?.items.map(
+            this.cachedEnvironments[projectKey] = project.environments?.items?.map(
                 (env: { key: string }) => env.key
             )
         }
@@ -75,7 +75,7 @@ export default class LDApiWrapper {
         )
         await this.handleErrors(response)
         const environmentResponse = await response.json()
-        this.cachedEnvironments = environmentResponse?.items?.map((env: { key: string }) => env.key)
+        this.cachedEnvironments[projectKey] = environmentResponse?.items?.map((env: { key: string }) => env.key)
     }
 
     async getFeatureFlagsForProject(projectKey: string) {
@@ -83,12 +83,12 @@ export default class LDApiWrapper {
         const encodedProjectKey = encodeURIComponent(projectKey)
         let url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`
         
-        if (!this.cachedEnvironments) {
+        if (!this.cachedEnvironments[projectKey]) {
             await this.getEnvironments(projectKey)
         }
         
-        if (this.cachedEnvironments && this.cachedEnvironments.length > 0) {
-            const envParams = this.cachedEnvironments
+        if (this.cachedEnvironments[projectKey]?.length > 0) {
+            const envParams = this.cachedEnvironments[projectKey]
                 .map((key) => `env=${encodeURIComponent(key)}`)
                 .join('&')
             url += `&${envParams}`
