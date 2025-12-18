@@ -106,8 +106,9 @@ export class LDFeatureImporter {
 
             if (!feature.environments) {
                 throw new Error(
-                    `Feature "${feature.key}" is missing environments, this is likely due to an API version mismatch.`
-                     + ' Please use API version 20220603 when creating the API access token.'
+                    `Feature '${feature.key}' is missing environments. ` +
+                    'This may indicate that the feature flags were not fetched with environment data. ' +
+                    'Please use API version 20240415 when creating the API access token.'
                 )
             }
 

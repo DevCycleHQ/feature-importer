@@ -2,12 +2,14 @@ import { ProjectResponse, SegmentResponse } from '../types/LaunchDarkly'
 import { handleErrors } from './utils'
 
 const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
-const LD_API_VERSION = '20220603'
+const LD_API_VERSION = '20240415'
 export default class LDApiWrapper {
     constructor(apiToken: string) {
         this.apiToken = apiToken
+        this.cachedEnvironments = {}
     }
     apiToken: string
+    private cachedEnvironments: Record<string, string[]>
 
     private async getHeaders() {
         return {
@@ -31,7 +33,16 @@ export default class LDApiWrapper {
             }
         )
         await this.handleErrors(response)
-        return response.json()
+        const project = await response.json()
+        
+        // Cache environment keys for use in feature flag requests
+        if (project.environments?.items) {
+            this.cachedEnvironments[projectKey] = project.environments?.items.map(
+                (env: { key: string }) => env.key
+            )
+        }
+        
+        return project
     }
 
     async getSegments(
@@ -51,17 +62,42 @@ export default class LDApiWrapper {
         await this.handleErrors(response)
         return response.json()
     }
-
-    async getFeatureFlagsForProject(projectKey: string) {
+    
+    private async getEnvironments(projectKey: string) {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
         const response = await fetch(
-            `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`,
+            `${LD_BASE_URL}/projects/${encodedProjectKey}/environments`,
             {
                 method: 'GET',
                 headers,
             }
         )
+        await this.handleErrors(response)
+        const environmentResponse = await response.json()
+        this.cachedEnvironments[projectKey] = environmentResponse?.items?.map((env: { key: string }) => env.key)
+    }
+
+    async getFeatureFlagsForProject(projectKey: string) {
+        const headers = await this.getHeaders()
+        const encodedProjectKey = encodeURIComponent(projectKey)
+        let url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0`
+        
+        if (!this.cachedEnvironments[projectKey]) {
+            await this.getEnvironments(projectKey)
+        }
+        
+        if (this.cachedEnvironments[projectKey]?.length > 0) {
+            const envParams = this.cachedEnvironments[projectKey]
+                .map((key) => `env=${encodeURIComponent(key)}`)
+                .join('&')
+            url += `&${envParams}`
+        }
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers,
+        })
         await this.handleErrors(response)
         return response.json()
     }

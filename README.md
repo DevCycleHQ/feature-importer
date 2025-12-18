@@ -1,9 +1,10 @@
 # DevCycle Feature Importer
 
-DevCycle's Feature Importer is designed to import resources from other feature flag providers. 
-The importer is intended to be run on a single project and will create or update a project with the same key containing Environments, Features, and Variables. 
+DevCycle's Feature Importer is designed to import resources from other feature flag providers.
+The importer is intended to be run on a single project and will create or update a project with the same key containing Environments, Features, and Variables.
 
 ## Table of Contents
+
 - [Setup](#setup)
 - [Configuration](#configuration)
   - [Required](#required)
@@ -11,16 +12,18 @@ The importer is intended to be run on a single project and will create or update
 - [Code Migration](#code-migration)
 
 ## Setup
+
 1. Run `npm install` to install dependencies
 2. Setup [configuration file](#configuration)
 3. Run `npm start` to start import
 
 ## Configuration
-The feature importer can be configured using environment variables or a JSON config file. 
+
+The feature importer can be configured using environment variables or a JSON config file.
 By default the config is read from `config.json` in the project root, this can be overwritten using `CONFIG_FILE_PATH`.
 
 ```
-Note: This feature importer only supports LaunchDarkly API Version `20220603`. Please select this version when creating an API access token in LaunchDarkly.
+Note: This feature importer only supports LaunchDarkly API Version `20240415`. Please select this version when creating an API access token in LaunchDarkly.
 ```
 
 ### Required
@@ -39,6 +42,7 @@ Note: This feature importer only supports LaunchDarkly API Version `20220603`. P
   - Equivalent env var: SOURCE_PROJECT_KEY
 
 ### Optional
+
 - <b>targetProjectKey</b>: <i>string</i>
   - A DevCycle project key, resources will be created within this project. A project will be created with this key if it does not already exist.
   - If not specified, the target project key will be used
@@ -72,10 +76,10 @@ Sample config.json
   "excludeFeatures": [],
   "overwriteDuplicates": false,
   "operationMap": {
-		"startsWith": "contain",
-		"endsWith": "contain"
-	},
-  "provider":"launchdarkly"
+    "startsWith": "contain",
+    "endsWith": "contain"
+  },
+  "provider": "launchdarkly"
 }
 ```
 
@@ -94,7 +98,9 @@ PROVIDER='launchdarkly'
 ```
 
 ## Code Migration
+
 ### Migrating Code from LaunchDarkly
+
 - In LD the primary identifier is `key`, in DVC the equivalent value should be passed as `user_id`
 - DVC supports the following top-level properties on the user object: see [DVC User Object](https://docs.devcycle.com/docs/sdk/client-side-sdks/javascript#dvc-user-object).
   Any other properties used for targeting should be passed within the `customData` map.

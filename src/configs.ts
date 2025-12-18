@@ -35,18 +35,19 @@ export const getConfigs = (): ParsedImporterConfig => {
 
 /**
  * Validates a key to prevent injection attacks in URL construction
- * Keys should only contain lowercase alphanumeric characters, hyphens, underscores, and periods
+ * Keys should only contain alphanumeric characters (uppercase or lowercase), hyphens, underscores, and periods
+ * Only the source Project Key can contain capital letters
  */
-const validateKey = (key: string, keyName: string): void => {
+export const validateKey = (key: string, keyName: string, allowCapitalLetters = false): void => {
     if (!key || typeof key !== 'string') {
         throw Error(`${keyName} must be a non-empty string`)
     }
-    // Pattern for safe keys: lowercase alphanumeric, hyphens, underscores, periods
-    const validKeyPattern = /^[a-z0-9._-]+$/
+    // Pattern for safe keys: alphanumeric, hyphens, underscores, periods
+    const validKeyPattern = allowCapitalLetters ? /^[a-zA-Z0-9._-]+$/ : /^[a-z0-9._-]+$/
     
     if (!validKeyPattern.test(key)) {
         throw Error(
-            `${keyName} contains invalid characters. Only lowercase alphanumeric characters, ` +
+            `${keyName} contains invalid characters. Only alphanumeric characters (uppercase or lowercase), ` +
             'hyphens, underscores, and periods are allowed.'
         )
     }
@@ -63,7 +64,7 @@ const validateConfigs = (configs: ParsedImporterConfig) => {
         throw Error('sourceProjectKey cannot be empty')
     
     // Validate project keys to prevent security issues with file data in network requests
-    validateKey(configs.sourceProjectKey, 'sourceProjectKey')
+    validateKey(configs.sourceProjectKey, 'sourceProjectKey', true)
     if (configs.targetProjectKey) {
         validateKey(configs.targetProjectKey, 'targetProjectKey')
     }
