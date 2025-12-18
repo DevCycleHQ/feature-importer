@@ -11,7 +11,6 @@ import {
 } from '../../api/__mocks__/MockResponses'
 import { LDAudienceImporter } from '../audiences'
 import {
-    featureConfigResponse,
     mockAudience,
     mockFeature
 } from '../../api/__mocks__/targetingRules'
@@ -33,7 +32,7 @@ describe('LDFeatureImporter', () => {
 
         test('with default config options', async () => {
             const config = { ...mockConfig }
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
             const featureImporter = new LDFeatureImporter(config, audienceImport)
@@ -58,7 +57,7 @@ describe('LDFeatureImporter', () => {
 
         test('with overwriteDuplicates=true - updates duplicate features', async () => {
             const config = { ...mockConfig, overwriteDuplicates: true }
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
             const featureImporter = new LDFeatureImporter(config, audienceImport)
@@ -84,7 +83,7 @@ describe('LDFeatureImporter', () => {
         test('with an includeFeatures array', async () => {
             const config = { ...mockConfig, includeFeatures: mockIncludeExcludeMap }
 
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
             const featureImporter = new LDFeatureImporter(config, audienceImport)
@@ -110,7 +109,7 @@ describe('LDFeatureImporter', () => {
         test('with an excludeFeatures array', async () => {
             const config = { ...mockConfig, excludeFeatures: mockIncludeExcludeMap }
 
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
             mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
 
             const featureImporter = new LDFeatureImporter(config, audienceImport)

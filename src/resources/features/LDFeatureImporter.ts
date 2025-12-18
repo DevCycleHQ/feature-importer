@@ -53,7 +53,7 @@ export class LDFeatureImporter {
         } = this.config
 
         const existingFeatures = await DVC.getFeaturesForProject(targetProjectKey)
-        const { items: ldFeatures } = await LD.getFeatureFlagsForProject(
+        const ldFeatures = await LD.getFeatureFlagsForProject(
             sourceProjectKey
         )
 
