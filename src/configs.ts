@@ -36,7 +36,7 @@ export const getConfigs = (): ParsedImporterConfig => {
 /**
  * Validates a key to prevent injection attacks in URL construction
  * Keys should only contain alphanumeric characters (uppercase or lowercase), hyphens, underscores, and periods
- * only the source Project Key can contain capital letters
+ * Only the source Project Key can contain capital letters
  */
 export const validateKey = (key: string, keyName: string, allowCapitalLetters = false): void => {
     if (!key || typeof key !== 'string') {

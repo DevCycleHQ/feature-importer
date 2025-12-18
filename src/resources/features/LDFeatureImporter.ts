@@ -108,7 +108,7 @@ export class LDFeatureImporter {
                 throw new Error(
                     `Feature '${feature.key}' is missing environments. ` +
                     'This may indicate that the feature flags were not fetched with environment data. ' +
-                    'Please use API version 20240415 when creating the API access token.' 
+                    'Please use API version 20240415 when creating the API access token.'
                 )
             }
 

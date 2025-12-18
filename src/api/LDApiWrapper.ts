@@ -37,7 +37,7 @@ export default class LDApiWrapper {
         
         // Cache environment keys for use in feature flag requests
         if (project.environments?.items) {
-            this.cachedEnvironments[projectKey] = project.environments?.items?.map(
+            this.cachedEnvironments[projectKey] = project.environments?.items.map(
                 (env: { key: string }) => env.key
             )
         }
@@ -92,7 +92,7 @@ export default class LDApiWrapper {
                 .map((key) => `env=${encodeURIComponent(key)}`)
                 .join('&')
             url += `&${envParams}`
-        } 
+        }
         
         const response = await fetch(url, {
             method: 'GET',

@@ -58,7 +58,7 @@ describe('validateKey', () => {
             expect(() => validateKey('.', 'testKey')).not.toThrow()
         })
 
-        test('should accept keys with all valid character types', () => {
+        test('should enforce capitalization rules for keys with all valid character types', () => {
             expect(() => validateKey('aA1-_.', 'testKey')).toThrow()
             expect(() => validateKey('Project-Key_2024.v1', 'testKey', false)).toThrow()
             expect(() => validateKey('Project-Key_2024.v1', 'testKey', true)).not.toThrow()
