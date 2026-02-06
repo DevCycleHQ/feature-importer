@@ -133,7 +133,10 @@ export default class LDApiWrapper {
 
                 const items: Feature[] = data.items || []
 
-                if (totalCount === null && data.totalCount) {
+                if (
+                    totalCount === null &&
+                    typeof data.totalCount === 'number'
+                ) {
                     totalCount = data.totalCount
                 }
                 if (i === 0) {
