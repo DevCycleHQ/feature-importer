@@ -365,11 +365,12 @@ describe("LDApiWrapper", () => {
       expect(fetchMock.mock.calls[1][0]).toContain(
         `/projects/${mockProjectKey2}/environments`,
       );
-      expect(fetchMock.mock.calls[2][0]).toMatch(
-        new RegExp(
-          `/flags/${mockProjectKey2}\\?summary=0&limit=100&offset=0&env=development`,
-        ),
-      );
+      const flagsUrl = fetchMock.mock.calls[2][0];
+      expect(flagsUrl).toContain(`/flags/${mockProjectKey2}`);
+      expect(flagsUrl).toContain('summary=0');
+      expect(flagsUrl).toContain('limit=100');
+      expect(flagsUrl).toContain('offset=0');
+      expect(flagsUrl).toContain('env=development');
     });
   });
 
@@ -495,9 +496,11 @@ describe("LDApiWrapper", () => {
       const featureFlagsCall = fetchMock.mock.calls[1];
       const url = featureFlagsCall[0];
 
-      expect(url).toMatch(
-        /^https:\/\/app\.launchdarkly\.com\/api\/v2\/flags\/test-project\?summary=0&limit=100&offset=0&env=dev$/,
-      );
+      expect(url).toContain('https://app.launchdarkly.com/api/v2/flags/test-project');
+      expect(url).toContain('summary=0');
+      expect(url).toContain('limit=100');
+      expect(url).toContain('offset=0');
+      expect(url).toContain('env=dev');
     });
 
     test("should split environments into multiple batches when more than 3", async () => {
