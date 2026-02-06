@@ -41,5 +41,5 @@ export type Operator = {
 
 export enum OperatorType {
     or = 'or',
-    and = 'and'
+    and = 'and',
 }

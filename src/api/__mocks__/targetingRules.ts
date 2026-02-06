@@ -1,42 +1,47 @@
-import { CustomProperties, CustomPropertyType, FeatureConfiguration, OperatorType } from '../../types/DevCycle'
+import {
+    CustomProperties,
+    CustomPropertyType,
+    FeatureConfiguration,
+    OperatorType,
+} from '../../types/DevCycle'
 import { FeatureKind } from '../../types/LaunchDarkly'
 
 export const mockFeature = {
-    'description': '',
-    'kind': FeatureKind.boolean,
+    description: '',
+    kind: FeatureKind.boolean,
     _version: 123,
     creationDate: 123,
     includeInSnippet: true,
     clientSideAvailability: {
         usingEnvironmentIds: true,
-        usingMobileKey: true
+        usingMobileKey: true,
     },
     temporary: true,
     _links: {
         self: {
             href: 'string',
-            type: 'string'
-        }
+            type: 'string',
+        },
     },
     maintainerId: 'string',
-    'key': 'mock-feature',
-    'name': 'flag 123',
-    'tags': [],
-    'variations': [
+    key: 'mock-feature',
+    name: 'flag 123',
+    tags: [],
+    variations: [
         {
-            '_id': '5750426e-32c3-4496-b80e-970ff42b3d1b',
-            'value': true
+            _id: '5750426e-32c3-4496-b80e-970ff42b3d1b',
+            value: true,
         },
         {
-            '_id': 'c24ce765-b79f-4f75-bf88-c940957d657e',
-            'value': false
-        }
+            _id: 'c24ce765-b79f-4f75-bf88-c940957d657e',
+            value: false,
+        },
     ],
 }
 
 export const featureConfigResponse: FeatureConfiguration = {
     targets: [],
-    status: 'active'
+    status: 'active',
 }
 
 export const mockAudience = {
@@ -46,8 +51,8 @@ export const mockAudience = {
         name: 'segment 1',
         key: 'project-key',
         description: 'audience description',
-        filters: { operator: OperatorType.or, filters: [] }
-    }
+        filters: { operator: OperatorType.or, filters: [] },
+    },
 }
 
 export const mockGetCustomProperties: CustomProperties[] = [
@@ -84,5 +89,4 @@ export const mockGetCustomProperties: CustomProperties[] = [
         createdAt: 'test-created-at-date',
         updatedAt: 'test-updated-at-date',
     },
-
 ]

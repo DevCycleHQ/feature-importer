@@ -24,7 +24,7 @@ async function run() {
 
     const ldEnvironments = sourceProject.environments.items
     const environmentKeys = ldEnvironments.map(
-        (env: Record<string, any>) => env.key
+        (env: Record<string, any>) => env.key,
     )
 
     console.log('Importing audiences...')
@@ -39,7 +39,7 @@ async function run() {
     const customPropertiesImporter = new CustomPropertiesImporter(config)
     await customPropertiesImporter.import(
         featureImporter.featuresToImport,
-        Object.values(audienceImporter.audiences)
+        Object.values(audienceImporter.audiences),
     )
 
     printSummary(featureSummary)
@@ -58,7 +58,7 @@ function printSummary(featureSummary: FeatureSummary) {
             'Failed to import the following features:',
             Object.entries(errored)
                 .map(([key, error]) => `\n\t- ${key}: ${error}`)
-                .join('')
+                .join(''),
         )
     }
     console.log('-------------------------------------------')

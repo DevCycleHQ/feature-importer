@@ -28,7 +28,7 @@ export type Feature = {
     maintainerId: string
     environments: {
         [key: string]: {
-            on: boolean,
+            on: boolean
             targets?: Target[]
             rules?: Rule[]
             fallthrough?: Fallthrough

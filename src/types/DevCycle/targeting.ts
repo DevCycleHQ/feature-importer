@@ -18,10 +18,9 @@ export type TargetingRule = {
         _variation: string
     }[]
     audience: AudiencePayload
-
 }
 
 export type FeatureConfiguration = {
-    targets: TargetingRule[],
+    targets: TargetingRule[]
     status: 'active' | 'inactive' | 'archived'
 }

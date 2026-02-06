@@ -23,7 +23,7 @@ const mockDvcAudienceResponse = {
     description: 'audience description',
     filters: {
         filters: [],
-        operator: 'and' as Operator['operator']
+        operator: 'and' as Operator['operator'],
     },
 }
 
@@ -33,7 +33,7 @@ const validSegment = {
     description: 'my segment',
     tags: ['tag1', 'tag2'],
     creationDate: 123456789,
-    rules: []
+    rules: [],
 }
 
 describe('LDAudienceImporter', () => {
@@ -47,13 +47,13 @@ describe('LDAudienceImporter', () => {
         const ldSegment = { ...validSegment }
         const expectedFilters = {
             operator: OperatorType.or,
-            filters: []
+            filters: [],
         }
         const createResponse = {
             ...mockDvcAudienceResponse,
             name: ldSegment.name,
             key: config.targetProjectKey,
-            filters: expectedFilters
+            filters: expectedFilters,
         }
         mockLD.getSegments.mockResolvedValue({ items: [ldSegment] })
         mockDVC.getAudiences.mockResolvedValue([])
@@ -63,7 +63,7 @@ describe('LDAudienceImporter', () => {
         await audienceImporter.import([envKey])
 
         expect(audienceImporter.audiences).toEqual({
-            [`${ldSegment.key}-${envKey}`]: createResponse
+            [`${ldSegment.key}-${envKey}`]: createResponse,
         })
         expect(audienceImporter.errors).toEqual({})
         expect(mockDVC.createAudience).toHaveBeenCalledWith(
@@ -73,19 +73,19 @@ describe('LDAudienceImporter', () => {
                 key: `${ldSegment.key}-${envKey}`,
                 description: ldSegment.description,
                 tags: ldSegment.tags,
-                filters: expectedFilters
-            }
+                filters: expectedFilters,
+            },
         )
         expect(mockDVC.updateAudience).not.toHaveBeenCalled()
     })
 
-    test("audience is skipped if it already exists", async () => {
+    test('audience is skipped if it already exists', async () => {
         const config = { ...mockConfig }
         const envKey = 'production'
         const ldSegment = { ...validSegment }
         const existingAudience = {
             ...mockDvcAudienceResponse,
-            key: `${ldSegment.key}-${envKey}`
+            key: `${ldSegment.key}-${envKey}`,
         }
         mockLD.getSegments.mockResolvedValue({ items: [ldSegment] })
         mockDVC.getAudiences.mockResolvedValue([existingAudience])
@@ -94,30 +94,30 @@ describe('LDAudienceImporter', () => {
         await audienceImporter.import([envKey])
 
         expect(audienceImporter.audiences).toEqual({
-            [existingAudience.key]: existingAudience
+            [existingAudience.key]: existingAudience,
         })
         expect(audienceImporter.errors).toEqual({})
         expect(mockDVC.createAudience).not.toHaveBeenCalled()
         expect(mockDVC.updateAudience).not.toHaveBeenCalled()
     })
 
-    test("audience is updated if overwriteDuplicates is true", async () => {
+    test('audience is updated if overwriteDuplicates is true', async () => {
         const config = { ...mockConfig, overwriteDuplicates: true }
         const envKey = 'production'
         const ldSegment = { ...validSegment }
         const existingAudience = {
             ...mockDvcAudienceResponse,
-            key: `${ldSegment.key}-${envKey}`
+            key: `${ldSegment.key}-${envKey}`,
         }
         const expectedFilters = {
             operator: OperatorType.or,
-            filters: []
+            filters: [],
         }
         const updateResponse = {
             ...mockDvcAudienceResponse,
             name: ldSegment.name,
             key: config.targetProjectKey,
-            filters: expectedFilters
+            filters: expectedFilters,
         }
         mockLD.getSegments.mockResolvedValue({ items: [ldSegment] })
         mockDVC.getAudiences.mockResolvedValue([existingAudience])
@@ -127,7 +127,7 @@ describe('LDAudienceImporter', () => {
         await audienceImporter.import([envKey])
 
         expect(audienceImporter.audiences).toEqual({
-            [`${ldSegment.key}-${envKey}`]: updateResponse
+            [`${ldSegment.key}-${envKey}`]: updateResponse,
         })
         expect(audienceImporter.errors).toEqual({})
         expect(mockDVC.updateAudience).toHaveBeenCalledWith(
@@ -138,8 +138,8 @@ describe('LDAudienceImporter', () => {
                 key: `${ldSegment.key}-${envKey}`,
                 description: ldSegment.description,
                 tags: ldSegment.tags,
-                filters: expectedFilters
-            }
+                filters: expectedFilters,
+            },
         )
         expect(mockDVC.createAudience).not.toHaveBeenCalled()
     })

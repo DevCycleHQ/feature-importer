@@ -22,7 +22,7 @@ const mockDvcProjectResponse = {
     key: 'some key',
     createdAt: 'datestring',
     updatedAt: 'datestring',
-    hasJiraIntegration: false
+    hasJiraIntegration: false,
 }
 
 describe('LDProjectImporter', () => {
@@ -33,21 +33,21 @@ describe('LDProjectImporter', () => {
         tags: [],
         environments: {
             totalCount: 0,
-            items: []
-        }
+            items: [],
+        },
     }
 
     beforeEach(() => {
         jest.clearAllMocks()
     })
 
-    test('project is created when it doesn\'t exist yet', async () => {
+    test("project is created when it doesn't exist yet", async () => {
         const config = { ...mockConfig }
         const dvcResponse = {
             ...mockDvcProjectResponse,
             _id: '123',
             name: 'project name',
-            key: ldProject.key
+            key: ldProject.key,
         }
         mockLD.getProject.mockResolvedValue(ldProject)
         mockDVC.getProject.mockRejectedValue(new Error('Not found'))
@@ -60,7 +60,7 @@ describe('LDProjectImporter', () => {
         expect(projectImporter.sourceProject).toEqual(ldProject)
         expect(mockDVC.createProject).toHaveBeenCalledWith({
             name: ldProject.name,
-            key: ldProject.key
+            key: ldProject.key,
         })
         expect(mockDVC.updateProject).not.toHaveBeenCalled()
     })
@@ -71,7 +71,7 @@ describe('LDProjectImporter', () => {
             ...mockDvcProjectResponse,
             _id: '123',
             name: 'a different project name',
-            key: ldProject.key
+            key: ldProject.key,
         }
         mockLD.getProject.mockResolvedValue(ldProject)
         mockDVC.getProject.mockResolvedValue(dvcResponse)
@@ -91,7 +91,7 @@ describe('LDProjectImporter', () => {
             ...mockDvcProjectResponse,
             _id: '123',
             name: 'different project name',
-            key: ldProject.key
+            key: ldProject.key,
         }
         const updatedDvcResponse = {
             ...mockDvcProjectResponse,
@@ -108,13 +108,10 @@ describe('LDProjectImporter', () => {
 
         expect(result).toEqual(expect.objectContaining(updatedDvcResponse))
         expect(projectImporter.sourceProject).toEqual(ldProject)
-        expect(mockDVC.updateProject).toHaveBeenCalledWith(
-            ldProject.key,
-            {
-                name: ldProject.name,
-                key: ldProject.key
-            }
-        )
+        expect(mockDVC.updateProject).toHaveBeenCalledWith(ldProject.key, {
+            name: ldProject.name,
+            key: ldProject.key,
+        })
         expect(mockDVC.createProject).not.toHaveBeenCalled()
     })
 })

@@ -23,5 +23,5 @@ export enum EnvironmentType {
     Dev = 'development',
     Staging = 'staging',
     Prod = 'production',
-    Recovery = 'disaster_recovery'
+    Recovery = 'disaster_recovery',
 }

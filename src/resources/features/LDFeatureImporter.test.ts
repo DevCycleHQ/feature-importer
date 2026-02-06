@@ -7,13 +7,10 @@ import {
     mockConfig,
     mockDVCFeaturesResponse,
     mockLDFeaturesFlags,
-    mockLDFeaturesMappedToDVC
+    mockLDFeaturesMappedToDVC,
 } from '../../api/__mocks__/MockResponses'
 import { LDAudienceImporter } from '../audiences'
-import {
-    mockAudience,
-    mockFeature
-} from '../../api/__mocks__/targetingRules'
+import { mockAudience, mockFeature } from '../../api/__mocks__/targetingRules'
 import { mapLDFeatureToDVCFeature } from '../../utils/LaunchDarkly'
 
 const mockLD = LD as jest.Mocked<typeof LD>
@@ -24,7 +21,7 @@ const audienceImport = new LDAudienceImporter(mockConfig)
 describe('LDFeatureImporter', () => {
     describe('getFeaturesToImport', () => {
         const mockIncludeExcludeMap: Map<string, boolean> = new Map([
-            ['feature-key', true]
+            ['feature-key', true],
         ])
         beforeEach(() => {
             jest.clearAllMocks()
@@ -32,104 +29,146 @@ describe('LDFeatureImporter', () => {
 
         test('with default config options', async () => {
             const config = { ...mockConfig }
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
-            mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(
+                mockLDFeaturesFlags.items,
+            )
+            mockDVC.getFeaturesForProject.mockResolvedValue(
+                mockDVCFeaturesResponse,
+            )
 
-            const featureImporter = new LDFeatureImporter(config, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                config,
+                audienceImport,
+            )
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: 'create'
+                    action: 'create',
                 },
                 'feature-key-2': {
                     feature: mockLDFeaturesMappedToDVC[1],
-                    action: 'create'
+                    action: 'create',
                 },
                 'duplicate-key': {
                     feature: mockLDFeaturesMappedToDVC[2],
-                    action: 'skip'
-                }
+                    action: 'skip',
+                },
             })
-            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
+            expect(featureImporter.sourceFeatures).toEqual(
+                mockLDFeaturesFlags.items,
+            )
         })
 
         test('with overwriteDuplicates=true - updates duplicate features', async () => {
             const config = { ...mockConfig, overwriteDuplicates: true }
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
-            mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(
+                mockLDFeaturesFlags.items,
+            )
+            mockDVC.getFeaturesForProject.mockResolvedValue(
+                mockDVCFeaturesResponse,
+            )
 
-            const featureImporter = new LDFeatureImporter(config, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                config,
+                audienceImport,
+            )
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: 'create'
+                    action: 'create',
                 },
                 'feature-key-2': {
                     feature: mockLDFeaturesMappedToDVC[1],
-                    action: 'create'
+                    action: 'create',
                 },
                 'duplicate-key': {
                     feature: mockLDFeaturesMappedToDVC[2],
-                    action: 'update'
-                }
+                    action: 'update',
+                },
             })
-            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
+            expect(featureImporter.sourceFeatures).toEqual(
+                mockLDFeaturesFlags.items,
+            )
         })
 
         test('with an includeFeatures array', async () => {
-            const config = { ...mockConfig, includeFeatures: mockIncludeExcludeMap }
+            const config = {
+                ...mockConfig,
+                includeFeatures: mockIncludeExcludeMap,
+            }
 
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
-            mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(
+                mockLDFeaturesFlags.items,
+            )
+            mockDVC.getFeaturesForProject.mockResolvedValue(
+                mockDVCFeaturesResponse,
+            )
 
-            const featureImporter = new LDFeatureImporter(config, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                config,
+                audienceImport,
+            )
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: 'create'
+                    action: 'create',
                 },
                 'feature-key-2': {
                     feature: mockLDFeaturesMappedToDVC[1],
-                    action: 'skip'
+                    action: 'skip',
                 },
                 'duplicate-key': {
                     feature: mockLDFeaturesMappedToDVC[2],
-                    action: 'skip'
-                }
+                    action: 'skip',
+                },
             })
-            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
+            expect(featureImporter.sourceFeatures).toEqual(
+                mockLDFeaturesFlags.items,
+            )
         })
 
         test('with an excludeFeatures array', async () => {
-            const config = { ...mockConfig, excludeFeatures: mockIncludeExcludeMap }
+            const config = {
+                ...mockConfig,
+                excludeFeatures: mockIncludeExcludeMap,
+            }
 
-            mockLD.getFeatureFlagsForProject.mockResolvedValue(mockLDFeaturesFlags.items)
-            mockDVC.getFeaturesForProject.mockResolvedValue(mockDVCFeaturesResponse)
+            mockLD.getFeatureFlagsForProject.mockResolvedValue(
+                mockLDFeaturesFlags.items,
+            )
+            mockDVC.getFeaturesForProject.mockResolvedValue(
+                mockDVCFeaturesResponse,
+            )
 
-            const featureImporter = new LDFeatureImporter(config, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                config,
+                audienceImport,
+            )
             await featureImporter['getFeaturesToImport']()
 
             expect(featureImporter.featuresToImport).toEqual({
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: 'skip'
+                    action: 'skip',
                 },
                 'feature-key-2': {
                     feature: mockLDFeaturesMappedToDVC[1],
-                    action: 'create'
+                    action: 'create',
                 },
                 'duplicate-key': {
                     feature: mockLDFeaturesMappedToDVC[2],
-                    action: 'skip'
-                }
+                    action: 'skip',
+                },
             })
-            expect(featureImporter.sourceFeatures).toEqual(mockLDFeaturesFlags.items)
+            expect(featureImporter.sourceFeatures).toEqual(
+                mockLDFeaturesFlags.items,
+            )
         })
     })
 
@@ -142,11 +181,14 @@ describe('LDFeatureImporter', () => {
             const featuresToImport = {
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: FeatureImportAction.Skip
+                    action: FeatureImportAction.Skip,
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -164,11 +206,14 @@ describe('LDFeatureImporter', () => {
             const featuresToImport = {
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: FeatureImportAction.Create
+                    action: FeatureImportAction.Create,
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -181,7 +226,7 @@ describe('LDFeatureImporter', () => {
             expect(mockDVC.createFeature).toHaveBeenCalledWith(
                 mockConfig.targetProjectKey,
                 featuresToImport['feature-key'].feature,
-                {}
+                {},
             )
             expect(mockDVC.updateFeature).not.toHaveBeenCalled()
         })
@@ -190,11 +235,14 @@ describe('LDFeatureImporter', () => {
             const featuresToImport = {
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: FeatureImportAction.Update
+                    action: FeatureImportAction.Update,
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -207,7 +255,7 @@ describe('LDFeatureImporter', () => {
             expect(mockDVC.updateFeature).toHaveBeenCalledWith(
                 mockConfig.targetProjectKey,
                 featuresToImport['feature-key'].feature,
-                {}
+                {},
             )
             expect(mockDVC.createFeature).not.toHaveBeenCalled()
         })
@@ -216,11 +264,14 @@ describe('LDFeatureImporter', () => {
             const featuresToImport = {
                 'feature-key': {
                     feature: mockLDFeaturesMappedToDVC[0],
-                    action: FeatureImportAction.Unsupported
+                    action: FeatureImportAction.Unsupported,
                 },
             }
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = featuresToImport
             const result = await featureImporter['importFeatures']()
 
@@ -243,22 +294,19 @@ describe('LDFeatureImporter', () => {
         test('target rules created for feature with target', async () => {
             const envKey = 'production'
             const featureTarget = {
-                'values': [
-                    'patel',
-                    'jamie'
-                ],
-                'variation': 0
+                values: ['patel', 'jamie'],
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [],
-                        'targets': [featureTarget],
+                        on: true,
+                        rules: [],
+                        targets: [featureTarget],
                     },
-                }
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -270,73 +318,77 @@ describe('LDFeatureImporter', () => {
 
             const mockLdFeatures = [createFeature]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
             const result = await featureImporter['getFeatureConfigsToImport']()
             const { configs } = result[createFeature.key]
-            expect(configs).toEqual(
-                [{
+            expect(configs).toEqual([
+                {
                     environment: envKey,
                     targetingRules: {
                         status: 'active',
-                        targets: [{
-                            audience: {
-                                filters: {
-                                    filters: [{
-                                        comparator: '=',
-                                        subType: 'user_id',
-                                        type: 'user',
-                                        values:
-                                            featureTarget.values
-                                    }],
-                                    operator: 'and'
+                        targets: [
+                            {
+                                audience: {
+                                    filters: {
+                                        filters: [
+                                            {
+                                                comparator: '=',
+                                                subType: 'user_id',
+                                                type: 'user',
+                                                values: featureTarget.values,
+                                            },
+                                        ],
+                                        operator: 'and',
+                                    },
+                                    name: 'Imported Target',
                                 },
-                                name: 'Imported Target'
-                            }, distribution:
-                                [{
-                                    _variation: `variation-${featureTarget.variation + 1}`,
-                                    percentage: 1
-                                }]
-                        }]
-                    }
-                }]
-            )
+                                distribution: [
+                                    {
+                                        _variation: `variation-${featureTarget.variation + 1}`,
+                                        percentage: 1,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ])
         })
 
         test('target rules created for feature with rule', async () => {
             const envKey = 'production'
             const featureRule = {
-                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'description': 'gmail',
-                'clauses': [
+                _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                ref: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                description: 'gmail',
+                clauses: [
                     {
-                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                        'attribute': 'email',
-                        'negate': false,
-                        'op': 'contains',
-                        'values': [
-                            'gmail'
-                        ]
+                        _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        attribute: 'email',
+                        negate: false,
+                        op: 'contains',
+                        values: ['gmail'],
                     },
                 ],
-                'variation': 0,
-                trackEvents: false
+                variation: 0,
+                trackEvents: false,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [featureRule],
-                        'targets': [],
+                        on: true,
+                        rules: [featureRule],
+                        targets: [],
                     },
-
-                }
-
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -347,73 +399,80 @@ describe('LDFeatureImporter', () => {
             }
             const mockLdFeatures = [createFeature]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
             const result = await featureImporter['getFeatureConfigsToImport']()
             const { configs } = result[createFeature.key]
-            expect(configs).toEqual(
-                [{
+            expect(configs).toEqual([
+                {
                     environment: envKey,
                     targetingRules: {
                         status: 'active',
-                        targets: [{
-                            audience: {
-                                filters: {
-                                    filters: [{
-                                        comparator: 'contain',
-                                        subType: featureRule.clauses[0].attribute,
-                                        type: 'user',
-                                        values:
-                                            featureRule.clauses[0].values
-                                    }],
-                                    operator: 'and'
+                        targets: [
+                            {
+                                audience: {
+                                    filters: {
+                                        filters: [
+                                            {
+                                                comparator: 'contain',
+                                                subType:
+                                                    featureRule.clauses[0]
+                                                        .attribute,
+                                                type: 'user',
+                                                values: featureRule.clauses[0]
+                                                    .values,
+                                            },
+                                        ],
+                                        operator: 'and',
+                                    },
+                                    name: 'Imported Rule',
                                 },
-                                name: 'Imported Rule'
-                            }, distribution:
-                                [{
-                                    _variation: 'variation-1',
-                                    percentage: 1
-                                }]
-                        }]
-                    }
-                }]
-            )
+                                distribution: [
+                                    {
+                                        _variation: 'variation-1',
+                                        percentage: 1,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ])
         })
 
         test('target rules created for feature with segmentMatch', async () => {
             const envKey = 'production'
             const featureRule = {
-                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'description': 'canadian',
-                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'clauses': [
+                _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                description: 'canadian',
+                ref: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                clauses: [
                     {
-                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                        'attribute': 'segmentMatch',
-                        'negate': false,
-                        'op': 'segmentMatch',
-                        'values': [
-                            'seg-1'
-                        ]
-                    }
+                        _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        attribute: 'segmentMatch',
+                        negate: false,
+                        op: 'segmentMatch',
+                        values: ['seg-1'],
+                    },
                 ],
-                'trackEvents': false,
-                'variation': 0
+                trackEvents: false,
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [featureRule],
-                        'targets': [],
+                        on: true,
+                        rules: [featureRule],
+                        targets: [],
                     },
-
-                }
-
+                },
             }
             const mockFeaturesToImport: FeaturesToImport = {
                 [createFeature.key]: {
@@ -425,74 +484,81 @@ describe('LDFeatureImporter', () => {
 
             audienceImport.audiences = mockAudience
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
             const result = await featureImporter['getFeatureConfigsToImport']()
 
             const { configs } = result[createFeature.key]
-            expect(configs).toEqual(
-                [{
+            expect(configs).toEqual([
+                {
                     environment: envKey,
                     targetingRules: {
                         status: 'active',
-                        targets: [{
-                            audience: {
-                                filters: {
-                                    filters: [{
-                                        comparator: '=',
-                                        type: 'audienceMatch',
-                                        _audiences: [
-                                            mockAudience['seg-1-production']._id
-                                        ]
-                                    }],
-                                    operator: 'and'
+                        targets: [
+                            {
+                                audience: {
+                                    filters: {
+                                        filters: [
+                                            {
+                                                comparator: '=',
+                                                type: 'audienceMatch',
+                                                _audiences: [
+                                                    mockAudience[
+                                                        'seg-1-production'
+                                                    ]._id,
+                                                ],
+                                            },
+                                        ],
+                                        operator: 'and',
+                                    },
+                                    name: 'Imported Rule',
                                 },
-                                name: 'Imported Rule'
-                            }, distribution:
-                                [{
-                                    _variation: 'variation-1',
-                                    percentage: 1
-                                }]
-                        }]
-                    }
-                }]
-            )
+                                distribution: [
+                                    {
+                                        _variation: 'variation-1',
+                                        percentage: 1,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ])
         })
 
         test('target rules not created for feature to skip', async () => {
             const envKey = 'production'
             const featureRule = {
-                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'description': 'gmail',
-                'clauses': [
+                _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                ref: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                description: 'gmail',
+                clauses: [
                     {
-                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                        'attribute': 'email',
-                        'negate': false,
-                        'op': 'contains',
-                        'values': [
-                            'gmail'
-                        ]
+                        _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        attribute: 'email',
+                        negate: false,
+                        op: 'contains',
+                        values: ['gmail'],
                     },
                 ],
-                'variation': 0,
-                trackEvents: false
+                variation: 0,
+                trackEvents: false,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [featureRule],
-                        'targets': [],
+                        on: true,
+                        rules: [featureRule],
+                        targets: [],
                     },
-
-                }
-
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -503,7 +569,10 @@ describe('LDFeatureImporter', () => {
             }
             const mockLdFeatures = [createFeature]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
@@ -512,38 +581,33 @@ describe('LDFeatureImporter', () => {
         })
 
         test('target rule empty for feature with unsupported feature (semVerEqual)', async () => {
-
             const envKey = 'production'
             const featureRule = {
-                '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'description': 'canadian',
-                'ref': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                'clauses': [
+                _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                description: 'canadian',
+                ref: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                clauses: [
                     {
-                        '_id': '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
-                        'attribute': 'segmentMatch',
-                        'negate': false,
-                        'op': 'semVerEqual',
-                        'values': [
-                            '2.0.2'
-                        ]
-                    }
+                        _id: '5f9b0b0e-3b1f-4b0f-8c1f-1c1f1c1f1c1f',
+                        attribute: 'segmentMatch',
+                        negate: false,
+                        op: 'semVerEqual',
+                        values: ['2.0.2'],
+                    },
                 ],
-                'trackEvents': false,
-                'variation': 0
+                trackEvents: false,
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [featureRule],
-                        'targets': [],
+                        on: true,
+                        rules: [featureRule],
+                        targets: [],
                     },
-
-                }
-
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -554,15 +618,19 @@ describe('LDFeatureImporter', () => {
             }
             const mockLdFeatures = [createFeature]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
 
             const result = await featureImporter['getFeatureConfigsToImport']()
-            expect(result[createFeature.key].action).toBe(FeatureImportAction.Unsupported)
+            expect(result[createFeature.key].action).toBe(
+                FeatureImportAction.Unsupported,
+            )
             expect(result[createFeature.key].configs).toHaveLength(0)
         })
-
     })
 
     describe('importFeatureConfigs', () => {
@@ -572,22 +640,19 @@ describe('LDFeatureImporter', () => {
         test('create a feature config for create feature', async () => {
             const envKey = 'production'
             const featureTarget = {
-                'values': [
-                    'patel',
-                    'jamie'
-                ],
-                'variation': 0
+                values: ['patel', 'jamie'],
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [],
-                        'targets': [featureTarget],
+                        on: true,
+                        rules: [],
+                        targets: [featureTarget],
                     },
-                }
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -598,7 +663,10 @@ describe('LDFeatureImporter', () => {
             }
             const mockLdFeatures = [createFeature]
 
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
@@ -610,22 +678,19 @@ describe('LDFeatureImporter', () => {
         test('do not create feature config for update with default configs overwriteDuplicates=false', async () => {
             const envKey = 'production'
             const featureTarget = {
-                'values': [
-                    'patel',
-                    'jamie'
-                ],
-                'variation': 0
+                values: ['patel', 'jamie'],
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [],
-                        'targets': [featureTarget],
+                        on: true,
+                        rules: [],
+                        targets: [featureTarget],
                     },
-                }
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -635,35 +700,34 @@ describe('LDFeatureImporter', () => {
                 },
             }
             const mockLdFeatures = [createFeature]
-            const featureImporter = new LDFeatureImporter(mockConfig, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                mockConfig,
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
             await featureImporter['importFeatures']()
 
             expect(mockDVC.createFeature).toHaveBeenCalledTimes(0)
-
         })
 
         test('do not create feature config for skip feature', async () => {
             const envKey = 'production'
             const featureTarget = {
-                'values': [
-                    'patel',
-                    'jamie'
-                ],
-                'variation': 0
+                values: ['patel', 'jamie'],
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [],
-                        'targets': [featureTarget],
+                        on: true,
+                        rules: [],
+                        targets: [featureTarget],
                     },
-                }
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -673,7 +737,10 @@ describe('LDFeatureImporter', () => {
                 },
             }
             const mockLdFeatures = [createFeature]
-            const featureImporter = new LDFeatureImporter({ ...mockConfig, overwriteDuplicates: true }, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                { ...mockConfig, overwriteDuplicates: true },
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
@@ -685,22 +752,19 @@ describe('LDFeatureImporter', () => {
         test('do not create feature config for unsupported feature', async () => {
             const envKey = 'production'
             const featureTarget = {
-                'values': [
-                    'patel',
-                    'jamie'
-                ],
-                'variation': 0
+                values: ['patel', 'jamie'],
+                variation: 0,
             }
 
             const createFeature = {
                 ...mockFeature,
                 environments: {
                     [envKey]: {
-                        'on': true,
-                        'rules': [],
-                        'targets': [featureTarget],
+                        on: true,
+                        rules: [],
+                        targets: [featureTarget],
                     },
-                }
+                },
             }
 
             const mockFeaturesToImport: FeaturesToImport = {
@@ -710,7 +774,10 @@ describe('LDFeatureImporter', () => {
                 },
             }
             const mockLdFeatures = [createFeature]
-            const featureImporter = new LDFeatureImporter({ ...mockConfig, overwriteDuplicates: true }, audienceImport)
+            const featureImporter = new LDFeatureImporter(
+                { ...mockConfig, overwriteDuplicates: true },
+                audienceImport,
+            )
             featureImporter.featuresToImport = mockFeaturesToImport
             featureImporter.sourceFeatures = mockLdFeatures
             await featureImporter['getFeatureConfigsToImport']()
