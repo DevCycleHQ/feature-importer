@@ -1,148 +1,153 @@
-import { ProjectResponse, SegmentResponse } from '../types/LaunchDarkly'
-import { handleErrors } from './utils'
+import { ProjectResponse, SegmentResponse } from "../types/LaunchDarkly";
+import { handleErrors } from "./utils";
 
-const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
-const LD_API_VERSION = '20240415'
+const LD_BASE_URL = "https://app.launchdarkly.com/api/v2";
+const LD_API_VERSION = "20240415";
 export default class LDApiWrapper {
-    constructor(apiToken: string) {
-        this.apiToken = apiToken
-        this.cachedEnvironments = {}
-    }
-    apiToken: string
-    private cachedEnvironments: Record<string, string[]>
+  constructor(apiToken: string) {
+    this.apiToken = apiToken;
+    this.cachedEnvironments = {};
+  }
+  apiToken: string;
+  private cachedEnvironments: Record<string, string[]>;
 
-    private async getHeaders() {
-        return {
-            Authorization: this.apiToken,
-            'LD-API-Version': LD_API_VERSION,
-        }
-    }
+  private async getHeaders() {
+    return {
+      Authorization: this.apiToken,
+      "LD-API-Version": LD_API_VERSION,
+    };
+  }
 
-    private async handleErrors(response: Response) {
-        await handleErrors('Error calling LaunchDarkly API', response)
-    }
+  private async handleErrors(response: Response) {
+    await handleErrors("Error calling LaunchDarkly API", response);
+  }
 
-    async getProject(projectKey: string): Promise<ProjectResponse> {
-        const headers = await this.getHeaders()
-        const encodedProjectKey = encodeURIComponent(projectKey)
-        const response = await fetch(
-            `${LD_BASE_URL}/projects/${encodedProjectKey}?expand=environments`,
-            {
-                method: 'GET',
-                headers,
-            }
-        )
-        await this.handleErrors(response)
-        const project = await response.json()
-        
-        // Cache environment keys for use in feature flag requests
-        if (project.environments?.items) {
-            this.cachedEnvironments[projectKey] = project.environments?.items.map(
-                (env: { key: string }) => env.key
-            )
-        }
-        
-        return project
+  async getProject(projectKey: string): Promise<ProjectResponse> {
+    const headers = await this.getHeaders();
+    const encodedProjectKey = encodeURIComponent(projectKey);
+    const response = await fetch(
+      `${LD_BASE_URL}/projects/${encodedProjectKey}?expand=environments`,
+      {
+        method: "GET",
+        headers,
+      },
+    );
+    await this.handleErrors(response);
+    const project = await response.json();
+
+    // Cache environment keys for use in feature flag requests
+    if (project.environments?.items) {
+      this.cachedEnvironments[projectKey] = project.environments?.items.map(
+        (env: { key: string }) => env.key,
+      );
     }
 
-    async getSegments(
-        projectKey: string,
-        environmentKey: string
-    ): Promise<SegmentResponse> {
-        const headers = await this.getHeaders()
-        const encodedProjectKey = encodeURIComponent(projectKey)
-        const encodedEnvironmentKey = encodeURIComponent(environmentKey)
-        const response = await fetch(
-            `${LD_BASE_URL}/segments/${encodedProjectKey}/${encodedEnvironmentKey}`,
-            {
-                method: 'GET',
-                headers,
-            }
-        )
-        await this.handleErrors(response)
-        return response.json()
-    }
-    
-    private async getEnvironments(projectKey: string) {
-        const headers = await this.getHeaders()
-        const encodedProjectKey = encodeURIComponent(projectKey)
-        const response = await fetch(
-            `${LD_BASE_URL}/projects/${encodedProjectKey}/environments`,
-            {
-                method: 'GET',
-                headers,
-            }
-        )
-        await this.handleErrors(response)
-        const environmentResponse = await response.json()
-        this.cachedEnvironments[projectKey] = environmentResponse?.items?.map((env: { key: string }) => env.key)
+    return project;
+  }
+
+  async getSegments(
+    projectKey: string,
+    environmentKey: string,
+  ): Promise<SegmentResponse> {
+    const headers = await this.getHeaders();
+    const encodedProjectKey = encodeURIComponent(projectKey);
+    const encodedEnvironmentKey = encodeURIComponent(environmentKey);
+    const response = await fetch(
+      `${LD_BASE_URL}/segments/${encodedProjectKey}/${encodedEnvironmentKey}`,
+      {
+        method: "GET",
+        headers,
+      },
+    );
+    await this.handleErrors(response);
+    return response.json();
+  }
+
+  private async getEnvironments(projectKey: string) {
+    const headers = await this.getHeaders();
+    const encodedProjectKey = encodeURIComponent(projectKey);
+    const response = await fetch(
+      `${LD_BASE_URL}/projects/${encodedProjectKey}/environments`,
+      {
+        method: "GET",
+        headers,
+      },
+    );
+    await this.handleErrors(response);
+    const environmentResponse = await response.json();
+    this.cachedEnvironments[projectKey] = environmentResponse?.items?.map(
+      (env: { key: string }) => env.key,
+    );
+  }
+
+  async getFeatureFlagsForProject(projectKey: string) {
+    const headers = await this.getHeaders();
+    const encodedProjectKey = encodeURIComponent(projectKey);
+
+    if (!this.cachedEnvironments[projectKey]) {
+      await this.getEnvironments(projectKey);
     }
 
-    async getFeatureFlagsForProject(projectKey: string) {
-        const headers = await this.getHeaders()
-        const encodedProjectKey = encodeURIComponent(projectKey)
-        
-        if (!this.cachedEnvironments[projectKey]) {
-            await this.getEnvironments(projectKey)
-        }
-        
-        const environments = this.cachedEnvironments[projectKey] || []
-        
-        if (environments.length === 0) {
-            return []
-        }
-        
-        const chunkSize = 3
-        const environmentChunks: string[][] = []
-        for (let i = 0; i < environments.length; i += chunkSize) {
-            environmentChunks.push(environments.slice(i, i + chunkSize))
-        }
-        
-        // Pagination parameters - LaunchDarkly defaults to 20 items per page
-        const pageSize = 100
-        const featuresMap = new Map<string, any>()
-        let offset = 0
-        let totalCount: number | null = null
-        
-        while (totalCount === null || offset < totalCount) {
-            for (let i = 0; i < environmentChunks.length; i++) {
-                const envChunk = environmentChunks[i]
-                const envParams = envChunk
-                    .map((key) => `env=${encodeURIComponent(key)}`)
-                    .join('&')
-                const url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0&limit=${pageSize}&offset=${offset}&${envParams}`
-                
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers,
-                })
-                await this.handleErrors(response)
-                const data = await response.json()
-                
-                // Get total count from first response
-                if (totalCount === null) {
-                    totalCount = data.totalCount ?? data.items?.length ?? 0
-                }
-                
-                // Add/merge features to map
-                for (const feature of data.items || []) {
-                    if (featuresMap.has(feature.key)) {
-                        // Merge environment data from duplicate entries
-                        const existing = featuresMap.get(feature.key)
-                        existing.environments = { ...existing.environments, ...feature.environments }
-                    } else {
-                        featuresMap.set(feature.key, feature)
-                    }
-                }
-                
-                if (i < environmentChunks.length - 1) {
-                    await new Promise((resolve) => setTimeout(resolve, 150))
-                }
-            }
-            
-            offset += pageSize
-        }
-        
-        return Array.from(featuresMap.values())
+    const environments = this.cachedEnvironments[projectKey] || [];
+
+    if (environments.length === 0) {
+      return [];
     }
+
+    const chunkSize = 3;
+    const environmentChunks: string[][] = [];
+    for (let i = 0; i < environments.length; i += chunkSize) {
+      environmentChunks.push(environments.slice(i, i + chunkSize));
+    }
+
+    // Pagination parameters - LaunchDarkly defaults to 20 items per page
+    const pageSize = 100;
+    const featuresMap = new Map<string, any>();
+    let offset = 0;
+    let totalCount: number | null = null;
+
+    while (totalCount === null || offset < totalCount) {
+      for (let i = 0; i < environmentChunks.length; i++) {
+        const envChunk = environmentChunks[i];
+        const envParams = envChunk
+          .map((key) => `env=${encodeURIComponent(key)}`)
+          .join("&");
+        const url = `${LD_BASE_URL}/flags/${encodedProjectKey}?summary=0&limit=${pageSize}&offset=${offset}&${envParams}`;
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers,
+        });
+        await this.handleErrors(response);
+        const data = await response.json();
+
+        // Get total count from first response
+        if (totalCount === null) {
+          totalCount = data.totalCount ?? data.items?.length ?? 0;
+        }
+
+        // Add/merge features to map
+        for (const feature of data.items || []) {
+          if (featuresMap.has(feature.key)) {
+            // Merge environment data from duplicate entries
+            const existing = featuresMap.get(feature.key);
+            existing.environments = {
+              ...existing.environments,
+              ...feature.environments,
+            };
+          } else {
+            featuresMap.set(feature.key, feature);
+          }
+        }
+
+        if (i < environmentChunks.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+      }
+
+      offset += pageSize;
+    }
+
+    return Array.from(featuresMap.values());
+  }
 }
