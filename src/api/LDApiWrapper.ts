@@ -1,4 +1,8 @@
-import { ProjectResponse, SegmentResponse } from '../types/LaunchDarkly'
+import {
+    Feature,
+    ProjectResponse,
+    SegmentResponse,
+} from '../types/LaunchDarkly'
 import { handleErrors } from './utils'
 
 const LD_BASE_URL = 'https://app.launchdarkly.com/api/v2'
@@ -81,7 +85,7 @@ export default class LDApiWrapper {
         )
     }
 
-    async getFeatureFlagsForProject(projectKey: string) {
+    async getFeatureFlagsForProject(projectKey: string): Promise<Feature[]> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
 
@@ -103,7 +107,7 @@ export default class LDApiWrapper {
 
         // Pagination parameters - LaunchDarkly defaults to 20 items per page
         const pageSize = 100
-        const featuresMap = new Map<string, any>()
+        const featuresMap = new Map<string, Feature>()
         let offset = 0
         let totalCount: number | null = null
         let lastPageItemCount = pageSize
@@ -127,7 +131,7 @@ export default class LDApiWrapper {
                 await this.handleErrors(response)
                 const data = await response.json()
 
-                const items = data.items || []
+                const items: Feature[] = data.items || []
 
                 if (totalCount === null && data.totalCount) {
                     totalCount = data.totalCount
@@ -140,7 +144,7 @@ export default class LDApiWrapper {
                 for (const feature of items) {
                     if (featuresMap.has(feature.key)) {
                         // Merge environment data from duplicate entries
-                        const existing = featuresMap.get(feature.key)
+                        const existing = featuresMap.get(feature.key)!
                         existing.environments = {
                             ...existing.environments,
                             ...feature.environments,
