@@ -7,7 +7,7 @@ const validSegment = {
     description: 'my segment',
     tags: ['tag1', 'tag2'],
     creationDate: 123456789,
-    rules: []
+    rules: [],
 }
 
 describe('mapSegmentToFilters', () => {
@@ -16,18 +16,18 @@ describe('mapSegmentToFilters', () => {
             ...validSegment,
             included: ['include-key'],
             excluded: ['exclude-key'],
-            rules: [{
-                clauses: [
-                    {
-                        'attribute': 'email',
-                        'negate': false,
-                        'op': 'in',
-                        'values': [
-                            'email@email.com'
-                        ]
-                    }
-                ]
-            }]
+            rules: [
+                {
+                    clauses: [
+                        {
+                            attribute: 'email',
+                            negate: false,
+                            op: 'in',
+                            values: ['email@email.com'],
+                        },
+                    ],
+                },
+            ],
         }
         const filters = mapSegmentToFilters(segment, {})
         expect(filters).toEqual({
@@ -37,7 +37,7 @@ describe('mapSegmentToFilters', () => {
                     type: 'user',
                     subType: 'user_id',
                     comparator: '!=',
-                    values: ['exclude-key']
+                    values: ['exclude-key'],
                 },
                 {
                     operator: OperatorType.or,
@@ -46,38 +46,38 @@ describe('mapSegmentToFilters', () => {
                             type: 'user',
                             subType: 'user_id',
                             comparator: '=',
-                            values: ['include-key']
+                            values: ['include-key'],
                         },
                         {
                             type: 'user',
                             subType: 'email',
                             comparator: '=',
-                            values: ['email@email.com']
-                        }
-                    ]
-                }
-            ]
+                            values: ['email@email.com'],
+                        },
+                    ],
+                },
+            ],
         })
     })
 
     test('maps a segment containing a rule with an op overrided in operationMap', () => {
         const segment = {
             ...validSegment,
-            rules: [{
-                clauses: [
-                    {
-                        'attribute': 'email',
-                        'negate': false,
-                        'op': 'endsWith',
-                        'values': [
-                            'email.com'
-                        ]
-                    }
-                ]
-            }]
+            rules: [
+                {
+                    clauses: [
+                        {
+                            attribute: 'email',
+                            negate: false,
+                            op: 'endsWith',
+                            values: ['email.com'],
+                        },
+                    ],
+                },
+            ],
         }
         const operationMap = {
-            'endsWith': 'contain'
+            endsWith: 'contain',
         }
         const filters = mapSegmentToFilters(segment, operationMap)
         expect(filters).toEqual({
@@ -87,9 +87,9 @@ describe('mapSegmentToFilters', () => {
                     type: 'user',
                     subType: 'email',
                     comparator: 'contain',
-                    values: ['email.com']
+                    values: ['email.com'],
                 },
-            ]
+            ],
         })
     })
 
@@ -100,36 +100,30 @@ describe('mapSegmentToFilters', () => {
                 {
                     clauses: [
                         {
-                            'attribute': 'email',
-                            'negate': false,
-                            'op': 'in',
-                            'values': [
-                                'email@email.com'
-                            ]
+                            attribute: 'email',
+                            negate: false,
+                            op: 'in',
+                            values: ['email@email.com'],
                         },
                         {
-                            'attribute': 'key',
-                            'negate': true,
-                            'op': 'in',
-                            'values': [
-                                'user1'
-                            ]
-                        }
-                    ]
+                            attribute: 'key',
+                            negate: true,
+                            op: 'in',
+                            values: ['user1'],
+                        },
+                    ],
                 },
                 {
                     clauses: [
                         {
-                            'attribute': 'name',
-                            'negate': false,
-                            'op': 'contains',
-                            'values': [
-                                'jim'
-                            ]
-                        }
-                    ]
-                }
-            ]
+                            attribute: 'name',
+                            negate: false,
+                            op: 'contains',
+                            values: ['jim'],
+                        },
+                    ],
+                },
+            ],
         }
         const filters = mapSegmentToFilters(segment, {})
         expect(filters).toEqual({
@@ -142,15 +136,15 @@ describe('mapSegmentToFilters', () => {
                             type: 'user',
                             subType: 'email',
                             comparator: '=',
-                            values: ['email@email.com']
+                            values: ['email@email.com'],
                         },
                         {
                             type: 'user',
                             subType: 'user_id',
                             comparator: '!=',
-                            values: ['user1']
-                        }
-                    ]
+                            values: ['user1'],
+                        },
+                    ],
                 },
                 {
                     type: 'user',
@@ -158,9 +152,9 @@ describe('mapSegmentToFilters', () => {
                     dataKey: 'name',
                     dataKeyType: 'String',
                     comparator: 'contain',
-                    values: ['jim']
-                }
-            ]
+                    values: ['jim'],
+                },
+            ],
         })
     })
 
@@ -171,18 +165,18 @@ describe('mapSegmentToFilters', () => {
                 {
                     clauses: [
                         {
-                            'attribute': 'segmentMatch',
-                            'negate': false,
-                            'op': 'in',
-                            'values': [
-                                'my-segment'
-                            ]
-                        }
-                    ]
-                }
-            ]
+                            attribute: 'segmentMatch',
+                            negate: false,
+                            op: 'in',
+                            values: ['my-segment'],
+                        },
+                    ],
+                },
+            ],
         }
-        expect(() => mapSegmentToFilters(segment, {})).toThrowError('Segment match rules are not supported in segments')
+        expect(() => mapSegmentToFilters(segment, {})).toThrowError(
+            'Segment match rules are not supported in segments',
+        )
     })
 
     test('throws an error if segment contains a weighted rule', () => {
@@ -190,18 +184,20 @@ describe('mapSegmentToFilters', () => {
             ...validSegment,
             rules: [
                 {
-                    clauses: [{
-                        'attribute': 'email',
-                        'negate': false,
-                        'op': 'in',
-                        'values': [
-                            'email@email.com'
-                        ]
-                    }],
-                    weight: 50000
-                }
-            ]
+                    clauses: [
+                        {
+                            attribute: 'email',
+                            negate: false,
+                            op: 'in',
+                            values: ['email@email.com'],
+                        },
+                    ],
+                    weight: 50000,
+                },
+            ],
         }
-        expect(() => mapSegmentToFilters(segment, {})).toThrowError('Weighted rules are not supported in segments')
+        expect(() => mapSegmentToFilters(segment, {})).toThrowError(
+            'Weighted rules are not supported in segments',
+        )
     })
 })

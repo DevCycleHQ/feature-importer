@@ -3,17 +3,11 @@ jest.mock('../../api')
 import { DVC } from '../../api'
 import { CustomPropertiesImporter } from '.'
 import { FeatureImportAction } from './types'
-import {
-    mockConfig,
-    mockAudience
-} from '../../api/__mocks__/MockResponses'
-import {
-    mockGetCustomProperties,
-} from '../../api/__mocks__/targetingRules'
+import { mockConfig, mockAudience } from '../../api/__mocks__/MockResponses'
+import { mockGetCustomProperties } from '../../api/__mocks__/targetingRules'
 import { OperatorType } from '../../types/DevCycle'
 
 const mockDVC = DVC as jest.Mocked<typeof DVC>
-
 
 describe('CustomPropertiesImporter', () => {
     const mockFeature = { key: 'feature-1' }
@@ -27,7 +21,7 @@ describe('CustomPropertiesImporter', () => {
                     dataKey: 'customProp',
                     dataKeyType: 'String',
                     comparator: 'contain',
-                    values: ['gmail']
+                    values: ['gmail'],
                 },
                 {
                     type: 'user',
@@ -35,7 +29,7 @@ describe('CustomPropertiesImporter', () => {
                     dataKey: 'customProp2',
                     dataKeyType: 'Number',
                     comparator: '=',
-                    values: [0]
+                    values: [0],
                 },
                 {
                     type: 'user',
@@ -43,31 +37,33 @@ describe('CustomPropertiesImporter', () => {
                     dataKey: 'customProp3',
                     dataKeyType: 'Boolean',
                     comparator: '!=',
-                    values: [false]
-                }
-            ]
-        }
+                    values: [false],
+                },
+            ],
+        },
     }
     const mockTarget = {
         audience: mockCustomDataAudience,
-        distribution: [{
-            _variation: 'variation-1',
-            percentage: 1,
-        }]
+        distribution: [
+            {
+                _variation: 'variation-1',
+                percentage: 1,
+            },
+        ],
     }
     const mockTargetingRules = {
         targets: [mockTarget],
-        status: 'active' as const
+        status: 'active' as const,
     }
     const mockFeatureImportConfig = {
         environment: 'production',
-        targetingRules: mockTargetingRules
+        targetingRules: mockTargetingRules,
     }
     const mockFeaturesToImport = {
         [mockFeature.key]: {
             action: FeatureImportAction.Create,
             feature: mockFeature,
-            configs: [mockFeatureImportConfig]
+            configs: [mockFeatureImportConfig],
         },
     }
 
@@ -79,58 +75,88 @@ describe('CustomPropertiesImporter', () => {
         test('create custom properties when they do not exist in the DevCycle Project', async () => {
             mockDVC.getCustomPropertiesForProject.mockResolvedValue([])
 
-            const customPropertiesImporter = new CustomPropertiesImporter(mockConfig)
+            const customPropertiesImporter = new CustomPropertiesImporter(
+                mockConfig,
+            )
             await customPropertiesImporter.import(mockFeaturesToImport, [])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(3)
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
         })
 
         test('does not update custom properties if they already exists in the DevCycle Project when overwriteDuplicates=false', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
+            mockDVC.getCustomPropertiesForProject.mockResolvedValue(
+                mockGetCustomProperties,
+            )
 
-            const customPropertiesImporter = new CustomPropertiesImporter(mockConfig)
+            const customPropertiesImporter = new CustomPropertiesImporter(
+                mockConfig,
+            )
             await customPropertiesImporter.import(mockFeaturesToImport, [])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
         })
 
         test('update custom properties if they already exists in the DevCycle Project when overwriteDuplicates=true', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue(mockGetCustomProperties)
-  
-            const customPropertiesImporter = new CustomPropertiesImporter({ ...mockConfig, overwriteDuplicates: true })
+            mockDVC.getCustomPropertiesForProject.mockResolvedValue(
+                mockGetCustomProperties,
+            )
+
+            const customPropertiesImporter = new CustomPropertiesImporter({
+                ...mockConfig,
+                overwriteDuplicates: true,
+            })
             await customPropertiesImporter.import(mockFeaturesToImport, [])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).not.toHaveBeenCalled()
             expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(3)
         })
 
-        test('create missing custom properties if they don\'t exist in the DevCycle Project and not update any when overwriteDuplicates=false', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
+        test("create missing custom properties if they don't exist in the DevCycle Project and not update any when overwriteDuplicates=false", async () => {
+            mockDVC.getCustomPropertiesForProject.mockResolvedValue([
+                mockGetCustomProperties[0],
+            ])
 
-            const customPropertiesImporter = new CustomPropertiesImporter(mockConfig)
+            const customPropertiesImporter = new CustomPropertiesImporter(
+                mockConfig,
+            )
             await customPropertiesImporter.import(mockFeaturesToImport, [])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
         })
 
-        test('create missing custom properties if they don\'t exist in the DevCycle Project and not update any when overwriteDuplicates=true', async () => {
-            mockDVC.getCustomPropertiesForProject.mockResolvedValue([mockGetCustomProperties[0]])
+        test("create missing custom properties if they don't exist in the DevCycle Project and not update any when overwriteDuplicates=true", async () => {
+            mockDVC.getCustomPropertiesForProject.mockResolvedValue([
+                mockGetCustomProperties[0],
+            ])
 
-            const customPropertiesImporter = new CustomPropertiesImporter({ ...mockConfig, overwriteDuplicates: true })
+            const customPropertiesImporter = new CustomPropertiesImporter({
+                ...mockConfig,
+                overwriteDuplicates: true,
+            })
             await customPropertiesImporter.import(mockFeaturesToImport, [])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(2)
             expect(mockDVC.updateCustomProperty).toHaveBeenCalledTimes(1)
@@ -141,13 +167,17 @@ describe('CustomPropertiesImporter', () => {
 
             const audience = {
                 ...mockAudience,
-                ...mockCustomDataAudience
+                ...mockCustomDataAudience,
             }
 
-            const customPropertiesImporter = new CustomPropertiesImporter(mockConfig)
+            const customPropertiesImporter = new CustomPropertiesImporter(
+                mockConfig,
+            )
             await customPropertiesImporter.import({}, [audience])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(3)
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()
@@ -158,13 +188,19 @@ describe('CustomPropertiesImporter', () => {
 
             const audience = {
                 ...mockAudience,
-                ...mockCustomDataAudience
+                ...mockCustomDataAudience,
             }
 
-            const customPropertiesImporter = new CustomPropertiesImporter(mockConfig)
-            await customPropertiesImporter.import(mockFeaturesToImport, [audience])
+            const customPropertiesImporter = new CustomPropertiesImporter(
+                mockConfig,
+            )
+            await customPropertiesImporter.import(mockFeaturesToImport, [
+                audience,
+            ])
 
-            expect(Object.values(customPropertiesImporter.propertiesToImport)).toHaveLength(3)
+            expect(
+                Object.values(customPropertiesImporter.propertiesToImport),
+            ).toHaveLength(3)
 
             expect(mockDVC.createCustomProperty).toHaveBeenCalledTimes(3)
             expect(mockDVC.updateCustomProperty).not.toHaveBeenCalled()

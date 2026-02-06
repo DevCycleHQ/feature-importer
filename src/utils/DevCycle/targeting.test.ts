@@ -9,7 +9,7 @@ describe('createUserFilters', () => {
             type: 'user',
             subType: 'user_id',
             comparator: 'contains',
-            values: ['email.com']
+            values: ['email.com'],
         })
     })
 
@@ -19,7 +19,7 @@ describe('createUserFilters', () => {
             type: 'user',
             subType: 'country',
             comparator: 'and',
-            values: ['US', 'CA']
+            values: ['US', 'CA'],
         })
     })
 
@@ -29,17 +29,26 @@ describe('createUserFilters', () => {
             type: 'user',
             subType: 'country',
             comparator: 'or',
-            values: ['US', 'CA']
+            values: ['US', 'CA'],
         })
     })
 
-    test.each([['usa'], ['zz'], ['111'], [111], [true]])('catch errors thrown with invalid data', (values) => {
-        expect(() => createUserFilter('country', 'or', [values])).toThrow()
-    })
+    test.each([['usa'], ['zz'], ['111'], [111], [true]])(
+        'catch errors thrown with invalid data',
+        (values) => {
+            expect(() => createUserFilter('country', 'or', [values])).toThrow()
+        },
+    )
 
-    test.each([['country', 'ca'], ['user_id', 123], ['email', true]])
-    ('values result should be string[] if subTypes are "country", "user_id", or "email"', (subType, value) => {
-        const result = createUserFilter(subType, 'or', [value])
-        expect(typeof result.values[0]).toBe('string')
-    })
+    test.each([
+        ['country', 'ca'],
+        ['user_id', 123],
+        ['email', true],
+    ])(
+        'values result should be string[] if subTypes are "country", "user_id", or "email"',
+        (subType, value) => {
+            const result = createUserFilter(subType, 'or', [value])
+            expect(typeof result.values[0]).toBe('string')
+        },
+    )
 })

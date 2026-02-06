@@ -1,27 +1,29 @@
 import { FeatureType, OperatorType } from '../../../types/DevCycle'
 
-export const mockDVCFeaturesResponse = [{
-    _id: '123',
-    _project: 'project',
-    name: 'duplicate feature name',
-    description: 'duplicate feature description',
-    key: 'duplicate-key',
-    type: FeatureType.release,
-    variations: [
-        {
-            key: 'off',
-            name: 'off variation',
-            variables: {}
-        },
-        {
-            key: 'on',
-            name: 'on variation',
-            variables: {}
-        }
-    ],
-    variables: [],
-    tags: []
-}]
+export const mockDVCFeaturesResponse = [
+    {
+        _id: '123',
+        _project: 'project',
+        name: 'duplicate feature name',
+        description: 'duplicate feature description',
+        key: 'duplicate-key',
+        type: FeatureType.release,
+        variations: [
+            {
+                key: 'off',
+                name: 'off variation',
+                variables: {},
+            },
+            {
+                key: 'on',
+                name: 'on variation',
+                variables: {},
+            },
+        ],
+        variables: [],
+        tags: [],
+    },
+]
 
 export const mockAudience = {
     _id: '123',
@@ -31,7 +33,7 @@ export const mockAudience = {
     description: 'a new audience',
     filters: {
         filters: [],
-        operator: OperatorType.and
+        operator: OperatorType.and,
     },
-    tags: ['tag1']
+    tags: ['tag1'],
 }

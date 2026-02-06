@@ -12,9 +12,9 @@ export const promptToGetEnvironmentType = async (environmentKey: string) => {
                     DVCEnvironmentType.Dev,
                     DVCEnvironmentType.Staging,
                     DVCEnvironmentType.Prod,
-                    DVCEnvironmentType.Recovery
-                ]
-            }
+                    DVCEnvironmentType.Recovery,
+                ],
+            },
         ])
         return answer.type
     } catch (error) {

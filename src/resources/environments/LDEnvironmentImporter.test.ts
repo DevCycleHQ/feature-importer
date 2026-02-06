@@ -1,17 +1,23 @@
 jest.mock('../../api')
 jest.mock('./utils', () => ({
-    promptToGetEnvironmentType: jest.fn()
+    promptToGetEnvironmentType: jest.fn(),
 }))
 
 import { LDEnvironmentImporter } from '.'
 import { DVC } from '../../api'
 import { mockConfig } from '../../api/__mocks__/MockResponses'
-import { EnvironmentResponse as DVCEnvironmentResponse, EnvironmentType as DVCEnvironmentType } from '../../types/DevCycle'
+import {
+    EnvironmentResponse as DVCEnvironmentResponse,
+    EnvironmentType as DVCEnvironmentType,
+} from '../../types/DevCycle'
 import { ProjectResponse as LDProjectResponse } from '../../types/LaunchDarkly/project'
 import { promptToGetEnvironmentType } from './utils'
 
 const mockDVC = DVC as jest.Mocked<typeof DVC>
-const mockPromptToGetEnvironmentType = promptToGetEnvironmentType as jest.MockedFunction<typeof promptToGetEnvironmentType>
+const mockPromptToGetEnvironmentType =
+    promptToGetEnvironmentType as jest.MockedFunction<
+        typeof promptToGetEnvironmentType
+    >
 
 const mockDvcEnvironmentResponse: DVCEnvironmentResponse = {
     _id: 'id_123',
@@ -23,7 +29,7 @@ const mockDvcEnvironmentResponse: DVCEnvironmentResponse = {
     _createdBy: 'user01',
     createdAt: '2023-02-23T20:23:02.191Z',
     updatedAt: '2023-02-23T20:23:02.191Z',
-    sdkKeys: {}
+    sdkKeys: {},
 }
 
 const mockLDEnvironment: LDProjectResponse['environments'] = {
@@ -34,8 +40,8 @@ const mockLDEnvironment: LDProjectResponse['environments'] = {
             key: 'test01',
             name: 'testing',
             color: '000000',
-        }
-    ]
+        },
+    ],
 }
 
 const config = { ...mockConfig }
@@ -62,13 +68,13 @@ describe('LDEnvironmentImporter', () => {
                 key,
                 name,
                 color: `#${color}`,
-                type: DVCEnvironmentType.Dev
-            }
+                type: DVCEnvironmentType.Dev,
+            },
         )
         expect(mockDVC.updateEnvironment).not.toHaveBeenCalled()
     })
 
-    test("environment is updated if it already exists and overwriteDuplicates is true", async () => {
+    test('environment is updated if it already exists and overwriteDuplicates is true', async () => {
         mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
         config.overwriteDuplicates = true
         await importEnvironment()
@@ -81,13 +87,13 @@ describe('LDEnvironmentImporter', () => {
                 key,
                 name,
                 color: `#${color}`,
-                type: mockDvcEnvironmentResponse.type
-            }
+                type: mockDvcEnvironmentResponse.type,
+            },
         )
         expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
     })
 
-    test("environment is skipped if it already exists and overwriteDuplicates is false", async () => {
+    test('environment is skipped if it already exists and overwriteDuplicates is false', async () => {
         mockLDEnvironment.items[0].key = mockDvcEnvironmentResponse.key
         config.overwriteDuplicates = false
         await importEnvironment()
@@ -105,8 +111,8 @@ describe('LDEnvironmentImporter', () => {
             config.targetProjectKey,
             mockDvcEnvironmentResponse.key,
             expect.objectContaining({
-                type: mockDvcEnvironmentResponse.type
-            })
+                type: mockDvcEnvironmentResponse.type,
+            }),
         )
         expect(mockDVC.createEnvironment).not.toHaveBeenCalled()
         expect(mockPromptToGetEnvironmentType).not.toHaveBeenCalled()
@@ -119,8 +125,8 @@ describe('LDEnvironmentImporter', () => {
         expect(mockDVC.createEnvironment).toHaveBeenCalledWith(
             config.targetProjectKey,
             expect.objectContaining({
-                type: 'production'
-            })
+                type: 'production',
+            }),
         )
         expect(mockPromptToGetEnvironmentType).not.toHaveBeenCalled()
     })

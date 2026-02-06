@@ -1,31 +1,46 @@
-import { AudiencePayload, FilterOrOperator, Operator, OperatorType } from '../../types/DevCycle'
+import {
+    AudiencePayload,
+    FilterOrOperator,
+    Operator,
+    OperatorType,
+} from '../../types/DevCycle'
 import { Segment, SegmentRule } from '../../types/LaunchDarkly'
 import { createUserFilter } from '../DevCycle'
 import { mapClauseToFilter } from './targeting'
 
 export function mapSegmentToFilters(
     segment: Segment,
-    operationMap: { [key: string]: string } = {}
+    operationMap: { [key: string]: string } = {},
 ): AudiencePayload['filters'] {
     const rulesFilters = segment.rules?.length
-        ? segment.rules.map((rule) => mapSegmentRuleToFilter(rule, operationMap))
+        ? segment.rules.map((rule) =>
+              mapSegmentRuleToFilter(rule, operationMap),
+          )
         : []
 
     if (segment.included?.length) {
-        const includesFilter = createUserFilter('user_id', '=', segment.included)
+        const includesFilter = createUserFilter(
+            'user_id',
+            '=',
+            segment.included,
+        )
         rulesFilters.unshift(includesFilter)
     }
 
     const filters: Operator = {
         operator: OperatorType.or,
-        filters: rulesFilters
+        filters: rulesFilters,
     }
 
     if (segment.excluded?.length) {
-        const excludesFilter = createUserFilter('user_id', '!=', segment.excluded)
+        const excludesFilter = createUserFilter(
+            'user_id',
+            '!=',
+            segment.excluded,
+        )
         return {
             operator: OperatorType.and,
-            filters: [excludesFilter, filters]
+            filters: [excludesFilter, filters],
         }
     }
 
@@ -34,7 +49,7 @@ export function mapSegmentToFilters(
 
 function mapSegmentRuleToFilter(
     rule: SegmentRule,
-    operationMap: { [key: string]: string }
+    operationMap: { [key: string]: string },
 ): FilterOrOperator {
     if (rule.weight) {
         throw new Error('Weighted rules are not supported in segments')
@@ -51,6 +66,6 @@ function mapSegmentRuleToFilter(
     }
     return {
         operator: OperatorType.and,
-        filters
+        filters,
     }
 }

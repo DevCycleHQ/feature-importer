@@ -1,7 +1,14 @@
 import { DVC } from '../../api'
 import { ParsedImporterConfig } from '../../configs'
-import { EnvironmentPayload, EnvironmentResponse, EnvironmentType } from '../../types/DevCycle'
-import { Environments as LDEnvironments, Environment as LDEnvironment } from '../../types/LaunchDarkly'
+import {
+    EnvironmentPayload,
+    EnvironmentResponse,
+    EnvironmentType,
+} from '../../types/DevCycle'
+import {
+    Environments as LDEnvironments,
+    Environment as LDEnvironment,
+} from '../../types/LaunchDarkly'
 import { formatKey } from '../../utils/DevCycle'
 import { promptToGetEnvironmentType } from './utils'
 
@@ -14,15 +21,21 @@ export class LDEnvironmentImporter {
     }
 
     private async getExistingEnvironmentByKey(projectKey: string) {
-        this.environmentsByKey = await DVC.getEnvironments(projectKey).then((environments) => (
-            environments.reduce((map: Record<string, EnvironmentResponse>, environment) => {
-                map[environment.key] = environment
-                return map
-            }, {})
-        ))
+        this.environmentsByKey = await DVC.getEnvironments(projectKey).then(
+            (environments) =>
+                environments.reduce(
+                    (map: Record<string, EnvironmentResponse>, environment) => {
+                        map[environment.key] = environment
+                        return map
+                    },
+                    {},
+                ),
+        )
     }
 
-    private async getEnvironmentPayload(environment: LDEnvironment): Promise<EnvironmentPayload> {
+    private async getEnvironmentPayload(
+        environment: LDEnvironment,
+    ): Promise<EnvironmentPayload> {
         const { key, name, color } = environment
         let type
         if (this.environmentsByKey[key]) {
@@ -36,7 +49,7 @@ export class LDEnvironmentImporter {
             key: formatKey(key),
             name,
             color: `#${color}`,
-            type
+            type,
         }
         return environmentPayload
     }
@@ -44,26 +57,37 @@ export class LDEnvironmentImporter {
     async import(environments: LDEnvironments) {
         const { targetProjectKey, overwriteDuplicates } = this.config
         await this.getExistingEnvironmentByKey(targetProjectKey)
-    
+
         for (const environment of environments.items) {
             const key = formatKey(environment.key)
             const isDuplicate = Boolean(this.environmentsByKey[key])
-    
+
             if (!isDuplicate) {
-                const environmentPayload = await this.getEnvironmentPayload(environment)
-    
-                this.environmentsByKey[key] = await DVC.createEnvironment(targetProjectKey, environmentPayload)
+                const environmentPayload =
+                    await this.getEnvironmentPayload(environment)
+
+                this.environmentsByKey[key] = await DVC.createEnvironment(
+                    targetProjectKey,
+                    environmentPayload,
+                )
                 console.log(`Creating environment "${key}" in DevCycle`)
             } else if (overwriteDuplicates) {
-                const environmentPayload = await this.getEnvironmentPayload(environment)
-    
-                this.environmentsByKey[key] = await DVC.updateEnvironment(targetProjectKey, key, environmentPayload)
+                const environmentPayload =
+                    await this.getEnvironmentPayload(environment)
+
+                this.environmentsByKey[key] = await DVC.updateEnvironment(
+                    targetProjectKey,
+                    key,
+                    environmentPayload,
+                )
                 console.log(`Updating environment "${key}" in DevCycle`)
             } else {
-                console.log(`Skipping environment "${key}" creation because it already exists`)
+                console.log(
+                    `Skipping environment "${key}" creation because it already exists`,
+                )
             }
         }
-    
+
         return this.environmentsByKey
     }
 }

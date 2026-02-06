@@ -14,10 +14,14 @@ import { FeatureConfiguration } from '../types/DevCycle/targeting'
 
 const DVC_BASE_URL = process.env.DVC_BASE_URL || 'https://api.devcycle.com/v1'
 const DVC_BASE_URL_V2 =
-  process.env.DVC_BASE_URL_V2 || 'https://api.devcycle.com/v2'
+    process.env.DVC_BASE_URL_V2 || 'https://api.devcycle.com/v2'
 
 export default class DevCycleApiWrapper {
-    constructor(dvcClientId: string, dvcClientSecret: string, provider?: string) {
+    constructor(
+        dvcClientId: string,
+        dvcClientSecret: string,
+        provider?: string,
+    ) {
         this.dvcClientId = dvcClientId
         this.dvcClientSecret = dvcClientSecret
         this.provider = provider ?? 'launchdarkly'
@@ -72,7 +76,7 @@ export default class DevCycleApiWrapper {
             {
                 method: 'GET',
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -91,7 +95,7 @@ export default class DevCycleApiWrapper {
 
     async updateProject(
         projectKey: string,
-        payload: ProjectPayload
+        payload: ProjectPayload,
     ): Promise<ProjectResponse> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -101,7 +105,7 @@ export default class DevCycleApiWrapper {
                 method: 'PATCH',
                 body: JSON.stringify(payload),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -115,14 +119,14 @@ export default class DevCycleApiWrapper {
             {
                 method: 'GET',
                 headers,
-            }
+            },
         )
         return response.json()
     }
 
     async createAudience(
         projectKey: string,
-        payload: AudiencePayload
+        payload: AudiencePayload,
     ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -132,7 +136,7 @@ export default class DevCycleApiWrapper {
                 method: 'POST',
                 body: JSON.stringify(payload),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -141,7 +145,7 @@ export default class DevCycleApiWrapper {
     async updateAudience(
         projectKey: string,
         audienceKey: string,
-        payload: AudiencePayload
+        payload: AudiencePayload,
     ): Promise<AudienceResponse> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -152,7 +156,7 @@ export default class DevCycleApiWrapper {
                 method: 'PATCH',
                 body: JSON.stringify(payload),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -161,7 +165,7 @@ export default class DevCycleApiWrapper {
     async createFeature(
         projectKey: string,
         feature: Feature,
-        configurations: Record<string, FeatureConfiguration>
+        configurations: Record<string, FeatureConfiguration>,
     ): Promise<Feature> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -174,7 +178,7 @@ export default class DevCycleApiWrapper {
                     configurations,
                 }),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return await response.json()
@@ -183,7 +187,7 @@ export default class DevCycleApiWrapper {
     async updateFeature(
         projectKey: string,
         feature: Feature,
-        configurations: Record<string, FeatureConfiguration>
+        configurations: Record<string, FeatureConfiguration>,
     ): Promise<Feature> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -197,7 +201,7 @@ export default class DevCycleApiWrapper {
                     configurations,
                 }),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return await response.json()
@@ -210,7 +214,7 @@ export default class DevCycleApiWrapper {
             `${DVC_BASE_URL_V2}/projects/${encodedProjectKey}/features?perPage=1000`,
             {
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return await response.json()
@@ -224,7 +228,7 @@ export default class DevCycleApiWrapper {
             {
                 method: 'GET',
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -232,7 +236,7 @@ export default class DevCycleApiWrapper {
 
     async createEnvironment(
         projectKey: string,
-        environment: EnvironmentPayload
+        environment: EnvironmentPayload,
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -242,7 +246,7 @@ export default class DevCycleApiWrapper {
                 method: 'POST',
                 body: JSON.stringify(environment),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -251,7 +255,7 @@ export default class DevCycleApiWrapper {
     async updateEnvironment(
         projectKey: string,
         environmentKey: string,
-        environment: EnvironmentPayload
+        environment: EnvironmentPayload,
     ): Promise<EnvironmentResponse> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -262,7 +266,7 @@ export default class DevCycleApiWrapper {
                 method: 'PATCH',
                 body: JSON.stringify(environment),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
@@ -270,7 +274,7 @@ export default class DevCycleApiWrapper {
 
     async createCustomProperty(
         projectKey: string,
-        customProperty: CustomPropertiesPayload
+        customProperty: CustomPropertiesPayload,
     ): Promise<CustomProperties> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -280,14 +284,14 @@ export default class DevCycleApiWrapper {
                 method: 'POST',
                 body: JSON.stringify(customProperty),
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return response.json()
     }
 
     async getCustomPropertiesForProject(
-        projectKey: string
+        projectKey: string,
     ): Promise<CustomProperties[]> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)
@@ -295,7 +299,7 @@ export default class DevCycleApiWrapper {
             `${DVC_BASE_URL}/projects/${encodedProjectKey}/customProperties?perPage=1000`,
             {
                 headers,
-            }
+            },
         )
         await this.handleErrors(response)
         return await response.json()
@@ -303,7 +307,7 @@ export default class DevCycleApiWrapper {
 
     async updateCustomProperty(
         projectKey: string,
-        customProperty: CustomPropertiesPayload
+        customProperty: CustomPropertiesPayload,
     ): Promise<CustomProperties> {
         const headers = await this.getHeaders()
         const encodedProjectKey = encodeURIComponent(projectKey)

@@ -1,7 +1,11 @@
 import * as countries from 'i18n-iso-countries'
 const countryCodes = countries.getAlpha2Codes()
 
-export function createUserFilter(subType: string, comparator: string, values: any[]) {
+export function createUserFilter(
+    subType: string,
+    comparator: string,
+    values: any[],
+) {
     const stringifySubTypes = ['user_id', 'country', 'email']
     let normalizedValues = values
 
@@ -10,8 +14,16 @@ export function createUserFilter(subType: string, comparator: string, values: an
     }
 
     if (subType === 'country') {
-        if (normalizedValues.some((value) => value.length !== 2 || countryCodes[(value.toUpperCase())] === undefined)) {
-            throw new Error(`Country values should be 2-letter ISO codes: ${values.join(', ')}`)
+        if (
+            normalizedValues.some(
+                (value) =>
+                    value.length !== 2 ||
+                    countryCodes[value.toUpperCase()] === undefined,
+            )
+        ) {
+            throw new Error(
+                `Country values should be 2-letter ISO codes: ${values.join(', ')}`,
+            )
         }
         normalizedValues = normalizedValues.map((value) => value.toUpperCase())
     }
@@ -20,7 +32,7 @@ export function createUserFilter(subType: string, comparator: string, values: an
         type: 'user',
         subType,
         comparator,
-        values: normalizedValues
+        values: normalizedValues,
     }
 }
 
@@ -28,22 +40,29 @@ export function createAllUsersFilter() {
     return { type: 'all' }
 }
 
-export function createCustomDataFilter(dataKey: string, comparator: string, values: any[]) {
+export function createCustomDataFilter(
+    dataKey: string,
+    comparator: string,
+    values: any[],
+) {
     return {
         type: 'user',
         subType: 'customData',
         dataKey,
         dataKeyType: getDataType(values),
         comparator,
-        values
+        values,
     }
 }
 
-export function createAudienceMatchFilter(comparator: string, audiences: string[]) {
+export function createAudienceMatchFilter(
+    comparator: string,
+    audiences: string[],
+) {
     return {
         type: 'audienceMatch',
         comparator,
-        _audiences: audiences
+        _audiences: audiences,
     }
 }
 
@@ -58,7 +77,9 @@ export function getDataType(values: any[]) {
         !(type in typeMap) ||
         !values.every((value) => typeof value === type) // all values should be of the same type
     ) {
-        throw new Error(`Unable to determine type of values: ${values.join(', ')}`)
+        throw new Error(
+            `Unable to determine type of values: ${values.join(', ')}`,
+        )
     }
     return typeMap[type as keyof typeof typeMap] // we've already checked that type is a key of typeMap
 }
@@ -71,14 +92,14 @@ export function getNegatedComparator(operator: string) {
         '>=': '<',
         '>': '<=',
         '<=': '>',
-        'contain': '!contain',
+        contain: '!contain',
         '!contain': 'contain',
-        'exist': '!exist',
+        exist: '!exist',
         '!exist': 'exist',
-        'startWith': '!startWith',
+        startWith: '!startWith',
         '!startWith': 'startWith',
         '!endWith': 'endWith',
-        'endWith': '!endWith',
+        endWith: '!endWith',
     }
     if (!(operator in negateComparatorMap)) {
         throw new Error(`Unsupported operator: ${operator}`)

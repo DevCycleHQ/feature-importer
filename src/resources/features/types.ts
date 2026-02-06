@@ -1,12 +1,16 @@
-import { CustomPropertyType, Feature, FeatureConfiguration } from '../../types/DevCycle'
+import {
+    CustomPropertyType,
+    Feature,
+    FeatureConfiguration,
+} from '../../types/DevCycle'
 
 export type FeaturesToImport = {
     [key: string]: {
-        feature: Feature,
+        feature: Feature
         action: FeatureImportAction
         configs?: {
-            environment: string,
-            targetingRules: FeatureConfiguration,
+            environment: string
+            targetingRules: FeatureConfiguration
         }[]
     }
 }

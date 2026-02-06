@@ -1,28 +1,39 @@
-import { Feature as DVCFeature, Variation, Variable, VariableType, FeatureType } from '../../types/DevCycle'
+import {
+    Feature as DVCFeature,
+    Variation,
+    Variable,
+    VariableType,
+    FeatureType,
+} from '../../types/DevCycle'
 import { Feature as LDFeature } from '../../types/LaunchDarkly'
 import { formatKey } from '../DevCycle'
 import { getVariationKey, getVariationName } from './variation'
 
 export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
-    const { name, description, variations, tags, clientSideAvailability } = feature
+    const { name, description, variations, tags, clientSideAvailability } =
+        feature
     const key = formatKey(feature.key)
 
-    const dvcVariations: Variation[] = variations.map((variation: any, index: number) => {
-        const variationName = getVariationName(feature, index)
+    const dvcVariations: Variation[] = variations.map(
+        (variation: any, index: number) => {
+            const variationName = getVariationName(feature, index)
 
-        return {
-            name: variationName,
-            key: getVariationKey(feature, index),
-            variables: {
-                [key]: variation.value,
+            return {
+                name: variationName,
+                key: getVariationKey(feature, index),
+                variables: {
+                    [key]: variation.value,
+                },
             }
-        }
-    })
+        },
+    )
 
-    const dvcVariables: Variable[] = [{
-        key,
-        type: getVariableType(variations),
-    }]
+    const dvcVariables: Variable[] = [
+        {
+            key,
+            type: getVariableType(variations),
+        },
+    ]
 
     const dvcFeature: DVCFeature = {
         name,
@@ -32,7 +43,7 @@ export const mapLDFeatureToDVCFeature = (feature: LDFeature): DVCFeature => {
         variations: dvcVariations,
         variables: dvcVariables,
         tags,
-        sdkVisibility: mapSDKVisibility(clientSideAvailability)
+        sdkVisibility: mapSDKVisibility(clientSideAvailability),
     }
 
     return dvcFeature
@@ -56,7 +67,9 @@ const getVariableType = (variations: any[]) => {
     return VariableType.json
 }
 
-const mapSDKVisibility = (clientSideAvailability: LDFeature['clientSideAvailability']) => {
+const mapSDKVisibility = (
+    clientSideAvailability: LDFeature['clientSideAvailability'],
+) => {
     const sdkVisibility: DVCFeature['sdkVisibility'] = {
         mobile: clientSideAvailability?.usingMobileKey ?? true,
         client: clientSideAvailability?.usingEnvironmentIds ?? true,

@@ -1,13 +1,16 @@
 jest.mock('../../api')
 
-import { mockLDFeaturesFlags, mockConfig } from '../../api/__mocks__/MockResponses'
+import {
+    mockLDFeaturesFlags,
+    mockConfig,
+} from '../../api/__mocks__/MockResponses'
 import { LDAudienceImporter } from '../../resources/audiences'
 import { OperatorType } from '../../types/DevCycle'
 import { getDataType } from '../DevCycle'
 import {
     buildTargetingRuleFromRule,
     buildTargetingRuleFromTarget,
-    buildTargetingRulesFromFallthrough
+    buildTargetingRulesFromFallthrough,
 } from './targeting'
 
 const mockFeature = mockLDFeaturesFlags.items[0]
@@ -20,7 +23,7 @@ mockFeature.variations = [
     {
         _id: 'variation-2',
         value: true,
-    }
+    },
 ]
 
 const mockRule = {
@@ -31,10 +34,10 @@ const mockRule = {
             attribute: 'email',
             negate: false,
             op: 'in',
-            values: ['email@email.com']
-        }
+            values: ['email@email.com'],
+        },
     ],
-    variation: 1
+    variation: 1,
 }
 
 const mockRuleWithCustomProperty = {
@@ -45,8 +48,8 @@ const mockRuleWithCustomProperty = {
             attribute: 'customProperty',
             negate: false,
             op: 'in',
-            values: ['email@email.com']
-        }
+            values: ['email@email.com'],
+        },
     ],
 }
 
@@ -58,10 +61,10 @@ const mockUnsupportedOpRule = {
             attribute: 'email',
             negate: false,
             op: 'rhymesWith',
-            values: ['email.com']
-        }
+            values: ['email.com'],
+        },
     ],
-    variation: 1
+    variation: 1,
 }
 
 describe('buildTargetingRuleFromTarget', () => {
@@ -76,21 +79,24 @@ describe('buildTargetingRuleFromTarget', () => {
             audience: {
                 name: 'Imported Target',
                 filters: {
-                    filters: [{
-                        type: 'user',
-                        subType: 'user_id',
-                        comparator: '=',
-                        values: target.values
-                    }],
-                    operator: OperatorType.and
-                }
+                    filters: [
+                        {
+                            type: 'user',
+                            subType: 'user_id',
+                            comparator: '=',
+                            values: target.values,
+                        },
+                    ],
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
-
     })
 })
 
@@ -98,38 +104,54 @@ describe('buildTargetingRuleFromRule', () => {
     test('builds targeting rule from a simple rule', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
 
-        const result = buildTargetingRuleFromRule(mockRule, mockFeature, 'prod', audienceImport, {})
+        const result = buildTargetingRuleFromRule(
+            mockRule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            {},
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Rule',
                 filters: {
                     filters: [expect.objectContaining({})],
-                    operator: OperatorType.and
-                }
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
     test('builds targeting rule with custom property', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
 
-        const result = buildTargetingRuleFromRule(mockRuleWithCustomProperty, mockFeature, 'prod', audienceImport, {})
+        const result = buildTargetingRuleFromRule(
+            mockRuleWithCustomProperty,
+            mockFeature,
+            'prod',
+            audienceImport,
+            {},
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Rule',
                 filters: {
                     filters: [expect.objectContaining({})],
-                    operator: OperatorType.and
-                }
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
@@ -142,37 +164,42 @@ describe('buildTargetingRuleFromRule', () => {
                 variations: [
                     {
                         variation: 0,
-                        weight: 20000
+                        weight: 20000,
                     },
                     {
                         variation: 1,
-                        weight: 80000
-                    }
-                ]
-            }
+                        weight: 80000,
+                    },
+                ],
+            },
         }
 
-        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
+        const result = buildTargetingRuleFromRule(
+            rule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            {},
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Rule',
                 filters: {
                     filters: [expect.objectContaining({})],
-                    operator: OperatorType.and
-                }
+                    operator: OperatorType.and,
+                },
             },
             distribution: [
                 {
                     _variation: 'variation-1',
-                    percentage: 0.2
+                    percentage: 0.2,
                 },
                 {
                     _variation: 'variation-2',
-                    percentage: 0.8
-                }
-            ]
+                    percentage: 0.8,
+                },
+            ],
         })
-
     })
 
     test('builds targeting rule from a segment match rule', () => {
@@ -181,8 +208,8 @@ describe('buildTargetingRuleFromRule', () => {
             'seg-1-prod': {
                 _id: 'audienceId',
                 _project: 'project',
-                filters: { filters: [], operator: OperatorType.and }
-            }
+                filters: { filters: [], operator: OperatorType.and },
+            },
         }
         const rule = {
             _id: '123',
@@ -192,36 +219,46 @@ describe('buildTargetingRuleFromRule', () => {
                     attribute: 'segmentMatch',
                     negate: false,
                     op: 'segmentMatch',
-                    values: ['seg-1']
-                }
+                    values: ['seg-1'],
+                },
             ],
-            variation: 0
+            variation: 0,
         }
 
-        const result = buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
+        const result = buildTargetingRuleFromRule(
+            rule,
+            mockFeature,
+            'prod',
+            audienceImport,
+            {},
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Rule',
                 filters: {
-                    filters: [{
-                        type: 'audienceMatch',
-                        comparator: '=',
-                        _audiences: ['audienceId']
-                    }],
-                    operator: OperatorType.and
-                }
+                    filters: [
+                        {
+                            type: 'audienceMatch',
+                            comparator: '=',
+                            _audiences: ['audienceId'],
+                        },
+                    ],
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-1',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-1',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
     test('throws error if an error occured while creating audience', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
         audienceImport.errors = {
-            'seg-1-prod': 'an error occured'
+            'seg-1-prod': 'an error occured',
         }
         const rule = {
             _id: '123',
@@ -231,13 +268,20 @@ describe('buildTargetingRuleFromRule', () => {
                     attribute: 'segmentMatch',
                     negate: false,
                     op: 'segmentMatch',
-                    values: ['seg-1']
-                }
+                    values: ['seg-1'],
+                },
             ],
-            variation: 0
+            variation: 0,
         }
 
-        const methodCall = () => buildTargetingRuleFromRule(rule, mockFeature, 'prod', audienceImport, {})
+        const methodCall = () =>
+            buildTargetingRuleFromRule(
+                rule,
+                mockFeature,
+                'prod',
+                audienceImport,
+                {},
+            )
         expect(methodCall).toThrowError('an error occured')
     })
 
@@ -258,19 +302,23 @@ describe('buildTargetingRuleFromRule', () => {
             audience: {
                 name: 'Imported Rule',
                 filters: {
-                    filters: [{
-                        comparator: 'contain',
-                        type: 'user',
-                        subType: 'email',
-                        values: ['email.com']
-                    }],
-                    operator: OperatorType.and
-                }
+                    filters: [
+                        {
+                            comparator: 'contain',
+                            type: 'user',
+                            subType: 'email',
+                            values: ['email.com'],
+                        },
+                    ],
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
@@ -285,9 +333,9 @@ describe('buildTargetingRuleFromRule', () => {
                     attribute: 'email',
                     negate: true,
                     op: 'endsWith',
-                    values: ['email.com']
-                }
-            ]
+                    values: ['email.com'],
+                },
+            ],
         }
 
         const result = buildTargetingRuleFromRule(
@@ -301,19 +349,23 @@ describe('buildTargetingRuleFromRule', () => {
             audience: {
                 name: 'Imported Rule',
                 filters: {
-                    filters: [{
-                        comparator: '!endWith',
-                        type: 'user',
-                        subType: 'email',
-                        values: ['email.com']
-                    }],
-                    operator: OperatorType.and
-                }
+                    filters: [
+                        {
+                            comparator: '!endWith',
+                            type: 'user',
+                            subType: 'email',
+                            values: ['email.com'],
+                        },
+                    ],
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
@@ -330,9 +382,9 @@ describe('buildTargetingRuleFromRule', () => {
                     attribute: 'email',
                     negate: true,
                     op: 'rhymesWith',
-                    values: ['email.com']
-                }
-            ]
+                    values: ['email.com'],
+                },
+            ],
         }
 
         const result = buildTargetingRuleFromRule(
@@ -346,35 +398,40 @@ describe('buildTargetingRuleFromRule', () => {
             audience: {
                 name: 'Imported Rule',
                 filters: {
-                    filters: [{
-                        comparator: '!contain',
-                        type: 'user',
-                        subType: 'email',
-                        values: ['email.com']
-                    }],
-                    operator: OperatorType.and
-                }
+                    filters: [
+                        {
+                            comparator: '!contain',
+                            type: 'user',
+                            subType: 'email',
+                            values: ['email.com'],
+                        },
+                    ],
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
     })
 
     test('throws error if unsupported operation is not in operationMap', () => {
         const audienceImport = new LDAudienceImporter(mockConfig)
         const operationMap = {
-            startsWith: 'contain'
+            startsWith: 'contain',
         }
 
-        const methodCall = () => buildTargetingRuleFromRule(
-            mockUnsupportedOpRule,
-            mockFeature,
-            'prod',
-            audienceImport,
-            operationMap,
-        )
+        const methodCall = () =>
+            buildTargetingRuleFromRule(
+                mockUnsupportedOpRule,
+                mockFeature,
+                'prod',
+                audienceImport,
+                operationMap,
+            )
         expect(methodCall).toThrowError('Unsupported operation: rhymesWith')
     })
 })
@@ -382,24 +439,28 @@ describe('buildTargetingRuleFromRule', () => {
 describe('buildTargetingRulesFromFallthrough', () => {
     test('builds targeting rule with variation', () => {
         const fallthrough = {
-            variation: 1
+            variation: 1,
         }
 
-        const result = buildTargetingRulesFromFallthrough(fallthrough, mockFeature)
+        const result = buildTargetingRulesFromFallthrough(
+            fallthrough,
+            mockFeature,
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Fallthrough',
                 filters: {
                     filters: [{ type: 'all' }],
-                    operator: OperatorType.and
-                }
+                    operator: OperatorType.and,
+                },
             },
-            distribution: [{
-                _variation: 'variation-2',
-                percentage: 1
-            }]
+            distribution: [
+                {
+                    _variation: 'variation-2',
+                    percentage: 1,
+                },
+            ],
         })
-
     })
 
     test('builds targeting rule with rollout', () => {
@@ -408,35 +469,38 @@ describe('buildTargetingRulesFromFallthrough', () => {
                 variations: [
                     {
                         variation: 0,
-                        weight: 10000
+                        weight: 10000,
                     },
                     {
                         variation: 1,
-                        weight: 90000
-                    }
-                ]
-            }
+                        weight: 90000,
+                    },
+                ],
+            },
         }
 
-        const result = buildTargetingRulesFromFallthrough(fallthrough, mockFeature)
+        const result = buildTargetingRulesFromFallthrough(
+            fallthrough,
+            mockFeature,
+        )
         expect(result).toEqual({
             audience: {
                 name: 'Imported Fallthrough',
                 filters: {
                     filters: [{ type: 'all' }],
-                    operator: OperatorType.and
-                }
+                    operator: OperatorType.and,
+                },
             },
             distribution: [
                 {
                     _variation: 'variation-1',
-                    percentage: 0.1
+                    percentage: 0.1,
                 },
                 {
                     _variation: 'variation-2',
-                    percentage: 0.9
-                }
-            ]
+                    percentage: 0.9,
+                },
+            ],
         })
     })
 })

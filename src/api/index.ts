@@ -4,4 +4,8 @@ import LDApiWrapper from './LDApiWrapper'
 
 const config = getConfigs()
 export const LD = new LDApiWrapper(config.ldAccessToken)
-export const DVC = new DVCApiWrapper(config.dvcClientId, config.dvcClientSecret, config.provider)
+export const DVC = new DVCApiWrapper(
+    config.dvcClientId,
+    config.dvcClientSecret,
+    config.provider,
+)

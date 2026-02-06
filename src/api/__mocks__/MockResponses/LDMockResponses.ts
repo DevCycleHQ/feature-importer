@@ -19,10 +19,10 @@ export const mockLDFeaturesFlags = {
                 {
                     _id: '456',
                     value: true,
-                }
+                },
             ],
             fallthrough: {
-                variation: 1
+                variation: 1,
             },
             targets: [],
             kind: FeatureKind.boolean,
@@ -34,13 +34,13 @@ export const mockLDFeaturesFlags = {
                 '123': {
                     on: true,
                     targets: [],
-                    rules: []
-                }
+                    rules: [],
+                },
             },
             clientSideAvailability: {
                 usingEnvironmentIds: true,
-                usingMobileKey: false
-            }
+                usingMobileKey: false,
+            },
         },
         {
             key: 'feature-key-2',
@@ -57,10 +57,10 @@ export const mockLDFeaturesFlags = {
                 {
                     _id: '456',
                     value: 'on',
-                }
+                },
             ],
             fallthrough: {
-                variation: 1
+                variation: 1,
             },
             targets: [],
             kind: FeatureKind.multivariate,
@@ -71,9 +71,9 @@ export const mockLDFeaturesFlags = {
                 '123': {
                     on: true,
                     targets: [],
-                    rules: []
-                }
-            }
+                    rules: [],
+                },
+            },
         },
         {
             key: 'duplicate-key',
@@ -90,10 +90,10 @@ export const mockLDFeaturesFlags = {
                 {
                     _id: '456',
                     value: true,
-                }
+                },
             ],
             fallthrough: {
-                variation: 1
+                variation: 1,
             },
             targets: [],
             kind: FeatureKind.boolean,
@@ -104,114 +104,114 @@ export const mockLDFeaturesFlags = {
                 '123': {
                     on: true,
                     targets: [],
-                    rules: []
-                }
-            }
-        }
-    ]
+                    rules: [],
+                },
+            },
+        },
+    ],
 }
 
 export const mockLDFeaturesMappedToDVC = [
     {
-        'name': 'feature name',
-        'description': 'feature description',
-        'type': FeatureType.release,
-        'key': 'feature-key',
-        'variations': [
+        name: 'feature name',
+        description: 'feature description',
+        type: FeatureType.release,
+        key: 'feature-key',
+        variations: [
             {
-                'name': 'Variation 1',
-                'key': 'variation-1',
-                'variables': {
-                    'feature-key': false
-                }
+                name: 'Variation 1',
+                key: 'variation-1',
+                variables: {
+                    'feature-key': false,
+                },
             },
             {
-                'name': 'Variation 2',
-                'key': 'variation-2',
-                'variables': {
-                    'feature-key': true
-                }
-            }
+                name: 'Variation 2',
+                key: 'variation-2',
+                variables: {
+                    'feature-key': true,
+                },
+            },
         ],
-        'variables': [
+        variables: [
             {
-                'key': 'feature-key',
-                'type': VariableType.boolean
-            }
+                key: 'feature-key',
+                type: VariableType.boolean,
+            },
         ],
-        'tags': [],
-        'sdkVisibility': {
-            'mobile': false,
-            'client': true,
-            'server': true
-        }
+        tags: [],
+        sdkVisibility: {
+            mobile: false,
+            client: true,
+            server: true,
+        },
     },
     {
-        'name': 'feature name 2',
-        'description': 'feature description 2',
-        'type': FeatureType.release,
-        'key': 'feature-key-2',
-        'variations': [
+        name: 'feature name 2',
+        description: 'feature description 2',
+        type: FeatureType.release,
+        key: 'feature-key-2',
+        variations: [
             {
-                'name': 'Variation 1',
-                'key': 'variation-1',
-                'variables': {
-                    'feature-key-2': 'off'
-                }
+                name: 'Variation 1',
+                key: 'variation-1',
+                variables: {
+                    'feature-key-2': 'off',
+                },
             },
             {
-                'name': 'Variation 2',
-                'key': 'variation-2',
-                'variables': {
-                    'feature-key-2': 'on'
-                }
-            }
+                name: 'Variation 2',
+                key: 'variation-2',
+                variables: {
+                    'feature-key-2': 'on',
+                },
+            },
         ],
-        'variables': [
+        variables: [
             {
-                'key': 'feature-key-2',
-                'type': VariableType.string
-            }
+                key: 'feature-key-2',
+                type: VariableType.string,
+            },
         ],
-        'tags': [],
-        'sdkVisibility': {
-            'mobile': true,
-            'client': true,
-            'server': true
-        }
+        tags: [],
+        sdkVisibility: {
+            mobile: true,
+            client: true,
+            server: true,
+        },
     },
     {
-        'name': 'duplicate feature name',
-        'description': 'duplicate feature description',
-        'type': FeatureType.release,
-        'key': 'duplicate-key',
-        'variations': [
+        name: 'duplicate feature name',
+        description: 'duplicate feature description',
+        type: FeatureType.release,
+        key: 'duplicate-key',
+        variations: [
             {
-                'name': 'Variation 1',
-                'key': 'variation-1',
-                'variables': {
-                    'duplicate-key': false
-                }
+                name: 'Variation 1',
+                key: 'variation-1',
+                variables: {
+                    'duplicate-key': false,
+                },
             },
             {
-                'name': 'Variation 2',
-                'key': 'variation-2',
-                'variables': {
-                    'duplicate-key': true
-                }
-            }
+                name: 'Variation 2',
+                key: 'variation-2',
+                variables: {
+                    'duplicate-key': true,
+                },
+            },
         ],
-        'variables': [
+        variables: [
             {
-                'key': 'duplicate-key',
-                'type': VariableType.boolean
-            }
+                key: 'duplicate-key',
+                type: VariableType.boolean,
+            },
         ],
-        'tags': [],
-        'sdkVisibility': {
-            'mobile': true,
-            'client': true,
-            'server': true
-        }
-    }
+        tags: [],
+        sdkVisibility: {
+            mobile: true,
+            client: true,
+            server: true,
+        },
+    },
 ]
