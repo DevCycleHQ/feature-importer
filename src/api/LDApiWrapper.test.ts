@@ -306,7 +306,7 @@ describe('LDApiWrapper', () => {
             expect(fetchMock).toHaveBeenCalledTimes(3)
             expect(fetchMock.mock.calls[1][0]).toContain(`/projects/${mockProjectKey2}/environments`)
             expect(fetchMock.mock.calls[2][0])
-                .toMatch(new RegExp(`/flags/${mockProjectKey2}\\?summary=0&env=development`))
+                .toMatch(new RegExp(`/flags/${mockProjectKey2}\\?summary=0&limit=100&offset=0&env=development`))
         })
     })
 
@@ -424,7 +424,7 @@ describe('LDApiWrapper', () => {
             const featureFlagsCall = fetchMock.mock.calls[1]
             const url = featureFlagsCall[0]
 
-            expect(url).toMatch(/^https:\/\/app\.launchdarkly\.com\/api\/v2\/flags\/test-project\?summary=0&env=dev$/)
+            expect(url).toMatch(/^https:\/\/app\.launchdarkly\.com\/api\/v2\/flags\/test-project\?summary=0&limit=100&offset=0&env=dev$/)
         })
 
         test('should split environments into multiple batches when more than 3', async () => {
@@ -730,6 +730,43 @@ describe('LDApiWrapper', () => {
                 expect(call[0]).toContain('env=dev')
                 expect(call[0]).toContain('env=prod')
             }
+        })
+    })
+
+    describe('Pagination', () => {
+        test('should paginate when totalCount exceeds page size', async () => {
+            // Setup: 1 environment cached
+            fetchMock.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({ items: [{ key: 'prod' }] })
+            })
+
+            // Page 1: 100 flags
+            fetchMock.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    items: Array.from({ length: 100 }, (_, i) => ({ key: `flag-${i}` })),
+                    totalCount: 150
+                })
+            })
+
+            // Page 2: 50 flags
+            fetchMock.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    items: Array.from({ length: 50 }, (_, i) => ({ key: `flag-${i + 100}` })),
+                    totalCount: 150
+                })
+            })
+
+            const result = await ldApi.getFeatureFlagsForProject(mockProjectKey)
+
+            expect(result).toHaveLength(150)
+            expect(fetchMock.mock.calls[1][0]).toContain('offset=0')
+            expect(fetchMock.mock.calls[2][0]).toContain('offset=100')
         })
     })
 })
