@@ -106,8 +106,13 @@ export default class LDApiWrapper {
         const featuresMap = new Map<string, any>()
         let offset = 0
         let totalCount: number | null = null
+        let lastPageItemCount = pageSize
 
-        while (totalCount === null || offset < totalCount) {
+        while (
+            totalCount === null
+                ? lastPageItemCount >= pageSize // No totalCount: keep fetching until we get a partial page
+                : offset < totalCount
+        ) {
             for (let i = 0; i < environmentChunks.length; i++) {
                 const envChunk = environmentChunks[i]
                 const envParams = envChunk
@@ -122,13 +127,17 @@ export default class LDApiWrapper {
                 await this.handleErrors(response)
                 const data = await response.json()
 
-                // Get total count from first response
-                if (totalCount === null) {
-                    totalCount = data.totalCount ?? data.items?.length ?? 0
+                const items = data.items || []
+
+                if (totalCount === null && data.totalCount) {
+                    totalCount = data.totalCount
+                }
+                if (i === 0) {
+                    lastPageItemCount = items.length
                 }
 
                 // Add/merge features to map
-                for (const feature of data.items || []) {
+                for (const feature of items) {
                     if (featuresMap.has(feature.key)) {
                         // Merge environment data from duplicate entries
                         const existing = featuresMap.get(feature.key)
