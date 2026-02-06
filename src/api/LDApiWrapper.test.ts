@@ -26,17 +26,32 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 3,
                     items: [
-                        { _id: 'env-1', key: 'development', name: 'Development', color: 'blue' },
-                        { _id: 'env-2', key: 'staging', name: 'Staging', color: 'yellow' },
-                        { _id: 'env-3', key: 'production', name: 'Production', color: 'green' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'development',
+                            name: 'Development',
+                            color: 'blue',
+                        },
+                        {
+                            _id: 'env-2',
+                            key: 'staging',
+                            name: 'Staging',
+                            color: 'yellow',
+                        },
+                        {
+                            _id: 'env-3',
+                            key: 'production',
+                            name: 'Production',
+                            color: 'green',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -45,14 +60,14 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [{ key: 'flag-1' }] })
+                json: async () => ({ items: [{ key: 'flag-1' }] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
 
             // Verify only 2 calls total: 1 getProject + 1 batched feature flags call
             expect(fetchMock).toHaveBeenCalledTimes(2)
-            
+
             // Verify all 3 environments were included in a single call
             const featureFlagsCall = fetchMock.mock.calls[1]
             expect(featureFlagsCall[0]).toContain('env=development')
@@ -69,15 +84,20 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 1,
                     items: [
-                        { _id: 'env-1', key: 'production', name: 'Production', color: 'green' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'production',
+                            name: 'Production',
+                            color: 'green',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -85,7 +105,7 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -105,16 +125,26 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 2,
                     items: [
-                        { _id: 'env-1', key: 'dev-env-1', name: 'Dev Env 1', color: 'blue' },
-                        { _id: 'env-2', key: 'staging&test', name: 'Staging & Test', color: 'yellow' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'dev-env-1',
+                            name: 'Dev Env 1',
+                            color: 'blue',
+                        },
+                        {
+                            _id: 'env-2',
+                            key: 'staging&test',
+                            name: 'Staging & Test',
+                            color: 'yellow',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -122,13 +152,13 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
             // Both environments in a single call (under 3 limit)
             expect(fetchMock).toHaveBeenCalledTimes(2)
-            
+
             const featureFlagsCall = fetchMock.mock.calls[1]
             expect(featureFlagsCall[0]).toContain('env=dev-env-1')
             expect(featureFlagsCall[0]).toContain('env=staging%26test') // & should be encoded as %26
@@ -140,30 +170,42 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 2,
                 items: [
-                    { _id: 'env-1', key: 'development', name: 'Development', color: 'blue' },
-                    { _id: 'env-2', key: 'production', name: 'Production', color: 'green' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'development',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                    {
+                        _id: 'env-2',
+                        key: 'production',
+                        name: 'Production',
+                        color: 'green',
+                    },
+                ],
             }
 
             // First call to getEnvironments (fallback)
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             // Single batched call for both environments
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
 
             // Verify getEnvironments was called
             const getEnvironmentsCall = fetchMock.mock.calls[0]
-            expect(getEnvironmentsCall[0]).toContain(`/projects/${mockProjectKey}/environments`)
+            expect(getEnvironmentsCall[0]).toContain(
+                `/projects/${mockProjectKey}/environments`,
+            )
 
             // Verify feature flags call includes both environments in one call
             const featureFlagsCall = fetchMock.mock.calls[1]
@@ -182,16 +224,21 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 1,
                     items: [
-                        { _id: 'env-1', key: 'production', name: 'Production', color: 'green' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'production',
+                            name: 'Production',
+                            color: 'green',
+                        },
+                    ],
+                },
             }
 
             // Call getProject first to cache environments
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -200,14 +247,14 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
 
             // Should only have 2 calls: getProject and getFeatureFlags, no getEnvironments
             expect(fetchMock).toHaveBeenCalledTimes(2)
-            
+
             // Verify getEnvironments endpoint was never called
             const calls = fetchMock.mock.calls
             calls.forEach((call) => {
@@ -219,22 +266,27 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 1,
                 items: [
-                    { _id: 'env-1', key: 'development', name: 'Development', color: 'blue' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'development',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                ],
             }
 
             // First getEnvironments call
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             // First getFeatureFlags call (one per environment)
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -243,7 +295,7 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -252,8 +304,10 @@ describe('LDApiWrapper', () => {
             expect(fetchMock).toHaveBeenCalledTimes(3)
 
             // Verify getEnvironments was only called once (in the first call)
-            const environmentCalls = fetchMock.mock.calls.filter((call) =>
-                call[0].includes('/environments') && !call[0].includes('/flags/')
+            const environmentCalls = fetchMock.mock.calls.filter(
+                (call) =>
+                    call[0].includes('/environments') &&
+                    !call[0].includes('/flags/'),
             )
             expect(environmentCalls).toHaveLength(1)
         })
@@ -269,15 +323,20 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 1,
                     items: [
-                        { _id: 'env-1', key: 'development', name: 'Development', color: 'blue' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'development',
+                            name: 'Development',
+                            color: 'blue',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -285,28 +344,39 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 1,
                 items: [
-                    { _id: 'env-1', key: 'development', name: 'Development', color: 'blue' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'development',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                ],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => (mockEnvironmentsResponse)
+                json: async () => mockEnvironmentsResponse,
             })
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey2)
 
             expect(fetchMock).toHaveBeenCalledTimes(3)
-            expect(fetchMock.mock.calls[1][0]).toContain(`/projects/${mockProjectKey2}/environments`)
-            expect(fetchMock.mock.calls[2][0])
-                .toMatch(new RegExp(`/flags/${mockProjectKey2}\\?summary=0&env=development`))
+            expect(fetchMock.mock.calls[1][0]).toContain(
+                `/projects/${mockProjectKey2}/environments`,
+            )
+            const flagsUrl = fetchMock.mock.calls[2][0]
+            expect(flagsUrl).toContain(`/flags/${mockProjectKey2}`)
+            expect(flagsUrl).toContain('summary=0')
+            expect(flagsUrl).toContain('limit=100')
+            expect(flagsUrl).toContain('offset=0')
+            expect(flagsUrl).toContain('env=development')
         })
     })
 
@@ -315,22 +385,37 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 3,
                 items: [
-                    { _id: 'env-1', key: 'dev', name: 'Development', color: 'blue' },
-                    { _id: 'env-2', key: 'staging', name: 'Staging', color: 'yellow' },
-                    { _id: 'env-3', key: 'prod', name: 'Production', color: 'green' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'dev',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                    {
+                        _id: 'env-2',
+                        key: 'staging',
+                        name: 'Staging',
+                        color: 'yellow',
+                    },
+                    {
+                        _id: 'env-3',
+                        key: 'prod',
+                        name: 'Production',
+                        color: 'green',
+                    },
+                ],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -351,20 +436,25 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 1,
                 items: [
-                    { _id: 'env-1', key: 'production', name: 'Production', color: 'green' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'production',
+                        name: 'Production',
+                        color: 'green',
+                    },
+                ],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -382,15 +472,23 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ 
-                    totalCount: 1, items: [{ _id: 'env-1', key: 'dev', name: 'Development', color: 'blue' }] 
-                })
+                json: async () => ({
+                    totalCount: 1,
+                    items: [
+                        {
+                            _id: 'env-1',
+                            key: 'dev',
+                            name: 'Development',
+                            color: 'blue',
+                        },
+                    ],
+                }),
             })
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(specialProjectKey)
@@ -403,20 +501,25 @@ describe('LDApiWrapper', () => {
             const mockEnvironmentsResponse = {
                 totalCount: 1,
                 items: [
-                    { _id: 'env-1', key: 'dev', name: 'Development', color: 'blue' }
-                ]
+                    {
+                        _id: 'env-1',
+                        key: 'dev',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                ],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [] })
+                json: async () => ({ items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -424,44 +527,75 @@ describe('LDApiWrapper', () => {
             const featureFlagsCall = fetchMock.mock.calls[1]
             const url = featureFlagsCall[0]
 
-            expect(url).toMatch(/^https:\/\/app\.launchdarkly\.com\/api\/v2\/flags\/test-project\?summary=0&env=dev$/)
+            expect(url).toContain(
+                'https://app.launchdarkly.com/api/v2/flags/test-project',
+            )
+            expect(url).toContain('summary=0')
+            expect(url).toContain('limit=100')
+            expect(url).toContain('offset=0')
+            expect(url).toContain('env=dev')
         })
 
         test('should split environments into multiple batches when more than 3', async () => {
             const mockEnvironmentsResponse = {
                 totalCount: 7,
                 items: [
-                    { _id: 'env-1', key: 'dev', name: 'Development', color: 'blue' },
-                    { _id: 'env-2', key: 'staging', name: 'Staging', color: 'yellow' },
-                    { _id: 'env-3', key: 'prod', name: 'Production', color: 'green' },
+                    {
+                        _id: 'env-1',
+                        key: 'dev',
+                        name: 'Development',
+                        color: 'blue',
+                    },
+                    {
+                        _id: 'env-2',
+                        key: 'staging',
+                        name: 'Staging',
+                        color: 'yellow',
+                    },
+                    {
+                        _id: 'env-3',
+                        key: 'prod',
+                        name: 'Production',
+                        color: 'green',
+                    },
                     { _id: 'env-4', key: 'qa', name: 'QA', color: 'orange' },
-                    { _id: 'env-5', key: 'test', name: 'Test', color: 'purple' },
+                    {
+                        _id: 'env-5',
+                        key: 'test',
+                        name: 'Test',
+                        color: 'purple',
+                    },
                     { _id: 'env-6', key: 'demo', name: 'Demo', color: 'pink' },
-                    { _id: 'env-7', key: 'sandbox', name: 'Sandbox', color: 'gray' }
-                ]
+                    {
+                        _id: 'env-7',
+                        key: 'sandbox',
+                        name: 'Sandbox',
+                        color: 'gray',
+                    },
+                ],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             // Mock 3 batched calls: [dev, staging, prod], [qa, test, demo], [sandbox]
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [{ key: 'flag-1' }] })
+                json: async () => ({ items: [{ key: 'flag-1' }] }),
             })
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [{ key: 'flag-2' }] })
+                json: async () => ({ items: [{ key: 'flag-2' }] }),
             })
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ items: [{ key: 'flag-3' }] })
+                json: async () => ({ items: [{ key: 'flag-3' }] }),
             })
 
             const result = await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -502,14 +636,14 @@ describe('LDApiWrapper', () => {
                 tags: [],
                 environments: {
                     totalCount: 0,
-                    items: []
-                }
+                    items: [],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -525,13 +659,13 @@ describe('LDApiWrapper', () => {
                 key: mockProjectKey,
                 name: 'Test Project',
                 tags: [],
-                environments: undefined
+                environments: undefined,
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -540,7 +674,7 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ totalCount: 0, items: [] })
+                json: async () => ({ totalCount: 0, items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -559,14 +693,14 @@ describe('LDApiWrapper', () => {
                 tags: [],
                 environments: {
                     totalCount: 0,
-                    items: null as any
-                }
+                    items: null as any,
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -575,7 +709,7 @@ describe('LDApiWrapper', () => {
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => ({ totalCount: 0, items: [] })
+                json: async () => ({ totalCount: 0, items: [] }),
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -586,13 +720,13 @@ describe('LDApiWrapper', () => {
         test('should handle empty environments from getEnvironments fallback', async () => {
             const mockEnvironmentsResponse = {
                 totalCount: 0,
-                items: []
+                items: [],
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -603,13 +737,13 @@ describe('LDApiWrapper', () => {
         test('should handle undefined items in getEnvironments response', async () => {
             const mockEnvironmentsResponse = {
                 totalCount: 0,
-                items: undefined
+                items: undefined,
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockEnvironmentsResponse
+                json: async () => mockEnvironmentsResponse,
             })
 
             await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -625,14 +759,14 @@ describe('LDApiWrapper', () => {
                 tags: [],
                 environments: {
                     totalCount: 0,
-                    items: []
-                }
+                    items: [],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -654,15 +788,20 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 1,
                     items: [
-                        { _id: 'env-1', key: 'production', name: 'Production', color: 'green' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'production',
+                            name: 'Production',
+                            color: 'green',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -679,7 +818,7 @@ describe('LDApiWrapper', () => {
                 ok: false,
                 status: 404,
                 statusText: 'Not Found',
-                json: async () => ({ message: 'Project not found' })
+                json: async () => ({ message: 'Project not found' }),
             })
 
             await expect(ldApi.getProject(mockProjectKey)).rejects.toThrow()
@@ -696,16 +835,26 @@ describe('LDApiWrapper', () => {
                 environments: {
                     totalCount: 2,
                     items: [
-                        { _id: 'env-1', key: 'dev', name: 'Development', color: 'blue' },
-                        { _id: 'env-2', key: 'prod', name: 'Production', color: 'green' }
-                    ]
-                }
+                        {
+                            _id: 'env-1',
+                            key: 'dev',
+                            name: 'Development',
+                            color: 'blue',
+                        },
+                        {
+                            _id: 'env-2',
+                            key: 'prod',
+                            name: 'Production',
+                            color: 'green',
+                        },
+                    ],
+                },
             }
 
             fetchMock.mockResolvedValueOnce({
                 ok: true,
                 status: 200,
-                json: async () => mockProjectResponse
+                json: async () => mockProjectResponse,
             })
 
             await ldApi.getProject(mockProjectKey)
@@ -715,7 +864,7 @@ describe('LDApiWrapper', () => {
                 fetchMock.mockResolvedValueOnce({
                     ok: true,
                     status: 200,
-                    json: async () => ({ items: [] })
+                    json: async () => ({ items: [] }),
                 })
 
                 await ldApi.getFeatureFlagsForProject(mockProjectKey)
@@ -732,5 +881,148 @@ describe('LDApiWrapper', () => {
             }
         })
     })
-})
 
+    test('should paginate when totalCount exceeds page size', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: [{ key: 'prod' }] }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: Array.from({ length: 100 }, (_, i) => ({
+                    key: `flag-${i}`,
+                })),
+                totalCount: 150,
+            }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: Array.from({ length: 50 }, (_, i) => ({
+                    key: `flag-${i + 100}`,
+                })),
+                totalCount: 150,
+            }),
+        })
+
+        const result = await ldApi.getFeatureFlagsForProject(mockProjectKey)
+
+        expect(result).toHaveLength(150)
+        expect(fetchMock.mock.calls[1][0]).toContain('offset=0')
+        expect(fetchMock.mock.calls[2][0]).toContain('offset=100')
+    })
+
+    test('should paginate correctly when totalCount is omitted from response', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: [{ key: 'prod' }] }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: Array.from({ length: 100 }, (_, i) => ({
+                    key: `flag-${i}`,
+                })),
+            }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: Array.from({ length: 100 }, (_, i) => ({
+                    key: `flag-${i + 100}`,
+                })),
+            }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: Array.from({ length: 30 }, (_, i) => ({
+                    key: `flag-${i + 200}`,
+                })),
+            }),
+        })
+
+        const result = await ldApi.getFeatureFlagsForProject(mockProjectKey)
+
+        expect(result).toHaveLength(230)
+        expect(fetchMock.mock.calls[1][0]).toContain('offset=0')
+        expect(fetchMock.mock.calls[2][0]).toContain('offset=100')
+        expect(fetchMock.mock.calls[3][0]).toContain('offset=200')
+        expect(fetchMock).toHaveBeenCalledTimes(4)
+    })
+
+    test('should merge environment data when same flag appears across environment chunks', async () => {
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: [
+                    { key: 'env1' },
+                    { key: 'env2' },
+                    { key: 'env3' },
+                    { key: 'env4' },
+                ],
+            }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: [
+                    {
+                        key: 'my-flag',
+                        name: 'My Flag',
+                        environments: {
+                            env1: { on: true },
+                            env2: { on: false },
+                            env3: { on: true },
+                        },
+                    },
+                ],
+                totalCount: 1,
+            }),
+        })
+
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({
+                items: [
+                    {
+                        key: 'my-flag',
+                        name: 'My Flag',
+                        environments: {
+                            env4: { on: false },
+                        },
+                    },
+                ],
+                totalCount: 1,
+            }),
+        })
+
+        const result = await ldApi.getFeatureFlagsForProject(mockProjectKey)
+
+        expect(result).toHaveLength(1)
+        expect(result[0].key).toBe('my-flag')
+        expect(result[0].environments).toEqual({
+            env1: { on: true },
+            env2: { on: false },
+            env3: { on: true },
+            env4: { on: false },
+        })
+    })
+})
