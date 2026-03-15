@@ -1,7 +1,7 @@
 {
     "name": "feature-importer",
     "engines": {
-        "node": ">=18.0.0"
+        "node": ">=18.18.0"
     },
     "version": "1.0.0",
     "description": "DevCycle Feature Importer",
@@ -30,7 +30,7 @@
         "@types/node": "^20.8.9",
         "@typescript-eslint/eslint-plugin": "^8.57.0",
         "@typescript-eslint/parser": "^8.57.0",
-        "eslint": "^8.52.0",
+        "eslint": "^8.57.0",
         "ts-jest": "^29.1.1",
         "typescript": "^5.2.2"
     },
